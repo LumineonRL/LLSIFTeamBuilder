@@ -1,2 +1,3 @@
 - Unidolized N's max stats are wrong. I don't have a good data source for these values.
 - No warnings if invalid level for non-URs is selected. (Correctly assigns default max level of the card, but does not warn the user that the level they passed in is invalid.)
+- Some cards that are internally considered to be different characters despite sharing the same name (i.e. the children sets or powerpuff girls) are treated as treated as if they were the same character.
