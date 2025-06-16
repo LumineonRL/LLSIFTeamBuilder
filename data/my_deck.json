@@ -1,0 +1,187 @@
+{
+    "next_deck_internal_id": 27,
+    "cards_in_deck": [
+        {
+            "card_id": 28,
+            "deck_internal_id": 1,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 29,
+            "deck_internal_id": 2,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 30,
+            "deck_internal_id": 3,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 31,
+            "deck_internal_id": 4,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 32,
+            "deck_internal_id": 5,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 33,
+            "deck_internal_id": 6,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 34,
+            "deck_internal_id": 7,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 35,
+            "deck_internal_id": 8,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 36,
+            "deck_internal_id": 9,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 2
+        },
+        {
+            "card_id": 55,
+            "deck_internal_id": 10,
+            "idolization_status": "idolized",
+            "skill_level": 5,
+            "sis_slots_active": 3
+        },
+        {
+            "card_id": 55,
+            "deck_internal_id": 11,
+            "idolization_status": "idolized",
+            "skill_level": 7,
+            "sis_slots_active": 3
+        },
+        {
+            "card_id": 64,
+            "deck_internal_id": 12,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 64,
+            "deck_internal_id": 13,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 408,
+            "deck_internal_id": 14,
+            "idolization_status": "idolized",
+            "skill_level": 8,
+            "sis_slots_active": 8
+        },
+        {
+            "card_id": 408,
+            "deck_internal_id": 15,
+            "idolization_status": "unidolized",
+            "skill_level": 1,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 556,
+            "deck_internal_id": 16,
+            "idolization_status": "idolized",
+            "skill_level": 1,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 565,
+            "deck_internal_id": 17,
+            "idolization_status": "unidolized",
+            "skill_level": 2,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 581,
+            "deck_internal_id": 18,
+            "idolization_status": "idolized",
+            "skill_level": 3,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 590,
+            "deck_internal_id": 19,
+            "idolization_status": "unidolized",
+            "skill_level": 4,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 600,
+            "deck_internal_id": 20,
+            "idolization_status": "idolized",
+            "skill_level": 5,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 608,
+            "deck_internal_id": 21,
+            "idolization_status": "unidolized",
+            "skill_level": 6,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 634,
+            "deck_internal_id": 22,
+            "idolization_status": "idolized",
+            "skill_level": 7,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 643,
+            "deck_internal_id": 23,
+            "idolization_status": "unidolized",
+            "skill_level": 8,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 650,
+            "deck_internal_id": 24,
+            "idolization_status": "idolized",
+            "skill_level": 7,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 659,
+            "deck_internal_id": 25,
+            "idolization_status": "idolized",
+            "skill_level": 5,
+            "sis_slots_active": 4
+        },
+        {
+            "card_id": 666,
+            "deck_internal_id": 26,
+            "idolization_status": "unidolized",
+            "skill_level": 4,
+            "sis_slots_active": 4
+        }
+    ]
+}
