@@ -94,30 +94,33 @@ class AccessoryManager:
             warnings.warn(f"Error: Could not save accessories to {filepath}: {e}")
             return False
 
-    @classmethod
-    def load(cls, filepath: str, factory: AccessoryFactory) -> 'AccessoryManager':
-        """Loads the manager's state from a JSON file."""
-        manager = cls(factory)
+    def load(self, filepath: str) -> bool:
+        """Loads the manager's state from a JSON file, overwriting the current state."""
         if not os.path.exists(filepath):
-            return manager
-
+            warnings.warn(f"Load failed: File not found at {filepath}")
+            return False
+        
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 state = json.load(f)
         except (IOError, json.JSONDecodeError) as e:
-            raise RuntimeError(f"Could not load or parse file {filepath}: {e}") from e
+            warnings.warn(f"Could not load or parse file {filepath}: {e}")
+            return False
+        
+        # Clear current state before loading
+        self.delete()
 
         for item_data in state.get("accessories", []):
-            accessory = factory.create_accessory(
+            accessory = self._factory.create_accessory(
                 accessory_id=item_data["accessory_id"],
                 level=item_data["level"]
             )
             if accessory:
                 player_acc = PlayerAccessory(item_data["manager_internal_id"], accessory)
-                manager._accessories[player_acc.manager_internal_id] = player_acc
-
-        manager._next_manager_internal_id = state.get("next_manager_internal_id", 1)
-        return manager
+                self._accessories[player_acc.manager_internal_id] = player_acc
+        
+        self._next_manager_internal_id = state.get("next_manager_internal_id", 1)
+        return True
 
     def delete(self) -> None:
         """Clears all accessories from the manager."""
