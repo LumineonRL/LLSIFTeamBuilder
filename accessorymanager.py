@@ -99,15 +99,14 @@ class AccessoryManager:
         if not os.path.exists(filepath):
             warnings.warn(f"Load failed: File not found at {filepath}")
             return False
-        
+
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 state = json.load(f)
         except (IOError, json.JSONDecodeError) as e:
             warnings.warn(f"Could not load or parse file {filepath}: {e}")
             return False
-        
-        # Clear current state before loading
+
         self.delete()
 
         for item_data in state.get("accessories", []):
@@ -118,7 +117,7 @@ class AccessoryManager:
             if accessory:
                 player_acc = PlayerAccessory(item_data["manager_internal_id"], accessory)
                 self._accessories[player_acc.manager_internal_id] = player_acc
-        
+
         self._next_manager_internal_id = state.get("next_manager_internal_id", 1)
         return True
 

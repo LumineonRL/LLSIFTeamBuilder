@@ -84,7 +84,7 @@ class SISManager:
         if not os.path.exists(filepath):
             warnings.warn(f"Load failed: File not found at {filepath}")
             return False
-        
+
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 state = json.load(f)
@@ -99,7 +99,7 @@ class SISManager:
             if sis:
                 player_sis = PlayerSIS(item_data["manager_internal_id"], sis)
                 self._skills[player_sis.manager_internal_id] = player_sis
-        
+
         self._next_manager_internal_id = state.get("next_manager_internal_id", 1)
         return True
 

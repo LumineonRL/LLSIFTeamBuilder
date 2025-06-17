@@ -54,7 +54,7 @@ class TestAccessoryManager(unittest.TestCase):
         test_accessories = AccessoryManager(self.factory)
         with self.assertWarns(UserWarning) as cm:
             test_accessories.add_accessory(4001, level=4)
-        self.assertEqual(str(cm.warnings[0].message), "Error: Accessory with ID 4001 not found.")        
+        self.assertEqual(str(cm.warnings[0].message), "Error: Accessory with ID 4001 not found.")
         test_accessories.add_accessory(28)
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
@@ -132,26 +132,21 @@ class TestAccessoryManager(unittest.TestCase):
         accessories_to_save.add_accessory(100)
         accessories_to_save.save(self.ACCESSORY_SAVE_PATH)
 
-        # Now, create a new deck, populate it, and then load over it
+        # Now, create a new accessory manager, populate it, and then load over it
         test_accessories = AccessoryManager(self.factory)
         test_accessories.add_accessory(150)
         test_accessories.add_accessory(160)
-        test_accessories.load(self.ACCESSORY_SAVE_PATH, self.factory)
+        test_accessories.load(self.ACCESSORY_SAVE_PATH)
         print(test_accessories)
-        expected = """<AccessoryManager (2 accessories)>
-  - ID 1: <Accessory id=150 card_id=3121 name='UR Spotted Bellflower Smartphone Ring' level=1>
-  - Stats: Smile=250, Pure=160, Cool=410
-  - Skill Type: Encore
-  - Trigger: 8% chance, Value: 0
-  - Effect Value: 1, Duration: 0s
-  - ID 2: <Accessory id=160 card_id=3137 name='UR Turtle Mug Bottle' level=1>
-  - Stats: Smile=400, Pure=240, Cool=150
-  - Skill Type: Amp
-  - Trigger: 11% chance, Value: 0
-  - Effect Value: 2, Duration: 0s"""
+        expected = """<AccessoryManager (1 accessories)>
+  - ID 1: <Accessory id=100 card_id=408 name='UR Block Checked Mug' level=1>
+  - Stats: Smile=220, Pure=150, Cool=120
+  - Skill Type: Combo Fever
+  - Trigger: 10% chance, Value: 0
+  - Effect Value: 20, Duration: 2.5s"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
-    def test_delete_deck(self):
+    def test_delete_accessories(self):
         test_accessories = AccessoryManager(self.factory)
         test_accessories.add_accessory(100)
         test_accessories.add_accessory(150)

@@ -42,7 +42,7 @@ class TestSISManager(unittest.TestCase):
         test_sis = SISManager(self.factory)
         with self.assertWarns(UserWarning) as cm:
             test_sis.add_sis(4001)
-        self.assertEqual(str(cm.warnings[0].message), "Error: SIS with ID 4001 not found.")        
+        self.assertEqual(str(cm.warnings[0].message), "Error: SIS with ID 4001 not found.")
         test_sis.add_sis(28)
         print(test_sis)
         expected = """<SISManager (1 skills)>
