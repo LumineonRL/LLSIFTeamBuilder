@@ -74,30 +74,18 @@ class Card:
             else:
                 warnings.warn(f"Custom level {provided_level} for UR is out of range (100-500). Using default level cap.")
 
-        if self.is_promo and not self.is_preidolized_non_promo:
-            self._update_stats_level_cap_promo()
-        else:
-            self._update_stats_level_cap_non_promo()
+        bonus_type = "promo" if self.is_promo and not self.is_preidolized_non_promo else "non_promo"
+        self._apply_level_cap_bonus(bonus_type)
 
-    def _update_stats_level_cap_non_promo(self) -> None:
-        """Adds level-based stat bonuses for non-promo cards."""
-        bonus_map = self._level_cap_bonus_map.get("non_promo", {})
+    def _apply_level_cap_bonus(self, bonus_type: str) -> None:
+        """Adds level-based stat bonuses using the specified bonus map."""
+        bonus_map = self._level_cap_bonus_map.get(bonus_type, {})
         bonus_value = bonus_map.get(str(self.level), 0)
         if bonus_value > 0:
             self.stats = replace(self.stats,
-                                 smile=self.stats.smile + bonus_value,
-                                 pure=self.stats.pure + bonus_value,
-                                 cool=self.stats.cool + bonus_value)
-
-    def _update_stats_level_cap_promo(self) -> None:
-        """Adds level-based stat bonuses for promo cards."""
-        bonus_map = self._level_cap_bonus_map.get("promo", {})
-        bonus_value = bonus_map.get(str(self.level), 0)
-        if bonus_value > 0:
-            self.stats = replace(self.stats,
-                                 smile=self.stats.smile + bonus_value,
-                                 pure=self.stats.pure + bonus_value,
-                                 cool=self.stats.cool + bonus_value)
+                                smile=self.stats.smile + bonus_value,
+                                pure=self.stats.pure + bonus_value,
+                                cool=self.stats.cool + bonus_value)
 
     @property
     def current_skill_level(self) -> int:
