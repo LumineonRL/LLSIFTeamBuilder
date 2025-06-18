@@ -147,15 +147,18 @@ class Deck:
             with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
-            self._entries.clear()
+            new_entries = {}
             for entry_data in data.get("entries", []):
                 card_id = entry_data.get("card_id")
                 config = entry_data.get("config", {})
                 card = self._card_factory.create_card(card_id, **config)
                 if card:
                     deck_id = entry_data["deck_id"]
-                    self._entries[deck_id] = DeckEntry(deck_id=deck_id, card=card)
-
+                    new_entries[deck_id] = DeckEntry(deck_id=deck_id, card=card)
+                else:
+                    warnings.warn(f"Skipping card in deck file due to creation failure: card_id {card_id}")
+            
+            self._entries = new_entries
             self._next_deck_id = data.get("next_deck_id", 1)
             return True
         except (IOError, json.JSONDecodeError, KeyError) as e:
