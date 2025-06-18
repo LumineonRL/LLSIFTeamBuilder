@@ -36,6 +36,8 @@ class Accessory:
 
     @level.setter
     def level(self, value: int) -> None:
+        value = int(value)
+
         if not 1 <= value <= 8:
             raise ValueError("Accessory level must be between 1 and 8.")
         self._level = value

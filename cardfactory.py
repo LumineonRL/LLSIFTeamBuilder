@@ -1,4 +1,5 @@
 import json
+import numbers
 from typing import Optional, Dict, Any, Union, List, Tuple
 import warnings
 
@@ -54,16 +55,20 @@ class CardFactory:
 
     def _validate_and_sanitize_inputs(self, skill_level: Any, level: Any, sis_slots: Any) -> Tuple[int, Optional[int], Optional[int]]:
         """Validates input types, warns on failure, and returns sanitized values."""
-        if not isinstance(skill_level, int):
+    
+        if not isinstance(skill_level, numbers.Integral):
             warnings.warn(f"Invalid type for skill_level: got {type(skill_level).__name__}, expected int. Defaulting to 1.")
             skill_level = 1
-        if level is not None and not isinstance(level, int):
+            
+        if level is not None and not isinstance(level, numbers.Integral):
             warnings.warn(f"Invalid type for level: got {type(level).__name__}, expected int. Ignoring custom level.")
             level = None
-        if sis_slots is not None and not isinstance(sis_slots, int):
+
+        if sis_slots is not None and not isinstance(sis_slots, numbers.Integral):
             warnings.warn(f"Invalid type for sis_slots: got {type(sis_slots).__name__}, expected int. Ignoring custom SIS slots.")
             sis_slots = None
-        return skill_level, level, sis_slots
+            
+        return int(skill_level), int(level) if level is not None else None, int(sis_slots) if sis_slots is not None else None
 
     def _apply_skill_level(self, card: Card, skill_level: int) -> None:
         """Applies the skill level to the card, warning if out of range."""
