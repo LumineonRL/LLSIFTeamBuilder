@@ -27,7 +27,6 @@ class Accessory:
         self._level: int = 1
         self.stats: Stats
         self.level = level
-        self.level = level
 
     @property
     def level(self) -> int:
