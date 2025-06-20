@@ -196,6 +196,12 @@ class Team:
         if not sis_entry:
             warnings.warn(f"SIS with Manager ID {manager_internal_id} not found.")
             return False
+        
+        new_sis_id = sis_entry.sis.id
+        if any(entry.sis.id == new_sis_id for entry in slot.sis_entries):
+            warnings.warn(f"Cannot equip SIS '{sis_entry.sis.name}': "
+                          f"A SIS with the same ID ({new_sis_id}) is already in this slot.")
+            return False
 
         if not self._check_sis_equip_restriction(slot.card, sis_entry.sis):
             return False

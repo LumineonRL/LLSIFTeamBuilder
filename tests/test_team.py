@@ -379,5 +379,28 @@ Guest: None
         """.strip()
         self.assertEqual(str(self.team).strip(), expected)
 
+    def test_equip_dupe_sis_to_same_slot(self):
+        """Test SIS year must match Card year."""
+        self.team.equip_card_in_slot(1, 9)
+        self.team.equip_sis_in_slot(1, 277)
+
+        with self.assertWarns(UserWarning) as cm:
+            self.team.equip_sis_in_slot(1, 347)
+
+        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Pure Ring [2nd]': A SIS with the same ID (11) is already in this slot.")
+
+        expected = """
+--- Team Configuration ---
+Guest: None
+
+[ Slot 1 ]
+  Card: Dolphin Show You (Deck ID: 9)
+  Accessory: None
+  SIS (2/6 slots used):
+    - Pure Ring [2nd] (2 slots)
+--------------------------
+        """.strip()
+        self.assertEqual(str(self.team).strip(), expected)
+
 if __name__ == '__main__':
     unittest.main()
