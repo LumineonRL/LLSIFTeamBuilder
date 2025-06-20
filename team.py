@@ -1,3 +1,5 @@
+import os
+import json
 import warnings
 from typing import List, Optional, Set, Dict, Any
 
@@ -5,6 +7,7 @@ from card import Card
 from deck import Deck
 from accessory import Accessory
 from accessorymanager import AccessoryManager
+from sis import SIS
 from sismanager import SISManager
 from guest import Guest
 from teamslot import TeamSlot
@@ -15,6 +18,22 @@ class Team:
     """
     NUM_SLOTS = 9
     CENTER_SLOT_NUMBER = 5
+
+    def _load_year_group_mapping(self, filepath: str) -> Dict[str, Set[str]]:
+        """Loads and processes the year group mapping from a JSON file."""
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                raw_mapping = json.load(f)
+
+            processed_mapping = {
+                group: set(characters)
+                for group, characters in raw_mapping.items()
+            }
+            return processed_mapping
+        except (FileNotFoundError, json.JSONDecodeError, TypeError) as e:
+            warnings.warn(f"Could not load or parse year group mapping from '{filepath}': {e}. "
+                          "Year-based SIS restrictions will not work.")
+            return {}
 
     def __init__(self, deck: Deck, accessory_manager: AccessoryManager, sis_manager: SISManager, guest_manager: Optional[Guest] = None):
         self.deck = deck
@@ -27,6 +46,9 @@ class Team:
         self.assigned_deck_ids: Set[int] = set()
         self.assigned_accessory_ids: Set[int] = set()
         self.assigned_sis_ids: Set[int] = set()
+
+        mapping_path = os.path.join('data', 'year_group_mapping.json')
+        self._year_group_mapping = self._load_year_group_mapping(mapping_path)
 
     @property
     def center_slot(self) -> TeamSlot:
@@ -111,9 +133,57 @@ class Team:
             return True
         return False
 
+    def _check_sis_attribute_restriction(self, card: Card, sis: SIS) -> bool:
+        """Checks if a SIS attribute restriction is met."""
+        if sis.equip_restriction == card.attribute:
+            return True
+        warnings.warn(f"Cannot equip SIS '{sis.name}': Attribute mismatch. "
+                      f"SIS requires {sis.equip_restriction}, but card is {card.attribute}.")
+        return False
+
+    def _check_sis_year_group_restriction(self, card: Card, sis: SIS) -> bool:
+        """Checks if a SIS year group restriction is met."""
+        restriction = sis.equip_restriction
+        if not restriction:
+            return False
+
+        if card.character in self._year_group_mapping.get(restriction, set()):
+            return True
+
+        warnings.warn(f"Cannot equip SIS '{sis.name}': Year group mismatch. "
+                      f"SIS is for {restriction}, but '{card.character}' is not.")
+        return False
+
+    def _check_sis_character_restriction(self, card: Card, sis: SIS) -> bool:
+        """Checks if a SIS character restriction is met."""
+        if sis.equip_restriction == card.character:
+            return True
+        warnings.warn(f"Cannot equip SIS '{sis.name}': Character mismatch. "
+                      f"SIS requires '{sis.equip_restriction}', but card is '{card.character}'.")
+        return False
+
+    def _check_sis_equip_restriction(self, card: Card, sis: SIS) -> bool:
+        """
+        Checks if a SIS can be equipped to a card by dispatching to the correct validator.
+        Returns True if allowed, False otherwise.
+        """
+        restriction = sis.equip_restriction
+        if not restriction:  # Covers None and ""
+            return True
+
+        if restriction in ["Smile", "Pure", "Cool"]:
+            return self._check_sis_attribute_restriction(card, sis)
+
+        if restriction in self._year_group_mapping:
+            return self._check_sis_year_group_restriction(card, sis)
+
+        # Default case is to assume a character-specific restriction
+        return self._check_sis_character_restriction(card, sis)
+
     def equip_sis_in_slot(self, slot_number: int, manager_internal_id: int) -> bool:
         """Equips a SIS to a card in a specific team slot (1-9)."""
         slot = self._get_slot(slot_number)
+
         if not slot or not slot.card:
             warnings.warn(f"Cannot equip SIS: No card in slot {slot_number}.")
             return False
@@ -125,6 +195,9 @@ class Team:
         sis_entry = self.sis_manager.get_player_sis(manager_internal_id)
         if not sis_entry:
             warnings.warn(f"SIS with Manager ID {manager_internal_id} not found.")
+            return False
+
+        if not self._check_sis_equip_restriction(slot.card, sis_entry.sis):
             return False
 
         if slot.equip_sis(sis_entry):

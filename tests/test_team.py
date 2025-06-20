@@ -303,7 +303,70 @@ Guest: None
             self.team.equip_accessory_in_slot(1, 2)
 
         self.assertEqual(str(cm.warning), "Cannot equip accessory 'UR You Aroma Spray': Character mismatch. Accessory is for 'Watanabe You', but card is for 'Tojo Nozomi'.")
-    
+
+        expected = """
+--- Team Configuration ---
+Guest: None
+
+[ Slot 1 ]
+  Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Accessory: None
+  SIS: None
+--------------------------
+        """.strip()
+        self.assertEqual(str(self.team).strip(), expected)
+
+    def test_equip_sis_to_wrong_attribute(self):
+        """Test SIS attribute must match Card attrubute."""
+        self.team.equip_card_in_slot(1, 1)
+
+        with self.assertWarns(UserWarning) as cm:
+            self.team.equip_sis_in_slot(1, 131)
+
+        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Angel Charm': Attribute mismatch. SIS requires Pure, but card is Smile.")
+
+        expected = """
+--- Team Configuration ---
+Guest: None
+
+[ Slot 1 ]
+  Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Accessory: None
+  SIS: None
+--------------------------
+        """.strip()
+        self.assertEqual(str(self.team).strip(), expected)
+
+    def test_equip_sis_to_wrong_char(self):
+        """Test SIS character must match Card character."""
+        self.team.equip_card_in_slot(1, 1)
+
+        with self.assertWarns(UserWarning) as cm:
+            self.team.equip_sis_in_slot(1, 1)
+
+        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Pure Humorous Petit': Character mismatch. SIS requires 'Miyashita Ai', but card is 'Tojo Nozomi'.")
+
+        expected = """
+--- Team Configuration ---
+Guest: None
+
+[ Slot 1 ]
+  Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Accessory: None
+  SIS: None
+--------------------------
+        """.strip()
+        self.assertEqual(str(self.team).strip(), expected)
+
+    def test_equip_sis_to_wrong_year(self):
+        """Test SIS year must match Card year."""
+        self.team.equip_card_in_slot(1, 1)
+
+        with self.assertWarns(UserWarning) as cm:
+            self.team.equip_sis_in_slot(1, 276)
+
+        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Smile Cross [1st]': Year group mismatch. SIS is for 1st years, but 'Tojo Nozomi' is not.")
+
         expected = """
 --- Team Configuration ---
 Guest: None
