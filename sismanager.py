@@ -53,6 +53,10 @@ class SISManager:
             if manager_id not in assigned_sis_ids
         ]
 
+    def get_player_sis(self, manager_internal_id: int) -> Optional[PlayerSIS]:
+        """Retrieves a PlayerSIS wrapper instance by its unique manager ID."""
+        return self._skills.get(manager_internal_id)
+
     def to_dict(self) -> Dict[str, Any]:
         """Serializes the manager's state to a dictionary."""
         return {

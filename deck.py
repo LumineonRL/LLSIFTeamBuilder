@@ -170,3 +170,6 @@ class Deck:
         """Clears all cards from the deck and resets the ID counter."""
         self._entries.clear()
         self._next_deck_id = 1
+
+    def get_entry(self, deck_id: int) -> Optional[DeckEntry]:
+        return self._entries.get(deck_id)

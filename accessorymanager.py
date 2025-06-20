@@ -67,6 +67,10 @@ class AccessoryManager:
             if manager_id not in assigned_accessory_ids
         ]
 
+    def get_player_accessory(self, manager_internal_id: int) -> Optional[PlayerAccessory]:
+        """Retrieves a PlayerAccessory wrapper instance by its unique manager ID."""
+        return self._accessories.get(manager_internal_id)
+
     def to_dict(self) -> Dict[str, Any]:
         """Serializes the manager's state to a dictionary."""
         return {

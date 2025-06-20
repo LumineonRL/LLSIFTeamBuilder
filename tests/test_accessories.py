@@ -62,8 +62,7 @@ class TestAccessory(unittest.TestCase):
         """Test the public method for getting skill values at any valid level."""
         test_accessory = self.factory.create_accessory(315)
         self.assertIsNotNone(test_accessory)
-        
-        # Get skill value for level 3, even though the accessory's current level is 1
+
         chance_at_lvl_10 = test_accessory.get_skill_value_for_level(test_accessory.skill_trigger_chances, 10)
         self.assertEqual(chance_at_lvl_10, 40)
 
