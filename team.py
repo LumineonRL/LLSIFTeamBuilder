@@ -1,7 +1,9 @@
 import warnings
 from typing import List, Optional, Set, Dict, Any
 
+from card import Card
 from deck import Deck
+from accessory import Accessory
 from accessorymanager import AccessoryManager
 from sismanager import SISManager
 from guest import Guest
@@ -62,14 +64,33 @@ class Team:
         self.assigned_deck_ids.add(deck_id)
         return True
 
+    def _check_accessory_character_restriction(self, card: Card, accessory: Accessory) -> bool:
+        """
+        Checks if an accessory can be equipped to a card based on character.
+        Returns True if allowed, False otherwise.
+        """
+        card_character = card.character
+        accessory_character = accessory.character
+
+        # An empty string "" for accessory character means no restriction.
+        if accessory_character == "" or accessory_character == card_character:
+            return True
+
+        warnings.warn(f"Cannot equip accessory '{accessory.name}': "
+                      f"Character mismatch. Accessory is for '{accessory_character}', "
+                      f"but card is for '{card_character}'.")
+        return False
+
     def equip_accessory_in_slot(self, slot_number: int, manager_internal_id: int) -> bool:
         """Equips an accessory to a card in a specific team slot (1-9)."""
         slot = self._get_slot(slot_number)
+
         if not slot or not slot.card:
             warnings.warn(f"Cannot equip accessory: No card in slot {slot_number}.")
             return False
 
-        if manager_internal_id in self.assigned_accessory_ids:
+        if manager_internal_id in self.assigned_accessory_ids and \
+           (not slot.accessory_entry or slot.accessory_entry.manager_internal_id != manager_internal_id):
             warnings.warn(f"Accessory with Manager ID {manager_internal_id} is already assigned.")
             return False
 
@@ -78,9 +99,12 @@ class Team:
             warnings.warn(f"Accessory with Manager ID {manager_internal_id} not found.")
             return False
 
+        if not self._check_accessory_character_restriction(slot.card, acc_entry.accessory):
+            return False
+
         # Unequip any existing accessory in this slot
         if slot.accessory_entry:
-            self.assigned_accessory_ids.remove(slot.accessory_entry.manager_internal_id)
+            self.assigned_accessory_ids.discard(slot.accessory_entry.manager_internal_id)
 
         if slot.equip_accessory(acc_entry):
             self.assigned_accessory_ids.add(manager_internal_id)
