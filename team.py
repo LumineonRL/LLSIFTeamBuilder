@@ -1,7 +1,8 @@
 import os
 import json
 import warnings
-from typing import List, Optional, Set, Dict, Any
+import math
+from typing import List, Optional, Set, Dict
 
 from card import Card
 from deck import Deck
@@ -19,20 +20,14 @@ class Team:
     NUM_SLOTS = 9
     CENTER_SLOT_NUMBER = 5
 
-    def _load_year_group_mapping(self, filepath: str) -> Dict[str, Set[str]]:
-        """Loads and processes the year group mapping from a JSON file."""
+    def _load_json_mapping(self, filepath: str, warning_message: str) -> Dict[str, Set[str]]:
+        """Generic helper to load a JSON file mapping groups to character sets."""
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 raw_mapping = json.load(f)
-
-            processed_mapping = {
-                group: set(characters)
-                for group, characters in raw_mapping.items()
-            }
-            return processed_mapping
+            return {group: set(characters) for group, characters in raw_mapping.items()}
         except (FileNotFoundError, json.JSONDecodeError, TypeError) as e:
-            warnings.warn(f"Could not load or parse year group mapping from '{filepath}': {e}. "
-                          "Year-based SIS restrictions will not work.")
+            warnings.warn(f"{warning_message} from '{filepath}': {e}.")
             return {}
 
     def __init__(self, deck: Deck, accessory_manager: AccessoryManager, sis_manager: SISManager, guest_manager: Optional[Guest] = None):
@@ -47,8 +42,18 @@ class Team:
         self.assigned_accessory_ids: Set[int] = set()
         self.assigned_sis_ids: Set[int] = set()
 
-        mapping_path = os.path.join('data', 'year_group_mapping.json')
-        self._year_group_mapping = self._load_year_group_mapping(mapping_path)
+        self.total_team_smile: int = 0
+        self.total_team_pure: int = 0
+        self.total_team_cool: int = 0
+
+        self._year_group_mapping = self._load_json_mapping(
+            os.path.join('data', 'year_group_mapping.json'),
+            "Could not load year group mapping"
+        )
+        self._group_member_mapping = self._load_json_mapping(
+            os.path.join('data', 'group_member_map.json'),
+            "Could not load group member mapping for Nonets"
+        )
 
     @property
     def center_slot(self) -> TeamSlot:
@@ -84,6 +89,7 @@ class Team:
 
         slot.equip_card(card_entry)
         self.assigned_deck_ids.add(deck_id)
+        self.calculate_team_stats()
         return True
 
     def _check_accessory_character_restriction(self, card: Card, accessory: Accessory) -> bool:
@@ -130,6 +136,7 @@ class Team:
 
         if slot.equip_accessory(acc_entry):
             self.assigned_accessory_ids.add(manager_internal_id)
+            self.calculate_team_stats()
             return True
         return False
 
@@ -196,7 +203,7 @@ class Team:
         if not sis_entry:
             warnings.warn(f"SIS with Manager ID {manager_internal_id} not found.")
             return False
-        
+
         new_sis_id = sis_entry.sis.id
         if any(entry.sis.id == new_sis_id for entry in slot.sis_entries):
             warnings.warn(f"Cannot equip SIS '{sis_entry.sis.name}': "
@@ -208,6 +215,7 @@ class Team:
 
         if slot.equip_sis(sis_entry):
             self.assigned_sis_ids.add(manager_internal_id)
+            self.calculate_team_stats()
             return True
         return False
 
@@ -232,16 +240,100 @@ class Team:
             self.assigned_deck_ids.discard(slot.card_entry.deck_id)
 
         slot.clear()
+        self.calculate_team_stats()
         return True
 
-    # --- Calculation Placeholders ---
+    # --- Calculations ---
 
-    def calculate_team_stats(self) -> Dict[str, Any]:
+    def _is_nonet_active(self, group_name: str) -> bool:
+        """Checks if the team composition satisfies the requirements for a specific nonet group."""
+        team_characters = {slot.card.character for slot in self.slots if slot.card}
+
+        if len(team_characters) != 9:
+            return False
+
+        valid_members = self._group_member_mapping.get(group_name)
+        if not valid_members:
+            return False
+
+        return team_characters.issubset(valid_members)
+
+    def _calculate_all_percent_boosts(self) -> Dict[str, float]:
+        """Calculates the total percentage boosts from all active 'all percent boost' SIS."""
+        boosts = {"Smile": 0.0, "Pure": 0.0, "Cool": 0.0}
+        active_nonets: Dict[str, bool] = {}
+
+        for slot in self.slots:
+            if not slot.card:
+                continue
+            for sis_entry in slot.sis_entries:
+                sis = sis_entry.sis
+                if sis.effect == "all percent boost":
+                    if not sis.group: # Regular boost
+                        if sis.attribute in boosts:
+                            boosts[sis.attribute] += sis.value
+                    else: # Nonet boost
+                        group_name = sis.group
+                        if group_name not in active_nonets:
+                            active_nonets[group_name] = self._is_nonet_active(group_name)
+
+                        if active_nonets[group_name] and sis.attribute in boosts:
+                            boosts[sis.attribute] += sis.value
+        return boosts
+
+    def calculate_team_stats(self) -> None:
         """
-        (Placeholder) The main orchestrator for all stat calculations.
+        Calculates the stats for each slot and the team as a whole.
         """
-        warnings.warn("Stat calculation logic is not yet implemented.")
-        return {"status": "unimplemented"}
+        all_percent_boosts = self._calculate_all_percent_boosts()
+
+        # Main Calculation Loop: Process each slot individually to calculate its final stats
+        for slot in self.slots:
+            # Step 1: Apply base card stats
+            if not slot.card:
+                slot.total_smile, slot.total_pure, slot.total_cool = 0, 0, 0
+                continue
+
+            slot.total_smile = slot.card.stats.smile
+            slot.total_pure = slot.card.stats.pure
+            slot.total_cool = slot.card.stats.cool
+
+            # Step 2: Apply team-wide "all percent boost" SIS (aura, veil, nonet, etc)
+            slot.total_smile = math.ceil(slot.total_smile * (1 + all_percent_boosts.get("Smile", 0)))
+            slot.total_pure = math.ceil(slot.total_pure * (1 + all_percent_boosts.get("Pure", 0)))
+            slot.total_cool = math.ceil(slot.total_cool * (1 + all_percent_boosts.get("Cool", 0)))
+
+            # Step 3: Apply slot-specific "self percent boost" SIS (ring, cross, etc)
+            self_boosts = {"Smile": 0.0, "Pure": 0.0, "Cool": 0.0}
+            for sis_entry in slot.sis_entries:
+                sis = sis_entry.sis
+                if sis.effect == "self percent boost" and sis.attribute in self_boosts:
+                    self_boosts[sis.attribute] += sis.value
+
+            slot.total_smile = math.ceil(slot.total_smile * (1 + self_boosts["Smile"]))
+            slot.total_pure = math.ceil(slot.total_pure * (1 + self_boosts["Pure"]))
+            slot.total_cool = math.ceil(slot.total_cool * (1 + self_boosts["Cool"]))
+
+            # Step 4: Apply slot-specific "self flat boost" SIS (kiss, perfume, etc)
+            for sis_entry in slot.sis_entries:
+                sis = sis_entry.sis
+                if sis.effect == "self flat boost":
+                    if sis.attribute == "Smile":
+                        slot.total_smile += int(sis.value)
+                    elif sis.attribute == "Pure":
+                        slot.total_pure += int(sis.value)
+                    elif sis.attribute == "Cool":
+                        slot.total_cool += int(sis.value)
+
+            # --- Future calculation steps will be added here ---
+            # Step 5: Add other Accessory Stats
+            # Step 6: Apply Leader Skill Bonuses
+            # etc.
+
+        # Final Aggregation Step: Sum up all final slot stats into the team total
+        self.total_team_smile = sum(s.total_smile for s in self.slots)
+        self.total_team_pure = sum(s.total_pure for s in self.slots)
+        self.total_team_cool = sum(s.total_cool for s in self.slots)
 
     def __repr__(self) -> str:
         """Provides a string representation of the entire team."""
@@ -251,6 +343,9 @@ class Team:
         if self.guest_manager and self.guest_manager.current_guest:
             guest_line = f"Guest: {self.guest_manager.current_guest}"
 
+        stats_header = (f"Total Stats: S/P/C "
+                        f"{self.total_team_smile}/{self.total_team_pure}/{self.total_team_cool}")
+
         slot_details = []
         for i, slot in enumerate(self.slots):
             if slot.card:
@@ -259,8 +354,8 @@ class Team:
                 slot_details.append(f"{slot_header}\n{slot_repr}")
 
         if not slot_details:
-            return f"{header}\n{guest_line}\n<Team is empty>"
+            return f"{header}\n{guest_line}\n{stats_header}\n<Team is empty>"
 
         footer = "--------------------------"
 
-        return f"{header}\n{guest_line}\n" + "\n".join(slot_details) + f"\n{footer}"
+        return f"{header}\n{guest_line}\n{stats_header}\n" + "\n".join(slot_details) + f"\n{footer}"

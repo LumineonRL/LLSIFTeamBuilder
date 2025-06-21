@@ -23,6 +23,10 @@ class TeamSlot:
         self.accessory_entry: Optional[PlayerAccessory] = None
         self.sis_entries: List[PlayerSIS] = []
 
+        self.total_smile: int = 0
+        self.total_pure: int = 0
+        self.total_cool: int = 0
+
     @property
     def card(self) -> Optional[Card]:
         """Convenience property to access the Card object directly."""
@@ -96,6 +100,9 @@ class TeamSlot:
         self.card_entry = None
         self.accessory_entry = None
         self.sis_entries.clear()
+        self.total_smile = 0
+        self.total_pure = 0
+        self.total_cool = 0
 
     def __repr__(self) -> str:
         """Provides a detailed, multi-line string representation of the slot."""
@@ -104,6 +111,7 @@ class TeamSlot:
 
         # Card line
         card_line = f"  Card: {self.card_entry.card.display_name} (Deck ID: {self.card_entry.deck_id})"
+        stats_line = f"  Stats: S/P/C {self.total_smile}/{self.total_pure}/{self.total_cool}"
 
         # Accessory line
         if self.accessory_entry and self.accessory_entry.accessory:
@@ -120,4 +128,4 @@ class TeamSlot:
         else:
             sis_lines.append("  SIS: None")
 
-        return "\n".join([card_line, acc_line, *sis_lines])
+        return "\n".join([card_line, stats_line, acc_line, *sis_lines])
