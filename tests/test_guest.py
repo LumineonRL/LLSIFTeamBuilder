@@ -22,7 +22,7 @@ class TestGuest(unittest.TestCase):
 
     def test_set_guest(self):
         self.guest_manager.set_guest(25)
-        self.guest_manager.display_guest()
+        print(self.guest_manager)
         expected = """--- Current Guest Details ---
 Leader Skill Id: 25
 Leader Attribute: Smile
@@ -35,22 +35,22 @@ Leader Extra Value: 0.03
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
     def test_unset_guest(self):
-        self.guest_manager.display_guest()
-        self.assertEqual(self.captured_output.getvalue().strip(), "No active guest is set.")
+        print(self.guest_manager)
+        self.assertEqual(self.captured_output.getvalue().strip(), "<Guest active_id=None>")
 
     def test_invalid_guest(self):
         with self.assertWarns(UserWarning) as cm:
             self.guest_manager.set_guest(25.9)
         self.assertEqual(str(cm.warnings[0].message), "Guest with ID 25.9 not found.")
         
-        self.guest_manager.display_guest()
-        self.assertEqual(self.captured_output.getvalue().strip(), "No active guest is set.")
+        print(self.guest_manager)
+        self.assertEqual(self.captured_output.getvalue().strip(), "<Guest active_id=None>")
 
     def test_change_guest(self):
         self.guest_manager.set_guest(1)
         self.guest_manager.set_guest(2)
         self.guest_manager.set_guest(3)
-        self.guest_manager.display_guest()
+        print(self.guest_manager)
         expected = """--- Current Guest Details ---
 Leader Skill Id: 3
 Leader Attribute: Smile

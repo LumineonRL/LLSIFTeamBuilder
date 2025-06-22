@@ -1,7 +1,9 @@
 import json
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, fields
 from typing import Optional, Dict, Any
+
+from leaderskill import LeaderSkill
 
 @dataclass(frozen=True)
 class GuestData:
@@ -66,28 +68,34 @@ class Guest:
         if guest_data:
             self.current_guest = guest_data
             return True
-        else:
-            self.current_guest = None
-            warnings.warn(f"Guest with ID {leader_skill_id} not found.")
-            return False
+        self.current_guest = None
+        warnings.warn(f"Guest with ID {leader_skill_id} not found.")
+        return False
 
-    def display_guest(self) -> None:
-        """Prints the details of the currently active guest."""
+    @property
+    def leader_skill(self) -> Optional[LeaderSkill]:
+        """Returns a LeaderSkill object for the current guest, if any."""
         if not self.current_guest:
-            print("No active guest is set.")
-            return
+            return None
 
-        def _format_value(value: Any) -> str:
-            """Helper function to format None values gracefully for display."""
-            return str(value) if value is not None else "N/A"
-
-        print("--- Current Guest Details ---")
-        for attr, value in self.current_guest.__dict__.items():
-            display_name = attr.replace('_', ' ').title()
-            print(f"{display_name}: {_format_value(value)}")
-        print("---------------------------")
+        return LeaderSkill(
+            attribute=self.current_guest.leader_attribute,
+            secondary_attribute=self.current_guest.leader_secondary_attribute,
+            value=self.current_guest.leader_value or 0.0
+        )
 
     def __repr__(self) -> str:
-        if self.current_guest:
-            return f"<Guest active_id={self.current_guest.leader_skill_id}>"
-        return "<Guest active_id=None>"
+        if not self.current_guest:
+            return "<Guest active_id=None>"
+
+        header = "--- Current Guest Details ---"
+        footer = "---------------------------"
+
+        details = []
+        for field in fields(self.current_guest):
+            value = getattr(self.current_guest, field.name)
+            display_name = field.name.replace('_', ' ').title()
+            display_value = str(value) if value is not None else "N/A"
+            details.append(f"{display_name}: {display_value}")
+            
+        return f"{header}\n" + "\n".join(details) + f"\n{footer}"

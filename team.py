@@ -6,6 +6,7 @@ from typing import List, Optional, Set, Dict
 
 from card import Card
 from deck import Deck
+from leaderskill import LeaderSkill
 from accessory import Accessory
 from accessorymanager import AccessoryManager
 from sis import SIS
@@ -281,11 +282,51 @@ class Team:
                             boosts[sis.attribute] += sis.value
         return boosts
 
+    def _calculate_leader_skill_bonus(self, leader_skill: Optional[LeaderSkill], target_slot: TeamSlot) -> Dict[str, int]:
+        """Generic helper to calculate bonuses from a LeaderSkill object."""
+        bonuses = {"Smile": 0, "Pure": 0, "Cool": 0}
+        if not leader_skill or not target_slot.card:
+            return bonuses
+
+        primary_attr = leader_skill.attribute
+        secondary_attr = leader_skill.secondary_attribute
+        value = leader_skill.value
+
+        if not secondary_attr:
+            # Regular boost: affects the primary attribute based on its own value
+            if primary_attr == "Smile":
+                bonuses["Smile"] = math.ceil(target_slot.total_smile * value)
+            elif primary_attr == "Pure":
+                bonuses["Pure"] = math.ceil(target_slot.total_pure * value)
+            elif primary_attr == "Cool":
+                bonuses["Cool"] = math.ceil(target_slot.total_cool * value)
+        else:
+            # Secondary boost: affects the primary attribute based on the secondary attribute's value
+            source_stat_map = {"Smile": target_slot.total_smile, "Pure": target_slot.total_pure, "Cool": target_slot.total_cool}
+            source_stat = source_stat_map.get(secondary_attr, 0)
+            bonus_value = math.ceil(source_stat * value)
+            if primary_attr in bonuses:
+                bonuses[primary_attr] = bonus_value
+
+        return bonuses
+
+    def _calculate_center_extra_skill_bonus(self, target_slot: TeamSlot) -> Dict[str, int]:
+        """(Skeleton) Calculates bonus from the center card's extra skill."""
+        return {"Smile": 0, "Pure": 0, "Cool": 0}
+
+    def _calculate_guest_extra_skill_bonus(self, target_slot: TeamSlot) -> Dict[str, int]:
+        """(Skeleton) Calculates bonus from the guest's extra skill."""
+        return {"Smile": 0, "Pure": 0, "Cool": 0}
+
+
     def calculate_team_stats(self) -> None:
         """
         Calculates the stats for each slot and the team as a whole.
         """
         all_percent_boosts = self._calculate_all_percent_boosts()
+
+        center_leader_skill = self.center_slot.card.leader_skill if self.center_slot.card else None
+        guest_leader_skill = self.guest_manager.leader_skill if self.guest_manager else None
 
         # Main Calculation Loop: Process each slot individually to calculate its final stats
         for slot in self.slots:
@@ -331,9 +372,18 @@ class Team:
                     elif sis.attribute == "Cool":
                         slot.total_cool += int(sis.value)
 
-            # --- Future calculation steps will be added here ---
-            # Step 6: Apply Leader Skill Bonuses
-            # etc.
+           # Step 6: Apply Leader Skill and Guest Bonuses
+            center_leader_bonus = self._calculate_leader_skill_bonus(center_leader_skill, slot)
+            center_extra_bonus = self._calculate_center_extra_skill_bonus(slot)
+            guest_leader_bonus = self._calculate_leader_skill_bonus(guest_leader_skill, slot)
+            guest_extra_bonus = self._calculate_guest_extra_skill_bonus(slot)
+
+            slot.total_smile += (center_leader_bonus["Smile"] + center_extra_bonus["Smile"] +
+                                 guest_leader_bonus["Smile"] + guest_extra_bonus["Smile"])
+            slot.total_pure += (center_leader_bonus["Pure"] + center_extra_bonus["Pure"] +
+                                guest_leader_bonus["Pure"] + guest_extra_bonus["Pure"])
+            slot.total_cool += (center_leader_bonus["Cool"] + center_extra_bonus["Cool"] +
+                                guest_leader_bonus["Cool"] + guest_extra_bonus["Cool"])
 
         # Final Aggregation Step: Sum up all final slot stats into the team total
         self.total_team_smile = sum(s.total_smile for s in self.slots)
