@@ -255,7 +255,7 @@ class Team:
         valid_members = self._group_member_mapping.get(group_name)
         if not valid_members:
             return False
-        
+
         return team_characters.issubset(valid_members)
 
     def _calculate_all_percent_boosts(self) -> Dict[str, float]:
