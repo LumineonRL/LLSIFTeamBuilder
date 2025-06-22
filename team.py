@@ -255,7 +255,7 @@ class Team:
         valid_members = self._group_member_mapping.get(group_name)
         if not valid_members:
             return False
-
+        
         return team_characters.issubset(valid_members)
 
     def _calculate_all_percent_boosts(self) -> Dict[str, float]:
@@ -269,7 +269,7 @@ class Team:
             for sis_entry in slot.sis_entries:
                 sis = sis_entry.sis
                 if sis.effect == "all percent boost":
-                    if not sis.group: # Regular boost
+                    if not sis.group: # Regular boost (Aura, Veil)
                         if sis.attribute in boosts:
                             boosts[sis.attribute] += sis.value
                     else: # Nonet boost
@@ -298,12 +298,18 @@ class Team:
             slot.total_pure = slot.card.stats.pure
             slot.total_cool = slot.card.stats.cool
 
-            # Step 2: Apply team-wide "all percent boost" SIS (aura, veil, nonet, etc)
+            # Step 2: Add Accessory Stats
+            if slot.accessory:
+                slot.total_smile += slot.accessory.stats.smile
+                slot.total_pure += slot.accessory.stats.pure
+                slot.total_cool += slot.accessory.stats.cool
+
+            # Step 3: Apply team-wide "all percent boost" SIS (aura, veil, nonet, etc)
             slot.total_smile = math.ceil(slot.total_smile * (1 + all_percent_boosts.get("Smile", 0)))
             slot.total_pure = math.ceil(slot.total_pure * (1 + all_percent_boosts.get("Pure", 0)))
             slot.total_cool = math.ceil(slot.total_cool * (1 + all_percent_boosts.get("Cool", 0)))
 
-            # Step 3: Apply slot-specific "self percent boost" SIS (ring, cross, etc)
+            # Step 4: Apply slot-specific "self percent boost" SIS (ring, cross, etc)
             self_boosts = {"Smile": 0.0, "Pure": 0.0, "Cool": 0.0}
             for sis_entry in slot.sis_entries:
                 sis = sis_entry.sis
@@ -314,7 +320,7 @@ class Team:
             slot.total_pure = math.ceil(slot.total_pure * (1 + self_boosts["Pure"]))
             slot.total_cool = math.ceil(slot.total_cool * (1 + self_boosts["Cool"]))
 
-            # Step 4: Apply slot-specific "self flat boost" SIS (kiss, perfume, etc)
+            # Step 5: Apply slot-specific "self flat boost" SIS (kiss, perfume, etc)
             for sis_entry in slot.sis_entries:
                 sis = sis_entry.sis
                 if sis.effect == "self flat boost":
@@ -326,7 +332,6 @@ class Team:
                         slot.total_cool += int(sis.value)
 
             # --- Future calculation steps will be added here ---
-            # Step 5: Add other Accessory Stats
             # Step 6: Apply Leader Skill Bonuses
             # etc.
 
