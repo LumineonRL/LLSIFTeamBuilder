@@ -1,5 +1,10 @@
 {
     "next_deck_id": 173,
+    "gallery": {
+        "smile": 0,
+        "pure": 0,
+        "cool": 0
+    },
     "entries": [
         {
             "deck_id": 1,
