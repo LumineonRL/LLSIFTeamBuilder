@@ -79,5 +79,24 @@ class TestCardFactory(unittest.TestCase):
         chance_at_lvl_11 = test_card.get_skill_attribute_for_level(test_card.skill.chances, 10)
         self.assertEqual(chance_at_lvl_11, 0.41)
 
+    def test_card_repr(self):
+        """Test the public method for getting skill values at any valid level."""
+        test_card = self.factory.create_card(101)
+        self.assertIsNotNone(test_card)
+        
+        expected = """
+<Card id=101 name='Initial Nozomi' rarity='UR'>
+  - Info: Character='Tojo Nozomi', Attribute='Pure', Level=80, Idolized=False
+  - Stats (S/P/C): 3890/5500/4000
+  - Skill: Level=1, Type='Scorer'
+    - Details: Activation: 'Combo'
+    - Effects: Chance: 0.36%, Threshold: 17.0, Value: 450.0
+  - SIS Slots: 4 (Base: 4, Max: 4)
+  - Leader Skill:
+    - Main: Boosts 'Pure' by 9.0%
+    - Extra: Boosts 'Pure' for 'μ's' by 3.0%
+        """.strip()
+        self.assertEqual(str(test_card).strip(), expected)
+
 if __name__ == '__main__':
     unittest.main(argv=['first-arg-is-ignored'], exit=False)

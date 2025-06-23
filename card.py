@@ -20,6 +20,7 @@ class Card:
         self.idolized_status: str = "idolized" if idolized else "unidolized"
         self.stats: Stats
         self.skill: Skill
+        self.leader_skill: LeaderSkill
 
         self._initialize_base_attributes()
         self._initialize_nested_attributes()
@@ -56,10 +57,15 @@ class Card:
         )
 
         leader_skill_data = self._data.leader_skill
+        extra_data = leader_skill_data.get('extra', {})
+
         flat_leader_skill = {
             "attribute": leader_skill_data.get("leader_attribute"),
             "secondary_attribute": leader_skill_data.get("leader_secondary_attribute"),
-            "value": leader_skill_data.get("leader_value", 0.0)
+            "value": leader_skill_data.get("leader_value", 0.0),
+            "extra_attribute": extra_data.get("leader_extra_attribute"),
+            "extra_target": extra_data.get("leader_extra_target"),
+            "extra_value": extra_data.get("leader_extra_value", 0.0)
         }
         self.leader_skill = LeaderSkill(**flat_leader_skill)
 
@@ -132,4 +138,57 @@ class Card:
         return self.get_skill_attribute_for_level(self.skill.durations, self.current_skill_level)
 
     def __repr__(self) -> str:
-        return f"<Card id={self.card_id} name='{self.display_name}' rarity='{self.rarity}'>"
+        """Provides a detailed, multi-line string representation of the card's state."""
+        header = f"<Card id={self.card_id} name='{self.display_name}' rarity='{self.rarity}'>"
+
+        info = (
+            f"  - Info: Character='{self.character}', Attribute='{self.attribute}', "
+            f"Level={self.level}, Idolized={self.idolized_status == 'idolized'}"
+        )
+
+        stats_line = (
+            f"  - Stats (S/P/C): {self.stats.smile}/{self.stats.pure}/{self.stats.cool}"
+        )
+
+        # Skill Info
+        skill_lines = [f"  - Skill: Level={self.current_skill_level}, Type='{self.skill.type}'"]
+        skill_details_parts = [
+            f"Activation: '{self.skill.activation}'" if self.skill.activation else "",
+            f"Target: '{self.skill.target}'" if self.skill.target else ""
+        ]
+        skill_details = ", ".join(filter(None, skill_details_parts))
+        if skill_details:
+            skill_lines.append(f"    - Details: {skill_details}")
+
+        skill_values_parts = [
+            f"Chance: {self.skill_chance}%" if self.skill_chance is not None else "",
+            f"Threshold: {self.skill_threshold}" if self.skill_threshold is not None else "",
+            f"Value: {self.skill_value}" if self.skill_value is not None else "",
+            f"Duration: {self.skill_duration}s" if self.skill_duration is not None else ""
+        ]
+        skill_values = ", ".join(filter(None, skill_values_parts))
+        if skill_values:
+            skill_lines.append(f"    - Effects: {skill_values}")
+
+        sis_line = f"  - SIS Slots: {self.current_sis_slots} (Base: {self.stats.sis_base}, Max: {self.stats.sis_max})"
+
+        # Leader Skill Info
+        ls = self.leader_skill
+        ls_header = "  - Leader Skill:"
+        ls_main_parts = [
+            f"Boosts '{ls.attribute}'",
+            f"based on '{ls.secondary_attribute}'" if ls.secondary_attribute else "",
+            f"by {ls.value*100:.1f}%"
+        ]
+        ls_main = " ".join(part for part in ls_main_parts if part)
+
+        ls_lines = [ls_header, f"    - Main: {ls_main}"]
+
+        if ls.extra_attribute:
+            ls_extra = (
+                f"    - Extra: Boosts '{ls.extra_attribute}' for '{ls.extra_target}' "
+                f"by {ls.extra_value*100:.1f}%"
+            )
+            ls_lines.append(ls_extra)
+
+        return "\n".join([header, info, stats_line, *skill_lines, sis_line, *ls_lines])

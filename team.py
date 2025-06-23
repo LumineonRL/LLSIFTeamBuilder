@@ -55,6 +55,10 @@ class Team:
             os.path.join('data', 'group_member_map.json'),
             "Could not load group member mapping for Nonets"
         )
+        self._additional_skill_map = self._load_json_mapping(
+            os.path.join('data', 'additional_leader_skill_map.json'),
+            "Could not load additional leader skill map"
+        )
 
     @property
     def center_slot(self) -> TeamSlot:
@@ -310,14 +314,22 @@ class Team:
 
         return bonuses
 
-    def _calculate_center_extra_skill_bonus(self, target_slot: TeamSlot) -> Dict[str, int]:
-        """(Skeleton) Calculates bonus from the center card's extra skill."""
-        return {"Smile": 0, "Pure": 0, "Cool": 0}
+    def _calculate_extra_skill_bonus(self, extra_attr, extra_target, extra_value, target_slot) -> Dict[str, int]:
+        """Generic helper to calculate bonuses from an 'extra' skill component."""
+        bonuses = {"Smile": 0, "Pure": 0, "Cool": 0}
+        if not all([extra_attr, extra_target, extra_value, target_slot.card]):
+            return bonuses
 
-    def _calculate_guest_extra_skill_bonus(self, target_slot: TeamSlot) -> Dict[str, int]:
-        """(Skeleton) Calculates bonus from the guest's extra skill."""
-        return {"Smile": 0, "Pure": 0, "Cool": 0}
+        target_group = self._additional_skill_map.get(extra_target, set())
+        if target_slot.card.character in target_group:
+            if extra_attr == "Smile":
+                bonuses["Smile"] = math.ceil(target_slot.total_smile * extra_value)
+            elif extra_attr == "Pure":
+                bonuses["Pure"] = math.ceil(target_slot.total_pure * extra_value)
+            elif extra_attr == "Cool":
+                bonuses["Cool"] = math.ceil(target_slot.total_cool * extra_value)
 
+        return bonuses
 
     def calculate_team_stats(self) -> None:
         """
@@ -326,6 +338,7 @@ class Team:
         all_percent_boosts = self._calculate_all_percent_boosts()
 
         center_leader_skill = self.center_slot.card.leader_skill if self.center_slot.card else None
+        guest = self.guest_manager.current_guest if self.guest_manager else None
         guest_leader_skill = self.guest_manager.leader_skill if self.guest_manager else None
 
         # Main Calculation Loop: Process each slot individually to calculate its final stats
@@ -374,9 +387,21 @@ class Team:
 
            # Step 6: Apply Leader Skill and Guest Bonuses
             center_leader_bonus = self._calculate_leader_skill_bonus(center_leader_skill, slot)
-            center_extra_bonus = self._calculate_center_extra_skill_bonus(slot)
             guest_leader_bonus = self._calculate_leader_skill_bonus(guest_leader_skill, slot)
-            guest_extra_bonus = self._calculate_guest_extra_skill_bonus(slot)
+
+            center_extra_bonus = self._calculate_extra_skill_bonus(
+                center_leader_skill.extra_attribute,
+                center_leader_skill.extra_target,
+                center_leader_skill.extra_value,
+                slot
+            ) if center_leader_skill else {"Smile": 0, "Pure": 0, "Cool": 0}
+
+            guest_extra_bonus = self._calculate_extra_skill_bonus(
+                guest.leader_extra_attribute,
+                guest.leader_extra_target,
+                guest.leader_extra_value,
+                slot
+            ) if guest else {"Smile": 0, "Pure": 0, "Cool": 0}
 
             slot.total_smile += (center_leader_bonus["Smile"] + center_extra_bonus["Smile"] +
                                  guest_leader_bonus["Smile"] + guest_extra_bonus["Smile"])

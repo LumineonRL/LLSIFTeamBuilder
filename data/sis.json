@@ -754,7 +754,7 @@
         "slots": 4,
         "attribute": "Cool",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.29
     },
@@ -1172,7 +1172,7 @@
         "slots": 4,
         "attribute": "Smile",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.29
     },
@@ -1183,7 +1183,7 @@
         "slots": 4,
         "attribute": "Pure",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.29
     },
@@ -1414,7 +1414,7 @@
         "slots": 2,
         "attribute": "Cool",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.13
     },
@@ -1788,7 +1788,7 @@
         "slots": 2,
         "attribute": "Smile",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.13
     },
@@ -1799,7 +1799,7 @@
         "slots": 2,
         "attribute": "Pure",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.13
     },
@@ -2074,7 +2074,7 @@
         "slots": 3,
         "attribute": "Cool",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.21
     },
@@ -2426,7 +2426,7 @@
         "slots": 3,
         "attribute": "Smile",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.21
     },
@@ -2437,7 +2437,7 @@
         "slots": 3,
         "attribute": "Pure",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.21
     },
@@ -2668,7 +2668,7 @@
         "slots": 5,
         "attribute": "Cool",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.53
     },
@@ -3020,7 +3020,7 @@
         "slots": 5,
         "attribute": "Smile",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.53
     },
@@ -3031,7 +3031,7 @@
         "slots": 5,
         "attribute": "Pure",
         "group": "",
-        "equip_restriction": "Tsushima Yohane",
+        "equip_restriction": "Tsushima Yoshiko",
         "target": "self",
         "value": 0.53
     },
