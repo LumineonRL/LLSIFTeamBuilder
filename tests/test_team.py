@@ -57,6 +57,7 @@ class TestTeam(unittest.TestCase):
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 0/0/0
 <Team is empty>
         """.strip()
         self.assertEqual(str(self.team).strip(), expected)
@@ -67,9 +68,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4170/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4170/3800
   Accessory: None
   SIS: None
 --------------------------
@@ -86,6 +89,7 @@ Guest: None
         expected_team_state = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 0/0/0
 <Team is empty>
         """.strip()
         self.assertEqual(str(self.team).strip(), expected_team_state)
@@ -100,6 +104,7 @@ Guest: None
         expected_team_state = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 0/0/0
 <Team is empty>
         """.strip()
         self.assertEqual(str(self.team).strip(), expected_team_state)
@@ -112,9 +117,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 4140/2140/1820
 
 [ Slot 1 ]
   Card: 2774 Emma (Deck ID: 6)
+  Stats: S/P/C 4140/2140/1820
   Accessory: None
   SIS: None
 --------------------------
@@ -129,9 +136,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5850/4360/3920
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5850/4360/3920
   Accessory: SR Crystal Ring (Manager ID: 3)
   SIS: None
 --------------------------
@@ -148,6 +157,7 @@ Guest: None
         expected_team_state = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 0/0/0
 <Team is empty>
         """.strip()
         self.assertEqual(str(self.team).strip(), expected_team_state)
@@ -161,9 +171,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5720/4280/3870
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5720/4280/3870
   Accessory: R Rose Brooch (Manager ID: 6)
   SIS: None
 --------------------------
@@ -179,9 +191,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5490/3100/4290
 
 [ Slot 1 ]
   Card: Kunoichi Honoka (Deck ID: 50)
+  Stats: S/P/C 5490/3100/4290
   Accessory: None
   SIS: None
 --------------------------
@@ -199,14 +213,78 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4170/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4170/3800
   Accessory: None
   SIS: None
 --------------------------
         """.strip()
         self.assertEqual(str(self.team).strip(), expected)
+
+    def test_equip_char_specific_acc(self):
+        """Test equipping an accessory that can only be equipped to a specific character ID"""
+        self.team.equip_card_in_slot(1, 152) # A Little Toughness Maki
+        self.team.equip_accessory_in_slot(1, 23) # UR Red Lantern
+
+        expected = """
+--- Team Configuration ---
+Guest: None
+Total Stats: S/P/C 3422/12759/8699
+
+[ Slot 1 ]
+  Card: A Little Toughness Maki (Deck ID: 152)
+  Stats: S/P/C 3422/12759/8699
+  Accessory: UR Red Lantern (Manager ID: 23)
+  SIS: None
+--------------------------
+        """.strip()
+        self.assertEqual(str(self.team).strip(), expected)
+
+    def test_equip_char_acc_wrong_character(self):
+        """Test equipping an accessory that can only be equipped to a specific Card ID to the wrong ID."""
+        self.team.equip_card_in_slot(1, 120)
+        with self.assertWarns(UserWarning) as cm:
+            self.team.equip_accessory_in_slot(1, 23)
+
+        self.assertEqual(str(cm.warning), "Cannot equip accessory 'UR Red Lantern': ID mismatch. Accessory requires card ID '3674', but card's ID is '563'.")
+
+        expected = """
+--- Team Configuration ---
+Guest: None
+Total Stats: S/P/C 3120/4210/5480
+
+[ Slot 1 ]
+  Card: Job Maki (Deck ID: 120)
+  Stats: S/P/C 3120/4210/5480
+  Accessory: None
+  SIS: None
+--------------------------
+        """.strip()
+        self.assertEqual(str(self.team).strip(), expected)
+
+    def verify_acc_stat_update(self):
+        self.team.equip_card_in_slot(1, 120)
+
+        acc_smile = self.accessory_manager.get_accessory(6).stats.smile
+        acc_pure = self.accessory_manager.get_accessory(6).stats.pure
+        acc_cool = self.accessory_manager.get_accessory(6).stats.cool
+
+        card_smile = self.team.slots[0].card.stats.smile
+        card_pure = self.team.slots[0].card.stats.pure
+        card_cool = self.team.slots[0].card.stats.cool
+
+        expected_smile = acc_smile + card_smile
+        expected_pure = acc_pure + card_pure
+        expected_cool = acc_cool + card_cool
+
+        self.team.equip_accessory_in_slot(1, 6)
+
+        self.assertEqual(self.team.slots[0].total_smile, expected_smile)
+        self.assertEqual(self.team.slots[0].total_pure, expected_pure)
+        self.assertEqual(self.team.slots[0].total_cool, expected_cool)
 
     def test_equip_sis(self):
         """Test equipping a single SIS to a card."""
@@ -216,9 +294,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4370/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4370/3800
   Accessory: None
   SIS (1/4 slots used):
     - Pure Kiss (1 slots)
@@ -245,9 +325,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4370/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4370/3800
   Accessory: None
   SIS (1/4 slots used):
     - Pure Kiss (1 slots)
@@ -267,9 +349,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4370/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4370/3800
   Accessory: None
   SIS (1/4 slots used):
     - Pure Kiss (1 slots)
@@ -286,30 +370,34 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 3180/5390/4210
 
 [ Slot 1 ]
   Card: Fruits (Swimsuit) Nozomi (Deck ID: 64)
+  Stats: S/P/C 3180/5390/4210
   Accessory: None
   SIS: None
 --------------------------
         """.strip()
         self.assertEqual(str(self.team).strip(), expected)
 
-    def test_equip_acc_to_wrong_char(self):
-        """Test Accessory character must match Card character."""
+    def test_equip_acc_to_wrong_id(self):
+        """Test Accessory id must match Cardid."""
         self.team.equip_card_in_slot(1, 1)
 
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_accessory_in_slot(1, 2)
 
-        self.assertEqual(str(cm.warning), "Cannot equip accessory 'UR You Aroma Spray': Character mismatch. Accessory is for 'Watanabe You', but card is for 'Tojo Nozomi'.")
+        self.assertEqual(str(cm.warning), "Cannot equip accessory 'UR You Aroma Spray': ID mismatch. Accessory requires card ID '3711', but card's ID is '2310'.")
 
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4170/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4170/3800
   Accessory: None
   SIS: None
 --------------------------
@@ -328,9 +416,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4170/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4170/3800
   Accessory: None
   SIS: None
 --------------------------
@@ -349,9 +439,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4170/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4170/3800
   Accessory: None
   SIS: None
 --------------------------
@@ -370,9 +462,11 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 5540/4170/3800
 
 [ Slot 1 ]
   Card: Make-Up Magic Nozomi (Deck ID: 1)
+  Stats: S/P/C 5540/4170/3800
   Accessory: None
   SIS: None
 --------------------------
@@ -392,15 +486,46 @@ Guest: None
         expected = """
 --- Team Configuration ---
 Guest: None
+Total Stats: S/P/C 11560/8448/14590
 
 [ Slot 1 ]
   Card: Dolphin Show You (Deck ID: 9)
+  Stats: S/P/C 11560/8448/14590
   Accessory: None
   SIS (2/6 slots used):
     - Pure Ring [2nd] (2 slots)
 --------------------------
         """.strip()
         self.assertEqual(str(self.team).strip(), expected)
+
+    # todo: Write more tests
+    def test_leader_skill(self):
+        pass
+
+    def test_leader_extra_skill(self):
+        pass
+
+    def test_guest_skill(self):
+        pass
+
+    def test_guest_extra_skill(self):
+        pass
+
+    def test_aura(self):
+        pass
+
+    def test_nonet(self):
+        pass
+
+    def test_nonet_dupe_member(self):
+        # should fail
+        pass
+
+    def test_charm(self):
+        pass
+
+    def test_ring(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
