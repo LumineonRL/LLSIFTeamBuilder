@@ -5,6 +5,7 @@ import warnings
 
 from carddata import CardData
 from card import Card
+from gallery import Gallery
 
 
 class CardFactory:
@@ -26,7 +27,8 @@ class CardFactory:
 
     def _load_json(self, json_path: str) -> Union[Dict, List]:
         try:
-            with open(json_path, 'r', encoding='utf-8') as f: return json.load(f)
+            with open(json_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
             raise RuntimeError(f"Failed to load or parse JSON from {json_path}: {e}") from e
 
@@ -55,11 +57,11 @@ class CardFactory:
 
     def _validate_and_sanitize_inputs(self, skill_level: Any, level: Any, sis_slots: Any) -> Tuple[int, Optional[int], Optional[int]]:
         """Validates input types, warns on failure, and returns sanitized values."""
-    
+
         if not isinstance(skill_level, numbers.Integral):
             warnings.warn(f"Invalid type for skill_level: got {type(skill_level).__name__}, expected int. Defaulting to 1.")
             skill_level = 1
-            
+
         if level is not None and not isinstance(level, numbers.Integral):
             warnings.warn(f"Invalid type for level: got {type(level).__name__}, expected int. Ignoring custom level.")
             level = None
@@ -67,7 +69,7 @@ class CardFactory:
         if sis_slots is not None and not isinstance(sis_slots, numbers.Integral):
             warnings.warn(f"Invalid type for sis_slots: got {type(sis_slots).__name__}, expected int. Ignoring custom SIS slots.")
             sis_slots = None
-            
+
         return int(skill_level), int(level) if level is not None else None, int(sis_slots) if sis_slots is not None else None
 
     def _apply_skill_level(self, card: Card, skill_level: int) -> None:
@@ -89,7 +91,9 @@ class CardFactory:
                     f"Defaulting to {card.current_sis_slots}."
                 )
 
-    def create_card(self, card_id: int, idolized: bool = False, skill_level: int = 1, level: Optional[int] = None, sis_slots: Optional[int] = None) -> Optional[Card]:
+    def create_card(self, card_id: int, gallery: Gallery, idolized: bool = False,
+                    skill_level: int = 1, level: Optional[int] = None,
+                    sis_slots: Optional[int] = None) -> Optional[Card]:
         """Orchestrates the creation of a configured Card instance."""
         skill_level, level, sis_slots = self._validate_and_sanitize_inputs(skill_level, level, sis_slots)
 
@@ -102,7 +106,7 @@ class CardFactory:
             warnings.warn(f"Card ID {card_id} is a promo and cannot be unidolized. Forcing to idolized state.")
             final_idolized = True
 
-        card = Card(card_data, self._level_cap_map, self._level_cap_bonus_map, final_idolized, level)
+        card = Card(card_data, gallery, self._level_cap_map, self._level_cap_bonus_map, final_idolized, level)
 
         self._apply_skill_level(card, skill_level)
         self._apply_sis_slots(card, sis_slots)

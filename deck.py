@@ -6,6 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from card import Card
 from cardfactory import CardFactory
+from gallery import Gallery
 
 @dataclass
 class DeckEntry:
@@ -20,6 +21,7 @@ class Deck:
         self._card_factory = card_factory
         self._entries: Dict[int, DeckEntry] = {}
         self._next_deck_id: int = 1
+        self.gallery: Gallery = Gallery()
 
     def add_card(self, card_id: int, **kwargs: Any) -> Optional[int]:
         """
@@ -78,6 +80,7 @@ class Deck:
 
         new_card = self._card_factory.create_card(
             card_id=current_card.card_id,
+            gallery=self.gallery,
             **current_config
         )
 
@@ -88,20 +91,6 @@ class Deck:
         entry.card = new_card
         return True
 
-    def display_deck(self) -> None:
-        """Prints a summary of each card currently in the deck."""
-        if not self._entries:
-            print("Deck is currently empty.")
-            return
-
-        print("\n--- Current Deck Contents ---")
-        for deck_id, entry in self._entries.items():
-            card = entry.card
-            print(f"Deck ID: {deck_id} | Card ID: {card.card_id} - {card.display_name} ({card.rarity})")
-            print(f"  State: Level: {card.level}, Idolized: {card.idolized_status == 'idolized'}, Skill Lvl: {card.current_skill_level}, SIS: {card.current_sis_slots}")
-        print(f"Total cards in deck: {len(self._entries)}")
-        print("--------------------------")
-
     def get_unassigned_cards(self, assigned_deck_ids: set[int]) -> List[Card]:
         """Returns a list of Card objects not in the provided set of assigned IDs."""
         return [entry.card for deck_id, entry in self._entries.items() if deck_id not in assigned_deck_ids]
@@ -110,6 +99,7 @@ class Deck:
         """Serializes the deck to a dictionary for JSON conversion."""
         return {
             "next_deck_id": self._next_deck_id,
+            "gallery": self.gallery.to_dict(),
             "entries": [
                 {
                     "deck_id": entry.deck_id,
@@ -147,17 +137,22 @@ class Deck:
             with open(filepath, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
+            # Load gallery first
+            gallery_data = data.get("gallery", {})
+            self.gallery = Gallery.from_dict(gallery_data)
+
             new_entries = {}
             for entry_data in data.get("entries", []):
                 card_id = entry_data.get("card_id")
                 config = entry_data.get("config", {})
-                card = self._card_factory.create_card(card_id, **config)
+                # Pass the loaded gallery to the factory
+                card = self._card_factory.create_card(card_id, gallery=self.gallery, **config)
                 if card:
                     deck_id = entry_data["deck_id"]
                     new_entries[deck_id] = DeckEntry(deck_id=deck_id, card=card)
                 else:
                     warnings.warn(f"Skipping card in deck file due to creation failure: card_id {card_id}")
-            
+
             self._entries = new_entries
             self._next_deck_id = data.get("next_deck_id", 1)
             return True
@@ -169,7 +164,26 @@ class Deck:
     def delete_deck(self) -> None:
         """Clears all cards from the deck and resets the ID counter."""
         self._entries.clear()
+        self.gallery = Gallery()
         self._next_deck_id = 1
 
     def get_entry(self, deck_id: int) -> Optional[DeckEntry]:
         return self._entries.get(deck_id)
+
+    def __repr__(self) -> str:
+        """Provides a detailed string representation of the deck's contents."""
+        gallery_stats = self.gallery.to_dict()
+        header = f"--- Current Deck Contents (Gallery Bonus: S/P/C {gallery_stats['smile']}/{gallery_stats['pure']}/{gallery_stats['cool']}) ---"
+
+        if not self._entries:
+            return f"{header}\nDeck is currently empty.\n--------------------------"
+
+        card_lines = []
+        for deck_id, entry in self._entries.items():
+            card_repr = repr(entry.card)
+            card_lines.append(f"Deck ID: {deck_id}\n{card_repr}")
+
+        cards_str = "\n\n".join(card_lines)
+        footer = f"\n\nTotal cards in deck: {len(self._entries)}\n--------------------------"
+
+        return f"\n{header}\n{cards_str}{footer}"

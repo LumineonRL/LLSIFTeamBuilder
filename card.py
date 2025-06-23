@@ -3,6 +3,7 @@ from dataclasses import replace
 from typing import Optional, Dict, Any, Union, List
 
 from carddata import CardData
+from gallery import Gallery
 from stats import Stats
 from skill import Skill
 from leaderskill import LeaderSkill
@@ -13,12 +14,13 @@ class Card:
     a specific state (e.g., idolization, skill level) and provides dynamic 
     properties based on that state.
     """
-    def __init__(self, card_data: CardData, level_cap_map: Dict, level_cap_bonus_map: Dict, idolized: bool = True, level: Optional[int] = None):
+    def __init__(self, card_data: CardData, gallery: Gallery, level_cap_map: Dict, level_cap_bonus_map: Dict, idolized: bool = True, level: Optional[int] = None):
         self._data: CardData = card_data
+        self._gallery: Gallery = gallery
         self._level_cap_map = level_cap_map
         self._level_cap_bonus_map = level_cap_bonus_map
         self.idolized_status: str = "idolized" if idolized else "unidolized"
-        self.stats: Stats
+        self._base_stats: Stats
         self.skill: Skill
         self.leader_skill: LeaderSkill
 
@@ -42,7 +44,7 @@ class Card:
     def _initialize_nested_attributes(self) -> None:
         """Initializes state-dependent nested objects like Stats, Skill, and LeaderSkill."""
         stats_data = self._data.stats.get(self.idolized_status, {})
-        self.stats = Stats(**stats_data)
+        self._base_stats = Stats(**stats_data)
 
         skill_data = self._data.skill
         self.skill = Skill(
@@ -84,14 +86,29 @@ class Card:
         self._apply_level_cap_bonus(bonus_type)
 
     def _apply_level_cap_bonus(self, bonus_type: str) -> None:
-        """Adds level-based stat bonuses using the specified bonus map."""
+        """Adds level-based stat bonuses to the internal base stats."""
         bonus_map = self._level_cap_bonus_map.get(bonus_type, {})
         bonus_value = bonus_map.get(str(self.level), 0)
         if bonus_value > 0:
-            self.stats = replace(self.stats,
-                                smile=self.stats.smile + bonus_value,
-                                pure=self.stats.pure + bonus_value,
-                                cool=self.stats.cool + bonus_value)
+            self._base_stats = replace(self._base_stats,
+                                 smile=self._base_stats.smile + bonus_value,
+                                 pure=self._base_stats.pure + bonus_value,
+                                 cool=self._base_stats.cool + bonus_value)
+
+    @property
+    def stats(self) -> Stats:
+        """
+        Returns a new Stats object with the gallery bonus applied to the
+        card's base stats. This is accessed dynamically.
+        """
+        return Stats(
+            smile=self._base_stats.smile + self._gallery.smile,
+            pure=self._base_stats.pure + self._gallery.pure,
+            cool=self._base_stats.cool + self._gallery.cool,
+            sis_base=self._base_stats.sis_base,
+            sis_max=self._base_stats.sis_max,
+            image=self._base_stats.image
+        )
 
     @property
     def current_skill_level(self) -> int:
