@@ -97,21 +97,30 @@ class Team:
         self.calculate_team_stats()
         return True
 
-    def _check_accessory_character_restriction(self, card: Card, accessory: Accessory) -> bool:
+    def _check_accessory_id_restriction(self, card: Card, accessory: Accessory) -> bool:
         """
-        Checks if an accessory can be equipped to a card based on character.
+        Checks if an accessory can be equipped to a card based on card_id.
         Returns True if allowed, False otherwise.
         """
-        card_character = card.character
-        accessory_character = accessory.character
+        card_id_to_match = card.card_id
+        accessory_card_id_str = accessory.card_id
 
-        # An empty string "" for accessory character means no restriction.
-        if accessory_character == "" or accessory_character == card_character:
+        # If the accessory has no specific card_id restriction, it can be equipped.
+        if not accessory_card_id_str:
             return True
 
+        try:
+            accessory_card_id_int = int(accessory_card_id_str)
+            if accessory_card_id_int == card_id_to_match:
+                return True
+        except (ValueError, TypeError):
+            # If the conversion to an integer fails, it's not a valid ID for matching.
+            pass
+
+        # If we reach here, the check failed.
         warnings.warn(f"Cannot equip accessory '{accessory.name}': "
-                      f"Character mismatch. Accessory is for '{accessory_character}', "
-                      f"but card is for '{card_character}'.")
+                        f"ID mismatch. Accessory requires card ID '{accessory.card_id}', "
+                        f"but card's ID is '{card.card_id}'.")
         return False
 
     def equip_accessory_in_slot(self, slot_number: int, manager_internal_id: int) -> bool:
@@ -132,7 +141,7 @@ class Team:
             warnings.warn(f"Accessory with Manager ID {manager_internal_id} not found.")
             return False
 
-        if not self._check_accessory_character_restriction(slot.card, acc_entry.accessory):
+        if not self._check_accessory_id_restriction(slot.card, acc_entry.accessory):
             return False
 
         # Unequip any existing accessory in this slot
