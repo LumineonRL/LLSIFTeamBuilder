@@ -1,5 +1,5 @@
 {
-    "next_deck_id": 173,
+    "next_deck_id": 181,
     "gallery": {
         "smile": 0,
         "pure": 0,
@@ -1723,6 +1723,86 @@
                 "idolized": true,
                 "level": 100,
                 "skill_level": 4,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 173,
+            "card_id": 90,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 174,
+            "card_id": 90,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 175,
+            "card_id": 90,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 176,
+            "card_id": 90,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 177,
+            "card_id": 90,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 178,
+            "card_id": 90,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 179,
+            "card_id": 90,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 180,
+            "card_id": 2051,
+            "config": {
+                "idolized": false,
+                "level": 80,
+                "skill_level": 1,
                 "sis_slots": 4
             }
         }

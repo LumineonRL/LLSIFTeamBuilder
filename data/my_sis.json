@@ -1,5 +1,5 @@
 {
-    "next_manager_internal_id": 422,
+    "next_manager_internal_id": 426,
     "skills": [
         {
             "manager_internal_id": 1,
@@ -1684,6 +1684,22 @@
         {
             "manager_internal_id": 421,
             "sid": 481
+        },
+        {
+            "manager_internal_id": 422,
+            "sid": 31
+        },
+        {
+            "manager_internal_id": 423,
+            "sid": 32
+        },
+        {
+            "manager_internal_id": 424,
+            "sid": 38
+        },
+        {
+            "manager_internal_id": 425,
+            "sid": 33
         }
     ]
 }
