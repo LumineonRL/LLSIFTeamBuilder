@@ -28,95 +28,86 @@ class TestAccessoryManager(unittest.TestCase):
 
     def test_add_accessory_display_deck(self):
         test_accessories = AccessoryManager(self.factory)
-        test_accessories.add_accessory(101, level=4)
+        test_accessories.add_accessory(101, skill_level=4)
         test_accessories.add_accessory(28)
         test_accessories.add_accessory(96)
         print(test_accessories)
         expected = """<AccessoryManager (3 accessories)>
-  - ID 1: <Accessory id=101 card_id=565 name='UR Police Badge Case' level=4>
+  - ID 1: <Accessory id=101 name='UR Police Badge Case' skill_level=4>
   - Stats: Smile=380, Pure=320, Cool=570
-  - Skill Type: Combo Fever
-  - Trigger: 22% chance, Value: 0
-  - Effect Value: 30, Duration: 5.5s
-  - ID 2: <Accessory id=28 card_id= name='SSR Amethyst Pendant' level=1>
+  - Skill: Type='Combo Bonus Up'
+    - Effects: Chance: 22%, Threshold: 0, Value: 30, Duration: 5.5s
+  - ID 2: <Accessory id=28 name='SSR Amethyst Pendant' skill_level=1>
   - Stats: Smile=50, Pure=30, Cool=20
-  - Skill Type: Healer
-  - Trigger: 5% chance, Value: 0
-  - Effect Value: 4, Duration: 0s
-  - ID 3: <Accessory id=96 card_id=1232 name='UR Peach Badge' level=1>
+  - Skill: Type='Healer'
+    - Effects: Chance: 5%, Threshold: 0, Value: 4, Duration: 0s
+  - ID 3: <Accessory id=96 name='UR Peach Badge' skill_level=1>
   - Stats: Smile=100, Pure=70, Cool=50
-  - Skill Type: SRU
-  - Trigger: 5% chance, Value: 0
-  - Effect Value: 4, Duration: 2.5s"""
+  - Skill: Type='Skill Rate Up'
+    - Effects: Chance: 5%, Threshold: 0, Value: 4, Duration: 2.5s"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
     def test_add_non_existent_accessory(self):
         test_accessories = AccessoryManager(self.factory)
         with self.assertWarns(UserWarning) as cm:
-            test_accessories.add_accessory(4001, level=4)
+            test_accessories.add_accessory(4001, skill_level=4)
         self.assertEqual(str(cm.warnings[0].message), "Error: Accessory with ID 4001 not found.")
         test_accessories.add_accessory(28)
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
-  - ID 1: <Accessory id=28 card_id= name='SSR Amethyst Pendant' level=1>
+  - ID 1: <Accessory id=28 name='SSR Amethyst Pendant' skill_level=1>
   - Stats: Smile=50, Pure=30, Cool=20
-  - Skill Type: Healer
-  - Trigger: 5% chance, Value: 0
-  - Effect Value: 4, Duration: 0s"""
+  - Skill: Type='Healer'
+    - Effects: Chance: 5%, Threshold: 0, Value: 4, Duration: 0s"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
     def test_modify_accessory(self):
         test_accessories = AccessoryManager(self.factory)
-        test_accessories.add_accessory(100, level=4)
-        test_accessories.modify_accessory(manager_internal_id=1, level = 6)
+        test_accessories.add_accessory(100, skill_level=4)
+        test_accessories.modify_accessory(manager_internal_id=1, skill_level = 6)
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
-  - ID 1: <Accessory id=100 card_id=408 name='UR Block Checked Mug' level=6>
+  - ID 1: <Accessory id=100 name='UR Block Checked Mug' skill_level=6>
   - Stats: Smile=910, Pure=600, Cool=500
-  - Skill Type: Combo Fever
-  - Trigger: 27% chance, Value: 0
-  - Effect Value: 31, Duration: 6s"""
+  - Skill: Type='Combo Bonus Up'
+    - Effects: Chance: 27%, Threshold: 0, Value: 31, Duration: 6s"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
     def test_remove_accessory(self):
         test_accessories = AccessoryManager(self.factory)
-        test_accessories.add_accessory(100, level=4)
-        test_accessories.add_accessory(101, level=4)
-        test_accessories.add_accessory(102, level=4)
+        test_accessories.add_accessory(100, skill_level=4)
+        test_accessories.add_accessory(101, skill_level=4)
+        test_accessories.add_accessory(102, skill_level=4)
         test_accessories.remove_accessory(2)
         test_accessories.add_accessory(100)
         print(test_accessories)
         expected = """<AccessoryManager (3 accessories)>
-  - ID 1: <Accessory id=100 card_id=408 name='UR Block Checked Mug' level=4>
+  - ID 1: <Accessory id=100 name='UR Block Checked Mug' skill_level=4>
   - Stats: Smile=570, Pure=380, Cool=310
-  - Skill Type: Combo Fever
-  - Trigger: 22% chance, Value: 0
-  - Effect Value: 28, Duration: 5.5s
-  - ID 3: <Accessory id=102 card_id=708 name='UR Dalmatian Bag' level=4>
+  - Skill: Type='Combo Bonus Up'
+    - Effects: Chance: 22%, Threshold: 0, Value: 28, Duration: 5.5s
+  - ID 3: <Accessory id=102 name='UR Dalmatian Bag' skill_level=4>
   - Stats: Smile=570, Pure=380, Cool=320
-  - Skill Type: Combo Fever
-  - Trigger: 22% chance, Value: 0
-  - Effect Value: 32, Duration: 5.5s
-  - ID 4: <Accessory id=100 card_id=408 name='UR Block Checked Mug' level=1>
+  - Skill: Type='Combo Bonus Up'
+    - Effects: Chance: 22%, Threshold: 0, Value: 32, Duration: 5.5s
+  - ID 4: <Accessory id=100 name='UR Block Checked Mug' skill_level=1>
   - Stats: Smile=220, Pure=150, Cool=120
-  - Skill Type: Combo Fever
-  - Trigger: 10% chance, Value: 0
-  - Effect Value: 20, Duration: 2.5s"""
+  - Skill: Type='Combo Bonus Up'
+    - Effects: Chance: 10%, Threshold: 0, Value: 20, Duration: 2.5s"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
     def test_remove_invalid_accessory_manager_id(self):
         test_accessories = AccessoryManager(self.factory)
-        test_accessories.add_accessory(100, level=4)
+        test_accessories.add_accessory(100, skill_level=4)
         with self.assertWarns(UserWarning) as cm:
             test_accessories.remove_accessory(2)
         self.assertEqual(str(cm.warnings[0].message), "Accessory Manager ID 2 does not exist and cannot be removed.")
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
-  - ID 1: <Accessory id=100 card_id=408 name='UR Block Checked Mug' level=4>
+  - ID 1: <Accessory id=100 name='UR Block Checked Mug' skill_level=4>
   - Stats: Smile=570, Pure=380, Cool=310
-  - Skill Type: Combo Fever
-  - Trigger: 22% chance, Value: 0
-  - Effect Value: 28, Duration: 5.5s"""
+  - Skill: Type='Combo Bonus Up'
+    - Effects: Chance: 22%, Threshold: 0, Value: 28, Duration: 5.5s"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
     def test_save_accessories(self):
@@ -139,11 +130,10 @@ class TestAccessoryManager(unittest.TestCase):
         test_accessories.load(self.ACCESSORY_SAVE_PATH)
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
-  - ID 1: <Accessory id=100 card_id=408 name='UR Block Checked Mug' level=1>
+  - ID 1: <Accessory id=100 name='UR Block Checked Mug' skill_level=1>
   - Stats: Smile=220, Pure=150, Cool=120
-  - Skill Type: Combo Fever
-  - Trigger: 10% chance, Value: 0
-  - Effect Value: 20, Duration: 2.5s"""
+  - Skill: Type='Combo Bonus Up'
+    - Effects: Chance: 10%, Threshold: 0, Value: 20, Duration: 2.5s"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
 
     def test_delete_accessories(self):

@@ -91,9 +91,9 @@ class Card:
         bonus_value = bonus_map.get(str(self.level), 0)
         if bonus_value > 0:
             self._base_stats = replace(self._base_stats,
-                                 smile=self._base_stats.smile + bonus_value,
-                                 pure=self._base_stats.pure + bonus_value,
-                                 cool=self._base_stats.cool + bonus_value)
+                                       smile=self._base_stats.smile + bonus_value,
+                                       pure=self._base_stats.pure + bonus_value,
+                                       cool=self._base_stats.cool + bonus_value)
 
     @property
     def stats(self) -> Stats:
@@ -131,12 +131,21 @@ class Card:
         self._current_sis_slots = value
 
     def get_skill_attribute_for_level(self, value_list: List[Any], level: int) -> Optional[Any]:
-        """Public method to get a skill attribute for a specific level (1-16)."""
-        if not 1 <= level <= 16:
-            warnings.warn(f"Requested skill level {level} is outside the valid data range (1-16).")
+        """
+        Public method to get a skill attribute for a specific level.
+
+        If the requested level is outside the bounds of the available data, it
+        clamps to the nearest valid level (e.g., a level greater than the max
+        will return the value for the max level, and a level < 1 will return
+        the value for level 1).
+        """
+        if not value_list:
             return None
+
         index = level - 1
-        return value_list[index] if 0 <= index < len(value_list) else None
+        clamped_index = max(0, min(index, len(value_list) - 1))
+
+        return value_list[clamped_index]
 
     @property
     def skill_chance(self) -> Optional[float]:

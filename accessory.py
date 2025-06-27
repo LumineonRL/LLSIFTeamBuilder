@@ -1,84 +1,152 @@
-import warnings
-from typing import Optional, List, Union
+from typing import Optional, List, Union, Any
 
 from accessorydata import AccessoryData
 from accessorystats import AccessoryStats as Stats
+from skill import Skill
+
 
 class Accessory:
     """
-    Represents a stateful instance of an accessory, configured with a specific level.
+    Represents a stateful instance of an accessory. It is configured with a
+    single skill_level that determines both its stats and skill effects.
+    The structure is aligned with the Card class for consistency.
     """
-    def __init__(self, accessory_data: AccessoryData, level: int = 1):
+
+    def __init__(self, accessory_data: AccessoryData, skill_level: int = 1):
         self._data = accessory_data
 
+        # --- Base Attributes ---
         self.accessory_id: int = self._data.accessory_id
         self.name: str = self._data.name
         self.character: str = self._data.character
         self.card_id: Optional[str] = self._data.card_id
-        self.skill_type: str = self._data.skill.get("effect", {}).get("type", "Unknown")
 
-        self._skill_trigger = self._data.skill.get("trigger", {})
-        self._skill_effect = self._data.skill.get("effect", {})
-        self.skill_trigger_chances: List[float] = self._skill_trigger.get("chances", [])
-        self.skill_trigger_values: List[float] = self._skill_trigger.get("values", [])
-        self.skill_effect_durations: List[float] = self._skill_effect.get("durations", [])
-        self.skill_effect_values: List[float] = self._skill_effect.get("values", [])
+        # --- Skill Initialization ---
+        skill_data = self._data.skill
+        trigger_data = skill_data.get("trigger", {})
+        effect_data = skill_data.get("effect", {})
 
-        self._level: int = 1
+        self.skill = Skill(
+            type=effect_data.get("type"),
+            target=skill_data.get("target"),
+            chances=trigger_data.get("chances", []),
+            thresholds=trigger_data.get("values", []),
+            durations=effect_data.get("durations", []),
+            values=effect_data.get("values", []),
+        )
+
+        # --- Level and Stats Initialization ---
+        self._skill_level: int = 1
         self.stats: Stats
-        self.level = level
+        # The setter for skill_level will also initialize stats.
+        self.skill_level = skill_level
 
     @property
-    def level(self) -> int:
-        """The current level of the accessory (1-8)."""
-        return self._level
+    def skill_level(self) -> int:
+        """
+        The current level of the accessory (1-16). This single property
+        controls both the stats and the skill effect values.
+        """
+        return self._skill_level
 
-    @level.setter
-    def level(self, value: int) -> None:
+    @skill_level.setter
+    def skill_level(self, value: int) -> None:
+        """
+        Sets the accessory's skill level and updates its stats accordingly.
+        """
         value = int(value)
-
         if not 1 <= value <= 8:
-            raise ValueError("Accessory level must be between 1 and 8.")
-        self._level = value
-        self._update_stats_from_level()
+            raise ValueError("Accessory skill_level must be between 1 and 8.")
+        self._skill_level = value
+        self._update_stats_from_skill_level()
 
-    def _update_stats_from_level(self) -> None:
-        """Updates the accessory's stats based on its current level."""
-        index = self.level - 1
-        raw_stats = self._data.stats[index] if 0 <= index < len(self._data.stats) else [0, 0, 0]
+    def _update_stats_from_skill_level(self) -> None:
+        """Updates the accessory's stats based on its current skill_level."""
+        index = self.skill_level - 1
+        # Clamp index to protect against accessories with fewer than 16 stat entries
+        clamped_index = max(0, min(index, len(self._data.stats) - 1))
+
+        raw_stats = self._data.stats[clamped_index] if self._data.stats else [0, 0, 0]
         self.stats = Stats(smile=raw_stats[0], pure=raw_stats[1], cool=raw_stats[2])
 
-    def get_skill_value_for_level(self, value_list: List[Union[int, float]], level: int) -> Union[int, float]:
+    def get_skill_attribute_for_level(
+        self, value_list: List[Any], level: int
+    ) -> Optional[Any]:
         """
-        Public method to get a skill value from a list for a specific level.
-        Returns 0.0 if the level is out of bounds.
+        Public method to get a skill attribute for a specific level.
+
+        If the requested level is outside the bounds of the available data, it
+        clamps to the nearest valid level (e.g., a level greater than the max
+        will return the value for the max level, and a level < 1 will return
+        the value for level 1).
         """
+        if not value_list:
+            return None
+
         index = level - 1
-        if not 1 <= level <= 16: # Accessories can have data up to level 16
-            warnings.warn(f"Requested level {level} is outside the valid range (1-16).")
-            return 0.0
-        return value_list[index] if 0 <= index < len(value_list) else 0.0
+        clamped_index = max(0, min(index, len(value_list) - 1))
+
+        return value_list[clamped_index]
+
+    # --- Skill Properties (Aligned with Card properties) ---
 
     @property
-    def current_skill_trigger_chance(self) -> float:
-        return self.get_skill_value_for_level(self.skill_trigger_chances, self.level)
+    def skill_chance(self) -> Optional[float]:
+        """Gets the skill's activation chance for the current skill level."""
+        return self.get_skill_attribute_for_level(self.skill.chances, self.skill_level)
 
     @property
-    def current_skill_trigger_value(self) -> float:
-        return self.get_skill_value_for_level(self.skill_trigger_values, self.level)
+    def skill_value(self) -> Optional[Union[int, float]]:
+        """Gets the skill's effect value for the current skill level."""
+        return self.get_skill_attribute_for_level(self.skill.values, self.skill_level)
 
     @property
-    def current_skill_effect_duration(self) -> float:
-        return self.get_skill_value_for_level(self.skill_effect_durations, self.level)
+    def skill_threshold(self) -> Optional[int]:
+        """Gets the skill's activation threshold for the current skill level."""
+        return self.get_skill_attribute_for_level(
+            self.skill.thresholds, self.skill_level
+        )
 
     @property
-    def current_skill_effect_value(self) -> float:
-        return self.get_skill_value_for_level(self.skill_effect_values, self.level)
+    def skill_duration(self) -> Optional[Union[int, float]]:
+        """Gets the skill's effect duration for the current skill level."""
+        return self.get_skill_attribute_for_level(
+            self.skill.durations, self.skill_level
+        )
 
     def __repr__(self) -> str:
-        header = f"<Accessory id={self.accessory_id} card_id={self.card_id} name='{self.name}' level={self.level}>"
+        """Provides a detailed string representation of the accessory's state."""
+        header = (
+            f"<Accessory id={self.accessory_id} name='{self.name}' "
+            f"skill_level={self.skill_level}>"
+        )
         stats_line = f"  - Stats: Smile={self.stats.smile}, Pure={self.stats.pure}, Cool={self.stats.cool}"
-        skill_line = f"  - Skill Type: {self.skill_type}"
-        trigger_line = f"  - Trigger: {self.current_skill_trigger_chance}% chance, Value: {self.current_skill_trigger_value}"
-        effect_line = f"  - Effect Value: {self.current_skill_effect_value}, Duration: {self.current_skill_effect_duration}s"
-        return f"{header}\n{stats_line}\n{skill_line}\n{trigger_line}\n{effect_line}"
+
+        # Skill Info
+        skill_lines = [f"  - Skill: Type='{self.skill.type}'"]
+        skill_details_parts = [
+            f"Target: '{self.skill.target}'" if self.skill.target else ""
+        ]
+        skill_details = ", ".join(filter(None, skill_details_parts))
+        if skill_details:
+            skill_lines.append(f"    - Details: {skill_details}")
+
+        skill_values_parts = [
+            f"Chance: {self.skill_chance}%" if self.skill_chance is not None else "",
+            (
+                f"Threshold: {self.skill_threshold}"
+                if self.skill_threshold is not None
+                else ""
+            ),
+            f"Value: {self.skill_value}" if self.skill_value is not None else "",
+            (
+                f"Duration: {self.skill_duration}s"
+                if self.skill_duration is not None
+                else ""
+            ),
+        ]
+        skill_values = ", ".join(filter(None, skill_values_parts))
+        if skill_values:
+            skill_lines.append(f"    - Effects: {skill_values}")
+
+        return "\n".join([header, stats_line, *skill_lines])

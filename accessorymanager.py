@@ -21,9 +21,12 @@ class AccessoryManager:
         self._accessories: Dict[int, PlayerAccessory] = {}
         self._next_manager_internal_id: int = 1
 
-    def add_accessory(self, accessory_id: int, level: int = 1) -> Optional[int]:
+    def add_accessory(self, accessory_id: int, skill_level: int = 1) -> Optional[int]:
         """Creates an accessory and adds it to the manager."""
-        accessory = self._factory.create_accessory(accessory_id, level=level)
+        # Pass skill_level to the factory
+        accessory = self._factory.create_accessory(
+            accessory_id, skill_level=skill_level
+        )
         if not accessory:
             return None
 
@@ -46,15 +49,16 @@ class AccessoryManager:
             warnings.warn(f"Accessory Manager ID {manager_internal_id} does not exist and cannot be removed.")
             return False
 
-    def modify_accessory(self, manager_internal_id: int, level: Optional[int] = None) -> bool:
+    def modify_accessory(self, manager_internal_id: int, skill_level: Optional[int] = None) -> bool:
         """Modifies the state of an accessory in the manager."""
         player_accessory = self._accessories.get(manager_internal_id)
         if not player_accessory:
+            warnings.warn(f"Accessory with Manager ID {manager_internal_id} not found.")
             return False
 
         try:
-            if level is not None:
-                player_accessory.accessory.level = level
+            if skill_level is not None:
+                player_accessory.accessory.skill_level = skill_level
         except ValueError as e:
             warnings.warn(f"Error modifying accessory {manager_internal_id}: {e}")
             return False
@@ -79,7 +83,7 @@ class AccessoryManager:
                 {
                     "manager_internal_id": pa.manager_internal_id,
                     "accessory_id": pa.accessory.accessory_id,
-                    "level": pa.accessory.level
+                    "skill_level": pa.accessory.skill_level  # Save only skill_level
                 }
                 for pa in self._accessories.values()
             ]
@@ -114,9 +118,10 @@ class AccessoryManager:
         self.delete()
 
         for item_data in state.get("accessories", []):
+            # Load only skill_level
             accessory = self._factory.create_accessory(
                 accessory_id=item_data["accessory_id"],
-                level=item_data["level"]
+                skill_level=item_data.get("skill_level", 1)
             )
             if accessory:
                 player_acc = PlayerAccessory(item_data["manager_internal_id"], accessory)

@@ -42,7 +42,7 @@ class AccessoryFactory:
                 warnings.warn(f"Warning: Skipping invalid accessory record with key '{acc_id_str}': {e}")
         return indexed_map
 
-    def create_accessory(self, accessory_id: int, level: int = 1) -> Optional[Accessory]:
+    def create_accessory(self, accessory_id: int, skill_level: int = 1) -> Optional[Accessory]:
         """Creates a configured, stateful Accessory instance."""
         accessory_data = self._accessory_data_map.get(accessory_id)
         if not accessory_data:
@@ -50,7 +50,8 @@ class AccessoryFactory:
             return None
 
         try:
-            return Accessory(accessory_data, level=level)
+            # Pass only skill_level to the Accessory constructor
+            return Accessory(accessory_data, skill_level=skill_level)
         except (ValueError, IndexError) as e:
             warnings.warn(f"Error creating accessory {accessory_id}: {e}")
             return None

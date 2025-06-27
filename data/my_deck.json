@@ -1,5 +1,5 @@
 {
-    "next_deck_id": 181,
+    "next_deck_id": 182,
     "gallery": {
         "smile": 0,
         "pure": 0,
@@ -1804,6 +1804,16 @@
                 "level": 80,
                 "skill_level": 1,
                 "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 181,
+            "card_id": 3706,
+            "config": {
+                "idolized": true,
+                "level": 100,
+                "skill_level": 8,
+                "sis_slots": 8
             }
         }
     ]
