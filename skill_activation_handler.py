@@ -1,9 +1,10 @@
 """
-This module handles the complex logic of skill activation.
+This module handles the logic of skill activation.
 
 It determines if a skill's trigger conditions are met, checks its activation
-probability against RNG, and manages the special activation ordering rules
-for different skill types (e.g., Amplify, Encore).
+probability, and manages the special activation ordering rules
+for different skill types (Amplify / Encore / Other). It also manages the state
+and trigger conditions for skills like Score-based Scorers or  Year Group skills.
 """
 
 import logging
@@ -28,7 +29,6 @@ class SkillActivationHandler:
     def __init__(self, random_state: np.random.Generator, logger: logging.Logger):
         self.random_state = random_state
         self.logger = logger
-        # Tracks if an Amplify boost has been used in the current game tick.
         self.amp_consumed_this_tick = False
 
     def _check_score_triggers(
@@ -45,11 +45,9 @@ class SkillActivationHandler:
             if not (card and card.skill.activation == "Score" and card.skill_threshold):
                 continue
 
-            # Use the tracker to get the *next* score threshold for this card
             next_thresh = state.score_skill_trackers.get(idx, card.skill_threshold)
 
             if state.total_score >= next_thresh:
-                # Set the next threshold for this card
                 if card.skill_threshold:
                     state.score_skill_trackers[idx] = next_thresh + card.skill_threshold
                 triggered.append({"card": card, "slot_idx": idx})
@@ -183,7 +181,7 @@ class SkillActivationHandler:
         is_accessory: bool,
     ) -> Tuple[bool, bool]:
         """
-        Checks RNG for a single item and activates if successful.
+        Checks RNG for a single skill and activates if successful.
         """
         amp_to_use = 0
         if skilled_item.skill.type != "Amplify" and not self.amp_consumed_this_tick:
@@ -337,7 +335,9 @@ class SkillActivationHandler:
             case "Encore":
                 state.spark_charges += 1
                 self.logger.info(
-                    "SKILL: Encore activated. Spark charges are now %d.",
+                    "SKILL: (%d) %s's Encore activated. Spark charges are now %d.",
+                    slot_idx + 1,
+                    item_name,
                     state.spark_charges,
                 )
                 if state.last_skill_info and state.last_skill_info.get("type") not in [
@@ -375,7 +375,7 @@ class SkillActivationHandler:
                         eff_lvl,
                     )
                     self.logger.info(
-                        "SKILL: (%d) %s's Skill Rate Up activated, boosting skill chance by %.2f% for %.2f seconds.",
+                        "SKILL: (%d) %s's Skill Rate Up activated, boosting skill chance by %.2f%% for %.2f seconds.",
                         slot_idx + 1,
                         item_name,
                         boost_val * 100,
@@ -405,7 +405,7 @@ class SkillActivationHandler:
                     )
                     if target_str:
                         self.logger.info(
-                            "SKILL: (%d) %s's Appeal Boost activated, increasing stats of %s by %.2f% for %.2f seconds.",
+                            "SKILL: (%d) %s's Appeal Boost activated, increasing stats of %s by %.2f%% for %.2f seconds.",
                             slot_idx + 1,
                             item_name,
                             target_str,
@@ -591,6 +591,102 @@ class SkillActivationHandler:
                     eff_lvl,
                     play,
                 )
+            case "Total Trick":
+                effect_handler.apply_total_trick_effect(
+                    state, current_time, state.song_end_time, copied_item, eff_lvl
+                )
+            case "Perfect Score Up":
+                duration = (
+                    copied_item.get_skill_attribute_for_level(
+                        copied_item.skill.durations, eff_lvl
+                    )
+                    or 0
+                )
+                value = (
+                    copied_item.get_skill_attribute_for_level(
+                        copied_item.skill.values, eff_lvl
+                    )
+                    or 0
+                )
+                effect_handler.apply_generic_timed_effect(
+                    state.active_psu_effects,
+                    event_queue,
+                    EventType.PERFECT_SCORE_UP_END,
+                    current_time,
+                    duration,
+                    value,
+                    state.song_end_time,
+                )
+            case "Appeal Boost":
+                effect_handler.apply_appeal_boost_effect(
+                    state,
+                    copied_item,
+                    copied_slot,
+                    play.team.slots,
+                    play.game_data,
+                    current_time,
+                    state.song_end_time,
+                    event_queue,
+                    play,
+                    eff_lvl,
+                )
+            case "Sync":
+                effect_handler.apply_sync_effect(
+                    state,
+                    copied_item,
+                    copied_slot,
+                    play.team.slots,
+                    play.game_data,
+                    self.random_state,
+                    current_time,
+                    state.song_end_time,
+                    event_queue,
+                    play,
+                    eff_lvl,
+                )
+            case "Skill Rate Up":
+                effect_handler.apply_skill_rate_up_effect(
+                    state,
+                    copied_item,
+                    copied_slot,
+                    current_time,
+                    state.song_end_time,
+                    event_queue,
+                    eff_lvl,
+                )
+            case "Spark":
+                threshold = (
+                    copied_item.get_skill_attribute_for_level(
+                        copied_item.skill.thresholds, eff_lvl
+                    )
+                    or 0
+                )
+                if not threshold or state.spark_charges < threshold:
+                    self.logger.info(
+                        "-> Copied Spark skill failed to activate. Needs %d charges, has %d.",
+                        threshold,
+                        state.spark_charges,
+                    )
+                else:
+                    activated, charges, bonus, duration = (
+                        effect_handler.apply_spark_effect(
+                            state,
+                            copied_item,
+                            current_time,
+                            state.song_end_time,
+                            event_queue,
+                            eff_lvl,
+                        )
+                    )
+                    if activated:
+                        self.logger.info(
+                            "-> Copied Spark skill activated, consuming %d charges. "
+                            "Adds %d to tap score for %.2f seconds. %d charges remaining.",
+                            charges,
+                            bonus,
+                            duration,
+                            state.spark_charges,
+                        )
             case _:  # Handles Scorer/Healer
                 if (score_gain := copied_info.get("score_gain", 0)) > 0:
                     state.total_score += score_gain
@@ -610,19 +706,31 @@ class SkillActivationHandler:
         for receiver_idx, required in list(state.year_group_skill_trackers.items()):
             if activating_character in required:
                 required.remove(activating_character)
-                receiver_card = play.team.slots[receiver_idx].card
-                if not required and receiver_card and receiver_card.skill.target:
-                    self.process_triggers(
-                        "Year Group",
-                        [{"card": receiver_card, "slot_idx": receiver_idx}],
-                        state,
-                        play,
-                        event_queue,
-                        current_time,
-                    )
-                    target = receiver_card.skill.target
-                    all_mems = play.game_data.sub_group_mapping.get(target, set())
-                    if receiver_card.character:
-                        state.year_group_skill_trackers[receiver_idx] = set(
-                            all_mems
-                        ) - {receiver_card.character}
+
+                # Check if all required members have now activated
+                if not required:
+                    receiver_card = play.team.slots[receiver_idx].card
+                    if receiver_card and receiver_card.skill.target:
+                        self.logger.info(
+                            "SKILL: (%d) %s's Year Group skill is now ready to activate.",
+                            receiver_idx + 1,
+                            receiver_card.display_name,
+                        )
+                        # Trigger the skill activation process for the year group card
+                        self.process_triggers(
+                            "Year Group",
+                            [{"card": receiver_card, "slot_idx": receiver_idx}],
+                            state,
+                            play,
+                            event_queue,
+                            current_time,
+                        )
+                        # Reset the tracker for this card for future activations
+                        target_group_name = receiver_card.skill.target
+                        all_members = play.game_data.sub_group_mapping.get(
+                            target_group_name, set()
+                        )
+                        if receiver_card.character:
+                            state.year_group_skill_trackers[receiver_idx] = set(
+                                all_members
+                            ) - {receiver_card.character}

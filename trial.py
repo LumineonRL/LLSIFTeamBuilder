@@ -1,6 +1,6 @@
 """
-This module contains the refactored Trial class, which manages the state and
-execution of a single simulation trial by orchestrating specialized handlers.
+This module manages the state and execution of a single simulation trial by 
+orchestrating specialized handlers.
 """
 
 from typing import TYPE_CHECKING, Dict, List, Tuple
@@ -11,7 +11,6 @@ from events import Event, EventType
 from event_processor import EventProcessor
 from trial_state import TrialState
 
-# Use a forward reference for the Play class to avoid circular imports
 if TYPE_CHECKING:
     from play import Play
 
@@ -37,9 +36,7 @@ class Trial:
 
         # --- Dynamic State ---
         self.state = TrialState(random_state=random_state)
-        # Initialize PPN based on the initial team state
         self.state.current_slot_ppn = list(play_instance.base_slot_ppn)
-        # Initialize score-based skill trackers
         self._initialize_trackers()
 
         # --- Event Queue & Processor ---
@@ -69,7 +66,26 @@ class Trial:
             for idx, s in enumerate(self.team.slots)
             if s.card and s.card.skill.activation == "Score" and s.card.skill_threshold
         }
-        # Note: Year Group tracker initialization would also go here.
+
+        # Initialize trackers for Year Group skills
+        for idx, s in enumerate(self.team.slots):
+            card = s.card
+            if not (
+                card and card.skill.activation == "Year Group" and card.skill.target
+            ):
+                continue
+
+            all_members = self.game_data.sub_group_mapping.get(card.skill.target, set())
+            required_members = set(all_members) - {card.character}
+            self.state.year_group_skill_trackers[idx] = required_members
+            if self.logger:
+                self.logger.debug(
+                    "YEAR GROUP DBG: Initialized tracker for (%d) %s. "
+                    "Waiting for: %s",
+                    idx + 1,
+                    card.display_name,
+                    required_members or "{None}",
+                )
 
     def _build_event_queue(self) -> Tuple[List[Event], float]:
         """Creates and sorts the initial list of all events for the song."""

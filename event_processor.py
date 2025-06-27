@@ -313,7 +313,7 @@ class EventProcessor:
                 current_stats[sync_info["target_slot_index"]]
             )
 
-        is_trick_active = state.active_pl_count > 0 or state.total_trick_end_time > 0
+        is_trick_active = state.active_pl_count > 0
         if is_trick_active:
             for slot_idx, tricks in play.trick_slots.items():
                 for trick_sis in tricks:
