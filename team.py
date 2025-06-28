@@ -114,7 +114,6 @@ class Team:
             if accessory_card_id_int == card_id_to_match:
                 return True
         except (ValueError, TypeError):
-            # If the conversion to an integer fails, it's not a valid ID for matching.
             pass
 
         # If we reach here, the check failed.
@@ -241,15 +240,12 @@ class Team:
         if not slot:
             return False
 
-        # Unassign SIS
         for sis_entry in slot.sis_entries:
             self.assigned_sis_ids.discard(sis_entry.manager_internal_id)
 
-        # Unassign Accessory
         if slot.accessory_entry:
             self.assigned_accessory_ids.discard(slot.accessory_entry.manager_internal_id)
 
-        # Unassign Card
         if slot.card_entry:
             self.assigned_deck_ids.discard(slot.card_entry.deck_id)
 
@@ -306,7 +302,7 @@ class Team:
         value = leader_skill.value
 
         if not secondary_attr:
-            # Regular boost: affects the primary attribute based on its own value
+            # On-attribute boost: affects the primary attribute based on its own value
             if primary_attr == "Smile":
                 bonuses["Smile"] = math.ceil(target_slot.total_smile * value)
             elif primary_attr == "Pure":
@@ -314,7 +310,7 @@ class Team:
             elif primary_attr == "Cool":
                 bonuses["Cool"] = math.ceil(target_slot.total_cool * value)
         else:
-            # Secondary boost: affects the primary attribute based on the secondary attribute's value
+            # Off-attribute boost: affects the primary attribute based on the secondary attribute's value
             source_stat_map = {"Smile": target_slot.total_smile, "Pure": target_slot.total_pure, "Cool": target_slot.total_cool}
             source_stat = source_stat_map.get(secondary_attr, 0)
             bonus_value = math.ceil(source_stat * value)
@@ -350,7 +346,6 @@ class Team:
         guest = self.guest_manager.current_guest if self.guest_manager else None
         guest_leader_skill = self.guest_manager.leader_skill if self.guest_manager else None
 
-        # Main Calculation Loop: Process each slot individually to calculate its final stats
         for slot in self.slots:
             # Step 1: Apply base card stats
             if not slot.card:
@@ -419,7 +414,6 @@ class Team:
             slot.total_cool += (center_leader_bonus["Cool"] + center_extra_bonus["Cool"] +
                                 guest_leader_bonus["Cool"] + guest_extra_bonus["Cool"])
 
-        # Final Aggregation Step: Sum up all final slot stats into the team total
         self.total_team_smile = sum(s.total_smile for s in self.slots)
         self.total_team_pure = sum(s.total_pure for s in self.slots)
         self.total_team_cool = sum(s.total_cool for s in self.slots)

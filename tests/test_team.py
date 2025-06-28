@@ -1,6 +1,7 @@
 import unittest
 import os
 import warnings
+import math
 
 from cardfactory import CardFactory
 from deck import Deck
@@ -11,46 +12,50 @@ from sismanager import SISManager
 from guest import Guest
 from team import Team
 
+
 class TestTeam(unittest.TestCase):
     """Unit tests for the Team and TeamSlot classes."""
 
     @classmethod
     def setUpClass(cls):
         cls.tests_dir = os.path.dirname(__file__)
-        cls.test_data_dir = os.path.join(cls.tests_dir, 'test_data')
+        cls.test_data_dir = os.path.join(cls.tests_dir, "test_data")
 
     def setUp(self):
         """
         Initialize factories and managers for each test.
         This runs before every single test method.
         """
-        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-        data_dir = os.path.join(project_root, 'data')
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        data_dir = os.path.join(project_root, "data")
 
         try:
             self.card_factory = CardFactory(
-                cards_json_path=os.path.join(data_dir, 'cards.json'),
-                level_caps_json_path=os.path.join(data_dir, 'level_caps.json'),
-                level_cap_bonuses_path=os.path.join(data_dir, 'level_cap_bonuses.json')
+                cards_json_path=os.path.join(data_dir, "cards.json"),
+                level_caps_json_path=os.path.join(data_dir, "level_caps.json"),
+                level_cap_bonuses_path=os.path.join(data_dir, "level_cap_bonuses.json"),
             )
-            self.accessory_factory = AccessoryFactory(os.path.join(data_dir, 'accessories.json'))
-            self.sis_factory = SISFactory(os.path.join(data_dir, 'sis.json'))
+            self.accessory_factory = AccessoryFactory(
+                os.path.join(data_dir, "accessories.json")
+            )
+            self.sis_factory = SISFactory(os.path.join(data_dir, "sis.json"))
         except RuntimeError as e:
             self.fail(f"FATAL: Could not load master data files for tests. {e}")
 
         self.deck = Deck(self.card_factory)
         self.accessory_manager = AccessoryManager(self.accessory_factory)
         self.sis_manager = SISManager(self.sis_factory)
-        self.guest_manager = Guest(os.path.join(data_dir, 'unique_leader_skills.json'))
+        self.guest_manager = Guest(os.path.join(data_dir, "unique_leader_skills.json"))
 
-        self.deck.load_deck(os.path.join(self.test_data_dir, 'test_deck.json'))
-        self.accessory_manager.load(os.path.join(self.test_data_dir, 'test_accs.json'))
-        self.sis_manager.load(os.path.join(self.test_data_dir, 'test_sis.json'))
+        self.deck.load_deck(os.path.join(self.test_data_dir, "test_deck.json"))
+        self.accessory_manager.load(os.path.join(self.test_data_dir, "test_accs.json"))
+        self.sis_manager.load(os.path.join(self.test_data_dir, "test_sis.json"))
 
-        self.team = Team(self.deck, self.accessory_manager, self.sis_manager, self.guest_manager)
+        self.team = Team(
+            self.deck, self.accessory_manager, self.sis_manager, self.guest_manager
+        )
 
         warnings.simplefilter("ignore", UserWarning)
-
 
     def test_empty_team(self):
         """Test the string representation of a newly created, empty team."""
@@ -84,7 +89,9 @@ Total Stats: S/P/C 5540/4170/3800
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_card_in_slot(10, 1)
 
-        self.assertEqual(str(cm.warning), "Invalid slot number: 10. Must be between 1 and 9.")
+        self.assertEqual(
+            str(cm.warning), "Invalid slot number: 10. Must be between 1 and 9."
+        )
 
         expected_team_state = """
 --- Team Configuration ---
@@ -99,7 +106,9 @@ Total Stats: S/P/C 0/0/0
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_card_in_slot(1, 1000)
 
-        self.assertEqual(str(cm.warning), "Card with Deck ID 1000 not found in the deck.")
+        self.assertEqual(
+            str(cm.warning), "Card with Deck ID 1000 not found in the deck."
+        )
 
         expected_team_state = """
 --- Team Configuration ---
@@ -166,7 +175,7 @@ Total Stats: S/P/C 0/0/0
         """Test that equipping a new accessory overwrites the old one."""
         self.team.equip_card_in_slot(1, 1)
         self.team.equip_accessory_in_slot(1, 3)
-        self.team.equip_accessory_in_slot(1, 6) # This should overwrite acc 3
+        self.team.equip_accessory_in_slot(1, 6)  # This should overwrite acc 3
 
         expected = """
 --- Team Configuration ---
@@ -226,8 +235,8 @@ Total Stats: S/P/C 5540/4170/3800
 
     def test_equip_char_specific_acc(self):
         """Test equipping an accessory that can only be equipped to a specific character ID"""
-        self.team.equip_card_in_slot(1, 152) # A Little Toughness Maki
-        self.team.equip_accessory_in_slot(1, 23) # UR Red Lantern
+        self.team.equip_card_in_slot(1, 152)  # A Little Toughness Maki
+        self.team.equip_accessory_in_slot(1, 23)  # UR Red Lantern
 
         expected = """
 --- Team Configuration ---
@@ -249,7 +258,10 @@ Total Stats: S/P/C 3422/12759/8699
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_accessory_in_slot(1, 23)
 
-        self.assertEqual(str(cm.warning), "Cannot equip accessory 'UR Red Lantern': ID mismatch. Accessory requires card ID '3674', but card's ID is '563'.")
+        self.assertEqual(
+            str(cm.warning),
+            "Cannot equip accessory 'UR Red Lantern': ID mismatch. Accessory requires card ID '3674', but card's ID is '563'.",
+        )
 
         expected = """
 --- Team Configuration ---
@@ -288,8 +300,8 @@ Total Stats: S/P/C 3120/4210/5480
 
     def test_equip_sis(self):
         """Test equipping a single SIS to a card."""
-        self.team.equip_card_in_slot(1, 1) # Card has 4 SIS slots
-        self.team.equip_sis_in_slot(1, 33)   # Pure Kiss, 1 slot
+        self.team.equip_card_in_slot(1, 1)  # Card has 4 SIS slots
+        self.team.equip_sis_in_slot(1, 33)  # Pure Kiss, 1 slot
 
         expected = """
 --- Team Configuration ---
@@ -318,7 +330,7 @@ Total Stats: S/P/C 5540/4370/3800
         self.team.equip_card_in_slot(1, 1)
         self.team.equip_sis_in_slot(1, 33)
         with self.assertWarns(UserWarning) as cm:
-            self.team.equip_sis_in_slot(1, 33) # Attempt to equip again
+            self.team.equip_sis_in_slot(1, 33)  # Attempt to equip again
 
         self.assertEqual(str(cm.warning), "SIS with Manager ID 33 is already assigned.")
 
@@ -339,12 +351,15 @@ Total Stats: S/P/C 5540/4370/3800
 
     def test_equip_sis_slot_overflow(self):
         """Test that a SIS cannot be equipped if there are not enough slots."""
-        self.team.equip_card_in_slot(1, 1) # Card has 4 slots
-        self.team.equip_sis_in_slot(1, 33)   # Pure Kiss, 1 slot. 3 slots remaining.
+        self.team.equip_card_in_slot(1, 1)  # Card has 4 slots
+        self.team.equip_sis_in_slot(1, 33)  # Pure Kiss, 1 slot. 3 slots remaining.
         with self.assertWarns(UserWarning) as cm:
-            self.team.equip_sis_in_slot(1, 64) # Smile Fortune Grand, 5 slots. Fails.
+            self.team.equip_sis_in_slot(1, 64)  # Smile Fortune Grand, 5 slots. Fails.
 
-        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Smile Fortune Grand': Not enough slots. (5 required, 3 available)")
+        self.assertEqual(
+            str(cm.warning),
+            "Cannot equip SIS 'Smile Fortune Grand': Not enough slots. (5 required, 3 available)",
+        )
 
         expected = """
 --- Team Configuration ---
@@ -388,7 +403,10 @@ Total Stats: S/P/C 3180/5390/4210
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_accessory_in_slot(1, 2)
 
-        self.assertEqual(str(cm.warning), "Cannot equip accessory 'UR You Aroma Spray': ID mismatch. Accessory requires card ID '3711', but card's ID is '2310'.")
+        self.assertEqual(
+            str(cm.warning),
+            "Cannot equip accessory 'UR You Aroma Spray': ID mismatch. Accessory requires card ID '3711', but card's ID is '2310'.",
+        )
 
         expected = """
 --- Team Configuration ---
@@ -411,7 +429,10 @@ Total Stats: S/P/C 5540/4170/3800
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_sis_in_slot(1, 131)
 
-        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Angel Charm': Attribute mismatch. SIS requires Pure, but card is Smile.")
+        self.assertEqual(
+            str(cm.warning),
+            "Cannot equip SIS 'Angel Charm': Attribute mismatch. SIS requires Pure, but card is Smile.",
+        )
 
         expected = """
 --- Team Configuration ---
@@ -434,7 +455,10 @@ Total Stats: S/P/C 5540/4170/3800
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_sis_in_slot(1, 1)
 
-        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Pure Humorous Petit': Character mismatch. SIS requires 'Miyashita Ai', but card is 'Tojo Nozomi'.")
+        self.assertEqual(
+            str(cm.warning),
+            "Cannot equip SIS 'Pure Humorous Petit': Character mismatch. SIS requires 'Miyashita Ai', but card is 'Tojo Nozomi'.",
+        )
 
         expected = """
 --- Team Configuration ---
@@ -457,7 +481,10 @@ Total Stats: S/P/C 5540/4170/3800
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_sis_in_slot(1, 276)
 
-        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Smile Cross [1st]': Year group mismatch. SIS is for 1st years, but 'Tojo Nozomi' is not.")
+        self.assertEqual(
+            str(cm.warning),
+            "Cannot equip SIS 'Smile Cross [1st]': Year group mismatch. SIS is for 1st years, but 'Tojo Nozomi' is not.",
+        )
 
         expected = """
 --- Team Configuration ---
@@ -481,7 +508,10 @@ Total Stats: S/P/C 5540/4170/3800
         with self.assertWarns(UserWarning) as cm:
             self.team.equip_sis_in_slot(1, 347)
 
-        self.assertEqual(str(cm.warning), "Cannot equip SIS 'Pure Ring [2nd]': A SIS with the same ID (11) is already in this slot.")
+        self.assertEqual(
+            str(cm.warning),
+            "Cannot equip SIS 'Pure Ring [2nd]': A SIS with the same ID (11) is already in this slot.",
+        )
 
         expected = """
 --- Team Configuration ---
@@ -500,32 +530,137 @@ Total Stats: S/P/C 11560/8448/14590
 
     # todo: Write more tests
     def test_leader_skill(self):
-        pass
+        # Card that has a leader skill, but no additional leader skill.
+        center_team = Team(
+            self.deck, self.accessory_manager, self.sis_manager, self.guest_manager
+        )
+
+        self.team.equip_card_in_slot(1, 3)
+        center_team.equip_card_in_slot(5, 3)
+
+        no_leader_smile = self.team.slots[0].total_smile
+        leader_smile = center_team.slots[4].total_smile
+        leader_smile_bonus = center_team.slots[4].card.leader_skill.value
+
+        self.assertEqual(
+            leader_smile, math.ceil(no_leader_smile * (1 + leader_smile_bonus))
+        )
 
     def test_leader_extra_skill(self):
-        pass
+        center_team = Team(
+            self.deck, self.accessory_manager, self.sis_manager, self.guest_manager
+        )
+
+        self.team.equip_card_in_slot(1, 1)
+        center_team.equip_card_in_slot(5, 1)
+
+        no_leader_smile = self.team.slots[0].total_smile
+        leader_smile = center_team.slots[4].total_smile
+        leader_smile_bonus = center_team.slots[4].card.leader_skill.value
+        leader_extra_bonus = center_team.slots[4].card.leader_skill.extra_value
+
+        self.assertEqual(
+            leader_smile,
+            math.ceil(no_leader_smile * (1 + leader_smile_bonus + leader_extra_bonus)),
+        )
 
     def test_guest_skill(self):
-        pass
+        self.guest_manager.set_guest(60)  # Smile 0.12 + nozonico 0.09
+        guest_team = Team(
+            self.deck, self.accessory_manager, self.sis_manager, self.guest_manager
+        )
 
-    def test_guest_extra_skill(self):
-        pass
+        guest_team.equip_card_in_slot(1, 1)
+
+        no_guest_smile = guest_team.slots[0].card.stats.smile
+        guest_smile_bonus = guest_team.guest_manager.leader_skill.value
+        guest_extra_bonus = guest_team.guest_manager.leader_skill.extra_value
+
+        self.guest_manager.set_guest(60) 
+
+        print(f"smile: {no_guest_smile}")
+        print(f"guest: {guest_smile_bonus}")
+        print(f"guest extra: {guest_extra_bonus}")
+
+        self.assertEqual(
+            guest_team.total_team_smile,
+            math.ceil(no_guest_smile * (1 + guest_smile_bonus + guest_extra_bonus)),
+        )
 
     def test_aura(self):
-        pass
+        self.team.equip_card_in_slot(1, 1)
+        self.team.equip_card_in_slot(2, 2)
 
-    def test_nonet(self):
-        pass
+        old_smile_1 = self.team.slots[0].total_smile
+        old_smile_2 = self.team.slots[1].total_smile
+
+        self.team.equip_sis_in_slot(1, 132) # Smile Aura
+        aura_value = self.team.slots[0].sis_list[0].value
+
+        expected_smile = math.ceil(old_smile_1 * (1 + aura_value)) +\
+              math.ceil(old_smile_2 * (1 + aura_value))
+
+        new_smile = self.team.total_team_smile
+
+        self.assertEqual(new_smile, expected_smile)
+
+    def test_nonet_condition(self):
+        self.team.equip_card_in_slot(1, 1) # Nozomi
+        self.team.equip_card_in_slot(2, 120) # Maki
+        self.team.equip_card_in_slot(3, 102) # Rin
+        self.team.equip_card_in_slot(4, 81) # Eli
+        self.team.equip_card_in_slot(5, 173) # Nico
+        self.team.equip_card_in_slot(6, 103) # Hanayo
+        self.team.equip_card_in_slot(7, 180) # Honoka
+        self.team.equip_card_in_slot(8, 87) # Umi
+        self.team.equip_card_in_slot(9, 94) # Kotori
+
+        self.team.equip_sis_in_slot(8, 341) # mu's nonet
+
+        self.assertTrue(self.team._is_nonet_active("μ's"))
 
     def test_nonet_dupe_member(self):
-        # should fail
-        pass
+        self.team.equip_card_in_slot(1, 1) # Nozomi
+        self.team.equip_card_in_slot(2, 120) # Maki
+        self.team.equip_card_in_slot(3, 102) # Rin
+        self.team.equip_card_in_slot(4, 81) # Eli
+        self.team.equip_card_in_slot(5, 173) # Nico
+        self.team.equip_card_in_slot(6, 103) # Hanayo
+        self.team.equip_card_in_slot(7, 180) # Honoka
+        self.team.equip_card_in_slot(8, 87) # Umi
+        self.team.equip_card_in_slot(4, 88) # Another Eli
+
+        self.team.equip_sis_in_slot(8, 341) # mu's nonet
+
+        self.assertFalse(self.team._is_nonet_active("μ's"))
 
     def test_charm(self):
-        pass
+        self.team.equip_card_in_slot(1, 102) # Rin
+
+        old_cool = self.team.slots[0].total_cool
+
+        self.team.equip_sis_in_slot(1, 394) # Cool Ring 1st
+        ring_value = self.team.slots[0].sis_list[0].value
+
+        expected_cool = math.ceil(old_cool * (1 + ring_value))
+
+        new_cool = self.team.total_team_cool
+
+        self.assertEqual(new_cool, expected_cool)
 
     def test_ring(self):
-        pass
+        self.team.equip_card_in_slot(1, 102) # Rin
 
-if __name__ == '__main__':
+        old_cool = self.team.slots[0].total_cool
+
+        self.team.equip_sis_in_slot(1, 410) # Cool Perfume
+        ring_value = self.team.slots[0].sis_list[0].value
+
+        expected_cool = math.ceil(old_cool + ring_value)
+
+        new_cool = self.team.total_team_cool
+
+        self.assertEqual(new_cool, expected_cool)
+
+if __name__ == "__main__":
     unittest.main()
