@@ -578,10 +578,6 @@ Total Stats: S/P/C 11560/8448/14590
 
         self.guest_manager.set_guest(60) 
 
-        print(f"smile: {no_guest_smile}")
-        print(f"guest: {guest_smile_bonus}")
-        print(f"guest extra: {guest_extra_bonus}")
-
         self.assertEqual(
             guest_team.total_team_smile,
             math.ceil(no_guest_smile * (1 + guest_smile_bonus + guest_extra_bonus)),
