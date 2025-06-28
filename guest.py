@@ -87,6 +87,9 @@ class Guest:
             attribute=self.current_guest.leader_attribute,
             secondary_attribute=self.current_guest.leader_secondary_attribute,
             value=self.current_guest.leader_value or 0.0,
+            extra_attribute=self.current_guest.leader_extra_attribute,
+            extra_target=self.current_guest.leader_extra_target,
+            extra_value=self.current_guest.leader_extra_value or 0.0
         )
 
     def __repr__(self) -> str:
