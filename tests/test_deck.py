@@ -31,9 +31,9 @@ class TestDeck(unittest.TestCase):
 
     def test_add_card(self):
         test_deck = Deck(self.factory)
-        test_deck.add_card(101, gallery=self.gallery, idolized=True, skill_level=4)
-        test_deck.add_card(28, gallery=self.gallery, idolized=False)
-        test_deck.add_card(96, gallery=self.gallery, idolized=True)
+        test_deck.add_card(101, idolized=True, skill_level=4)
+        test_deck.add_card(28, idolized=False)
+        test_deck.add_card(96, idolized=True)
         print(test_deck)
         expected = """--- Current Deck Contents (Gallery Bonus: S/P/C 0/0/0) ---
 Deck ID: 1
@@ -76,8 +76,8 @@ Total cards in deck: 3
 
     def test_add_non_existent_card(self):
         test_deck = Deck(self.factory)
-        test_deck.add_card(4001, gallery=self.gallery, idolized=True, skill_level=4)
-        test_deck.add_card(28, gallery=self.gallery, idolized=False)
+        test_deck.add_card(4001, idolized=True, skill_level=4)
+        test_deck.add_card(28, idolized=False)
         print(test_deck)
         expected = """--- Current Deck Contents (Gallery Bonus: S/P/C 0/0/0) ---
 Deck ID: 1
@@ -97,7 +97,7 @@ Total cards in deck: 1
 
     def test_modify_card(self):
         test_deck = Deck(self.factory)
-        test_deck.add_card(1000, gallery=self.gallery, idolized=False, skill_level=4)
+        test_deck.add_card(1000, idolized=False, skill_level=4)
         test_deck.modify_card(deck_id=1, idolized=True, skill_level=6)
         print(test_deck)
         expected = """--- Current Deck Contents (Gallery Bonus: S/P/C 0/0/0) ---
@@ -118,11 +118,11 @@ Total cards in deck: 1
 
     def test_remove_card(self):
         test_deck = Deck(self.factory)
-        test_deck.add_card(1000, gallery=self.gallery, idolized=False, skill_level=4)
-        test_deck.add_card(1001, gallery=self.gallery, idolized=False, skill_level=4)
-        test_deck.add_card(1002, gallery=self.gallery, idolized=False, skill_level=4)
+        test_deck.add_card(1000, idolized=False, skill_level=4)
+        test_deck.add_card(1001, idolized=False, skill_level=4)
+        test_deck.add_card(1002, idolized=False, skill_level=4)
         test_deck.remove_card(2)
-        test_deck.add_card(1000, gallery=self.gallery,)
+        test_deck.add_card(1000)
         print(test_deck)
         expected = """--- Current Deck Contents (Gallery Bonus: S/P/C 0/0/0) ---
 Deck ID: 1
@@ -165,7 +165,7 @@ Total cards in deck: 3
 
     def test_remove_invalid_deck_id(self):
         test_deck = Deck(self.factory)
-        test_deck.add_card(1000, gallery=self.gallery, idolized=False, skill_level=4)
+        test_deck.add_card(1000, idolized=False, skill_level=4)
         with self.assertWarns(UserWarning) as cm:
             test_deck.remove_card(2)
         self.assertEqual(str(cm.warnings[0].message), "Deck ID 2 not found for removal.")
@@ -189,20 +189,20 @@ Total cards in deck: 1
     def test_save_deck(self):
         test_deck = Deck(self.factory)
         self.assertFalse(os.path.exists(self.DECK_SAVE_PATH))
-        test_deck.add_card(1000, gallery=self.gallery, idolized=False, level=110, sis_slots=2)
+        test_deck.add_card(1000, idolized=False, level=110, sis_slots=2)
         test_deck.save_deck(self.DECK_SAVE_PATH)
         self.assertTrue(os.path.exists(self.DECK_SAVE_PATH))
 
     def test_load_deck(self):
         # First, create and save a deck to load from
         deck_to_save = Deck(self.factory)
-        deck_to_save.add_card(1000, gallery=self.gallery, idolized=False, level=110, sis_slots=2)
+        deck_to_save.add_card(1000, idolized=False, level=110, sis_slots=2)
         deck_to_save.save_deck(self.DECK_SAVE_PATH)
 
-        # Now, create a new deck, populate it, and then load over it
+        # Create a new deck, populate it, and then load over it
         test_deck = Deck(self.factory)
-        test_deck.add_card(1500, gallery=self.gallery)
-        test_deck.add_card(1600, gallery=self.gallery)
+        test_deck.add_card(1500)
+        test_deck.add_card(1600)
         test_deck.load_deck(self.DECK_SAVE_PATH)
         print(test_deck)
         expected = """--- Current Deck Contents (Gallery Bonus: S/P/C 0/0/0) ---
@@ -223,8 +223,8 @@ Total cards in deck: 1
 
     def test_delete_deck(self):
         test_deck = Deck(self.factory)
-        test_deck.add_card(1000, gallery=self.gallery)
-        test_deck.add_card(1500, gallery=self.gallery)
+        test_deck.add_card(1000)
+        test_deck.add_card(1500)
         test_deck.delete_deck()
         print(test_deck)
 
@@ -232,6 +232,25 @@ Total cards in deck: 1
 Deck is currently empty.
 --------------------------"""
         self.assertEqual(self.captured_output.getvalue().strip(), expected)
+
+    def test_update_gallery(self):
+        test_deck = Deck(self.factory)
+        test_deck.add_card(1000)
+
+        old_smile = test_deck.get_card(1).stats.smile
+        old_pure = test_deck.get_card(1).stats.pure
+        old_cool = test_deck.get_card(1).stats.cool
+
+        new_gallery = Gallery(5000, 3000, 2000)
+        test_deck.gallery = new_gallery
+
+        new_smile = test_deck.get_card(1).stats.smile
+        new_pure = test_deck.get_card(1).stats.pure
+        new_cool = test_deck.get_card(1).stats.cool
+
+        self.assertEqual(old_smile + new_gallery.smile, new_smile)
+        self.assertEqual(old_pure + new_gallery.pure, new_pure)
+        self.assertEqual(old_cool + new_gallery.cool, new_cool)
 
 if __name__ == '__main__':
     unittest.main(argv=['first-arg-is-ignored'], exit=False)

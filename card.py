@@ -95,11 +95,19 @@ class Card:
                                        pure=self._base_stats.pure + bonus_value,
                                        cool=self._base_stats.cool + bonus_value)
 
+    def _set_gallery_reference(self, gallery: Gallery) -> None:
+        """
+        Internal method to update the card's reference to the gallery object.
+        Called by the parent Deck when its gallery is replaced.
+        """
+        self._gallery = gallery
+
     @property
     def stats(self) -> Stats:
         """
         Returns a new Stats object with the gallery bonus applied to the
-        card's base stats. This is accessed dynamically.
+        card's base stats. This will reflect the
+        current state of the deck's gallery.
         """
         return Stats(
             smile=self._base_stats.smile + self._gallery.smile,
