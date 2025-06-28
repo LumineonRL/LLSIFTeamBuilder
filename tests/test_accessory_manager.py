@@ -3,12 +3,13 @@ import os
 import sys
 from io import StringIO
 
-from accessoryfactory import AccessoryFactory
-from accessorymanager import AccessoryManager
+from src.simulator.accessory.accessory_factory import AccessoryFactory
+from src.simulator.accessory.accessory_manager import AccessoryManager
+
 
 class TestAccessoryManager(unittest.TestCase):
 
-    ACCESSORY_SAVE_PATH = './data/test_accessories.json'
+    ACCESSORY_SAVE_PATH = "./data/test_accessories.json"
 
     def setUp(self):
         """Set up the factory, redirect stdout, and ensure clean file state for each test."""
@@ -51,7 +52,9 @@ class TestAccessoryManager(unittest.TestCase):
         test_accessories = AccessoryManager(self.factory)
         with self.assertWarns(UserWarning) as cm:
             test_accessories.add_accessory(4001, skill_level=4)
-        self.assertEqual(str(cm.warnings[0].message), "Error: Accessory with ID 4001 not found.")
+        self.assertEqual(
+            str(cm.warnings[0].message), "Error: Accessory with ID 4001 not found."
+        )
         test_accessories.add_accessory(28)
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
@@ -64,7 +67,7 @@ class TestAccessoryManager(unittest.TestCase):
     def test_modify_accessory(self):
         test_accessories = AccessoryManager(self.factory)
         test_accessories.add_accessory(100, skill_level=4)
-        test_accessories.modify_accessory(manager_internal_id=1, skill_level = 6)
+        test_accessories.modify_accessory(manager_internal_id=1, skill_level=6)
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
   - ID 1: <Accessory id=100 name='UR Block Checked Mug' skill_level=6>
@@ -101,7 +104,10 @@ class TestAccessoryManager(unittest.TestCase):
         test_accessories.add_accessory(100, skill_level=4)
         with self.assertWarns(UserWarning) as cm:
             test_accessories.remove_accessory(2)
-        self.assertEqual(str(cm.warnings[0].message), "Accessory Manager ID 2 does not exist and cannot be removed.")
+        self.assertEqual(
+            str(cm.warnings[0].message),
+            "Accessory Manager ID 2 does not exist and cannot be removed.",
+        )
         print(test_accessories)
         expected = """<AccessoryManager (1 accessories)>
   - ID 1: <Accessory id=100 name='UR Block Checked Mug' skill_level=4>
@@ -142,7 +148,10 @@ class TestAccessoryManager(unittest.TestCase):
         test_accessories.add_accessory(150)
         test_accessories.delete()
         print(test_accessories)
-        self.assertEqual(self.captured_output.getvalue().strip(), "<AccessoryManager (empty)>")
+        self.assertEqual(
+            self.captured_output.getvalue().strip(), "<AccessoryManager (empty)>"
+        )
 
-if __name__ == '__main__':
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+
+if __name__ == "__main__":
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)

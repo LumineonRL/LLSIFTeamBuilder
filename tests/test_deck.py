@@ -3,17 +3,22 @@ import os
 import sys
 from io import StringIO
 
-from cardfactory import CardFactory
-from deck import Deck
-from gallery import Gallery
+from src.simulator.card.card_factory import CardFactory
+from src.simulator.card.deck import Deck
+from src.simulator.card.gallery import Gallery
+
 
 class TestDeck(unittest.TestCase):
 
-    DECK_SAVE_PATH = './data/test_deck.json'
+    DECK_SAVE_PATH = "./data/test_deck.json"
 
     def setUp(self):
         """Set up the factory, redirect stdout, and ensure clean file state for each test."""
-        self.factory = CardFactory(cards_json_path="./data/cards.json", level_caps_json_path="./data/level_caps.json", level_cap_bonuses_path="./data/level_cap_bonuses.json")
+        self.factory = CardFactory(
+            cards_json_path="./data/cards.json",
+            level_caps_json_path="./data/level_caps.json",
+            level_cap_bonuses_path="./data/level_cap_bonuses.json",
+        )
         self.gallery = Gallery(0, 0, 0)
 
         self.held_stdout = sys.stdout
@@ -168,7 +173,9 @@ Total cards in deck: 3
         test_deck.add_card(1000, idolized=False, skill_level=4)
         with self.assertWarns(UserWarning) as cm:
             test_deck.remove_card(2)
-        self.assertEqual(str(cm.warnings[0].message), "Deck ID 2 not found for removal.")
+        self.assertEqual(
+            str(cm.warnings[0].message), "Deck ID 2 not found for removal."
+        )
         print(test_deck)
         expected = """--- Current Deck Contents (Gallery Bonus: S/P/C 0/0/0) ---
 Deck ID: 1
@@ -252,5 +259,6 @@ Deck is currently empty.
         self.assertEqual(old_pure + new_gallery.pure, new_pure)
         self.assertEqual(old_cool + new_gallery.cool, new_cool)
 
-if __name__ == '__main__':
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+
+if __name__ == "__main__":
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)

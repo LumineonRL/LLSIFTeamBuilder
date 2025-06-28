@@ -3,12 +3,13 @@ import os
 import sys
 from io import StringIO
 
-from sisfactory import SISFactory
-from sismanager import SISManager
+from src.simulator.sis.sis_factory import SISFactory
+from src.simulator.sis.sis_manager import SISManager
+
 
 class TestSISManager(unittest.TestCase):
 
-    SIS_SAVE_PATH = './data/test_sis.json'
+    SIS_SAVE_PATH = "./data/test_sis.json"
 
     def setUp(self):
         """Set up the factory, redirect stdout, and ensure clean file state for each test."""
@@ -42,7 +43,9 @@ class TestSISManager(unittest.TestCase):
         test_sis = SISManager(self.factory)
         with self.assertWarns(UserWarning) as cm:
             test_sis.add_sis(4001)
-        self.assertEqual(str(cm.warnings[0].message), "Error: SIS with ID 4001 not found.")
+        self.assertEqual(
+            str(cm.warnings[0].message), "Error: SIS with ID 4001 not found."
+        )
         test_sis.add_sis(28)
         print(test_sis)
         expected = """<SISManager (1 skills)>
@@ -68,7 +71,10 @@ class TestSISManager(unittest.TestCase):
         test_sis.add_sis(100)
         with self.assertWarns(UserWarning) as cm:
             test_sis.remove_sis(2)
-        self.assertEqual(str(cm.warnings[0].message), "SIS Manager ID 2 does not exist and cannot be removed.")
+        self.assertEqual(
+            str(cm.warnings[0].message),
+            "SIS Manager ID 2 does not exist and cannot be removed.",
+        )
         print(test_sis)
         expected = """<SISManager (1 skills)>
   - ID 1: Pure Blossom (SID: 100)"""
@@ -101,7 +107,10 @@ class TestSISManager(unittest.TestCase):
         test_sis.add_sis(150)
         test_sis.delete()
         print(test_sis)
-        self.assertEqual(self.captured_output.getvalue().strip(), "<SISManager (empty)>")
+        self.assertEqual(
+            self.captured_output.getvalue().strip(), "<SISManager (empty)>"
+        )
 
-if __name__ == '__main__':
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+
+if __name__ == "__main__":
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)

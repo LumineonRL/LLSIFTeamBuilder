@@ -1,7 +1,8 @@
 import unittest
 import os
 
-from sisfactory import SISFactory
+from src.simulator.sis.sis_factory import SISFactory
+
 
 class TestAccessory(unittest.TestCase):
 
@@ -31,5 +32,6 @@ class TestAccessory(unittest.TestCase):
         self.assertIsNone(test_sis)
         self.assertIn("Error: SIS with ID 5000 not found.", str(cm.warning))
 
-if __name__ == '__main__':
-    unittest.main(argv=['first-arg-is-ignored'], exit=False)
+
+if __name__ == "__main__":
+    unittest.main(argv=["first-arg-is-ignored"], exit=False)

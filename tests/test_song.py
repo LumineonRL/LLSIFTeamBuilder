@@ -1,7 +1,8 @@
 import unittest
 import os
 
-from songfactory import SongFactory
+from src.simulator.song.song_factory import SongFactory
+
 
 class TestAccessory(unittest.TestCase):
     TEST_DIR = "data"

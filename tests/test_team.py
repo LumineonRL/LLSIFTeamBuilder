@@ -3,14 +3,14 @@ import os
 import warnings
 import math
 
-from cardfactory import CardFactory
-from deck import Deck
-from accessoryfactory import AccessoryFactory
-from accessorymanager import AccessoryManager
-from sisfactory import SISFactory
-from sismanager import SISManager
-from guest import Guest
-from team import Team
+from src.simulator.card.card_factory import CardFactory
+from src.simulator.card.deck import Deck
+from src.simulator.accessory.accessory_factory import AccessoryFactory
+from src.simulator.accessory.accessory_manager import AccessoryManager
+from src.simulator.sis.sis_factory import SISFactory
+from src.simulator.sis.sis_manager import SISManager
+from src.simulator.team.guest import Guest
+from src.simulator.team.team import Team
 
 
 class TestTeam(unittest.TestCase):
@@ -576,7 +576,7 @@ Total Stats: S/P/C 11560/8448/14590
         guest_smile_bonus = guest_team.guest_manager.leader_skill.value
         guest_extra_bonus = guest_team.guest_manager.leader_skill.extra_value
 
-        self.guest_manager.set_guest(60) 
+        self.guest_manager.set_guest(60)
 
         self.assertEqual(
             guest_team.total_team_smile,
@@ -590,52 +590,53 @@ Total Stats: S/P/C 11560/8448/14590
         old_smile_1 = self.team.slots[0].total_smile
         old_smile_2 = self.team.slots[1].total_smile
 
-        self.team.equip_sis_in_slot(1, 132) # Smile Aura
+        self.team.equip_sis_in_slot(1, 132)  # Smile Aura
         aura_value = self.team.slots[0].sis_list[0].value
 
-        expected_smile = math.ceil(old_smile_1 * (1 + aura_value)) +\
-              math.ceil(old_smile_2 * (1 + aura_value))
+        expected_smile = math.ceil(old_smile_1 * (1 + aura_value)) + math.ceil(
+            old_smile_2 * (1 + aura_value)
+        )
 
         new_smile = self.team.total_team_smile
 
         self.assertEqual(new_smile, expected_smile)
 
     def test_nonet_condition(self):
-        self.team.equip_card_in_slot(1, 1) # Nozomi
-        self.team.equip_card_in_slot(2, 120) # Maki
-        self.team.equip_card_in_slot(3, 102) # Rin
-        self.team.equip_card_in_slot(4, 81) # Eli
-        self.team.equip_card_in_slot(5, 173) # Nico
-        self.team.equip_card_in_slot(6, 103) # Hanayo
-        self.team.equip_card_in_slot(7, 180) # Honoka
-        self.team.equip_card_in_slot(8, 87) # Umi
-        self.team.equip_card_in_slot(9, 94) # Kotori
+        self.team.equip_card_in_slot(1, 1)  # Nozomi
+        self.team.equip_card_in_slot(2, 120)  # Maki
+        self.team.equip_card_in_slot(3, 102)  # Rin
+        self.team.equip_card_in_slot(4, 81)  # Eli
+        self.team.equip_card_in_slot(5, 173)  # Nico
+        self.team.equip_card_in_slot(6, 103)  # Hanayo
+        self.team.equip_card_in_slot(7, 180)  # Honoka
+        self.team.equip_card_in_slot(8, 87)  # Umi
+        self.team.equip_card_in_slot(9, 94)  # Kotori
 
-        self.team.equip_sis_in_slot(8, 341) # mu's nonet
+        self.team.equip_sis_in_slot(8, 341)  # mu's nonet
 
         self.assertTrue(self.team._is_nonet_active("μ's"))
 
     def test_nonet_dupe_member(self):
-        self.team.equip_card_in_slot(1, 1) # Nozomi
-        self.team.equip_card_in_slot(2, 120) # Maki
-        self.team.equip_card_in_slot(3, 102) # Rin
-        self.team.equip_card_in_slot(4, 81) # Eli
-        self.team.equip_card_in_slot(5, 173) # Nico
-        self.team.equip_card_in_slot(6, 103) # Hanayo
-        self.team.equip_card_in_slot(7, 180) # Honoka
-        self.team.equip_card_in_slot(8, 87) # Umi
-        self.team.equip_card_in_slot(4, 88) # Another Eli
+        self.team.equip_card_in_slot(1, 1)  # Nozomi
+        self.team.equip_card_in_slot(2, 120)  # Maki
+        self.team.equip_card_in_slot(3, 102)  # Rin
+        self.team.equip_card_in_slot(4, 81)  # Eli
+        self.team.equip_card_in_slot(5, 173)  # Nico
+        self.team.equip_card_in_slot(6, 103)  # Hanayo
+        self.team.equip_card_in_slot(7, 180)  # Honoka
+        self.team.equip_card_in_slot(8, 87)  # Umi
+        self.team.equip_card_in_slot(4, 88)  # Another Eli
 
-        self.team.equip_sis_in_slot(8, 341) # mu's nonet
+        self.team.equip_sis_in_slot(8, 341)  # mu's nonet
 
         self.assertFalse(self.team._is_nonet_active("μ's"))
 
     def test_charm(self):
-        self.team.equip_card_in_slot(1, 102) # Rin
+        self.team.equip_card_in_slot(1, 102)  # Rin
 
         old_cool = self.team.slots[0].total_cool
 
-        self.team.equip_sis_in_slot(1, 394) # Cool Ring 1st
+        self.team.equip_sis_in_slot(1, 394)  # Cool Ring 1st
         ring_value = self.team.slots[0].sis_list[0].value
 
         expected_cool = math.ceil(old_cool * (1 + ring_value))
@@ -645,11 +646,11 @@ Total Stats: S/P/C 11560/8448/14590
         self.assertEqual(new_cool, expected_cool)
 
     def test_ring(self):
-        self.team.equip_card_in_slot(1, 102) # Rin
+        self.team.equip_card_in_slot(1, 102)  # Rin
 
         old_cool = self.team.slots[0].total_cool
 
-        self.team.equip_sis_in_slot(1, 410) # Cool Perfume
+        self.team.equip_sis_in_slot(1, 410)  # Cool Perfume
         ring_value = self.team.slots[0].sis_list[0].value
 
         expected_cool = math.ceil(old_cool + ring_value)
@@ -657,6 +658,7 @@ Total Stats: S/P/C 11560/8448/14590
         new_cool = self.team.total_team_cool
 
         self.assertEqual(new_cool, expected_cool)
+
 
 if __name__ == "__main__":
     unittest.main()
