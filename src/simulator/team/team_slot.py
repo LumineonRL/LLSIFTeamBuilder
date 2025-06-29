@@ -73,20 +73,16 @@ class TeamSlot:
         return True
 
     def equip_sis(self, sis_entry: PlayerSIS) -> bool:
-        """Equips a SIS to this slot if there is capacity."""
+        """
+        Equips a SIS to this slot.
+        Assumes all validation (capacity, restrictions) has been performed externally.
+        """
         if not self.card:
             warnings.warn("Cannot equip SIS: No card is in this slot.")
             return False
 
-        if sis_entry.sis.slots <= self.available_sis_slots:
-            self.sis_entries.append(sis_entry)
-            return True
-        else:
-            warnings.warn(
-                f"Cannot equip SIS '{sis_entry.sis.name}': Not enough slots. "
-                f"({sis_entry.sis.slots} required, {self.available_sis_slots} available)"
-            )
-            return False
+        self.sis_entries.append(sis_entry)
+        return True
 
     def unequip_sis(self, manager_internal_id: int) -> bool:
         """Unequips a SIS from the slot by its manager-specific internal ID."""

@@ -212,11 +212,25 @@ class Team:
         )
         return False
 
-    def _check_sis_equip_restriction(self, card: Card, sis: SIS) -> bool:
+    def _check_sis_equip_restriction(self, slot: TeamSlot, sis: SIS) -> bool:
         """
-        Checks if a SIS can be equipped to a card by dispatching to the correct validator.
+        Checks if a SIS can be equipped to a card in a specific slot by dispatching
+        to the correct validator.
+        Validates quantitative (slot capacity) and qualitative (attribute, etc.) restrictions.
         Returns True if allowed, False otherwise.
         """
+        card = slot.card
+        if not card:
+            warnings.warn("Cannot check SIS restriction: No card in slot.")
+            return False
+
+        if sis.slots > slot.available_sis_slots:
+            warnings.warn(
+                f"Cannot equip SIS '{sis.name}': Not enough slots. "
+                f"({sis.slots} required, {slot.available_sis_slots} available)"
+            )
+            return False
+
         restriction = sis.equip_restriction
         if not restriction:  # Covers None and ""
             return True
@@ -257,7 +271,7 @@ class Team:
             )
             return False
 
-        if not self._check_sis_equip_restriction(slot.card, sis_entry.sis):
+        if not self._check_sis_equip_restriction(slot, sis_entry.sis):
             return False
 
         if slot.equip_sis(sis_entry):
