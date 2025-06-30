@@ -27,7 +27,7 @@ class SISManager:
     @property
     def skills(self):
         """Allows agent to directly read SIS skills."""
-        return self.skills
+        return self._skills
 
     def add_sis(self, sid: int) -> Optional[int]:
         """Creates a SIS and adds it to the manager."""
