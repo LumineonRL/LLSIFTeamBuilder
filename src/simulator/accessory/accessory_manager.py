@@ -24,6 +24,11 @@ class AccessoryManager:
         self._accessories: Dict[int, PlayerAccessory] = {}
         self._next_manager_internal_id: int = 1
 
+    @property
+    def accessories(self):
+        """Allows agent to directly read owned Accessories."""
+        return self._accessories
+
     def add_accessory(self, accessory_id: int, skill_level: int = 1) -> Optional[int]:
         """Creates an accessory and adds it to the manager."""
         # Pass skill_level to the factory

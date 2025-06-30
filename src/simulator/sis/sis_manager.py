@@ -24,6 +24,11 @@ class SISManager:
         self._skills: Dict[int, PlayerSIS] = {}
         self._next_manager_internal_id: int = 1
 
+    @property
+    def skills(self):
+        """Allows agent to directly read SIS skills."""
+        return self.skills
+
     def add_sis(self, sid: int) -> Optional[int]:
         """Creates a SIS and adds it to the manager."""
         sis = self._factory.create_sis(sid)

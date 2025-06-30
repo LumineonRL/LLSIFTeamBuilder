@@ -111,7 +111,7 @@ class Team:
         self.calculate_team_stats()
         return True
 
-    def _check_accessory_id_restriction(self, card: Card, accessory: Accessory) -> bool:
+    def check_accessory_id_restriction(self, card: Card, accessory: Accessory) -> bool:
         """
         Checks if an accessory can be equipped to a card based on card_id.
         Returns True if allowed, False otherwise.
@@ -162,7 +162,7 @@ class Team:
             warnings.warn(f"Accessory with Manager ID {manager_internal_id} not found.")
             return False
 
-        if not self._check_accessory_id_restriction(slot.card, acc_entry.accessory):
+        if not self.check_accessory_id_restriction(slot.card, acc_entry.accessory):
             return False
 
         # Unequip any existing accessory in this slot
@@ -212,7 +212,7 @@ class Team:
         )
         return False
 
-    def _check_sis_equip_restriction(self, slot: TeamSlot, sis: SIS) -> bool:
+    def check_sis_equip_restriction(self, slot: TeamSlot, sis: SIS) -> bool:
         """
         Checks if a SIS can be equipped to a card in a specific slot by dispatching
         to the correct validator.
@@ -271,7 +271,7 @@ class Team:
             )
             return False
 
-        if not self._check_sis_equip_restriction(slot, sis_entry.sis):
+        if not self.check_sis_equip_restriction(slot, sis_entry.sis):
             return False
 
         if slot.equip_sis(sis_entry):

@@ -45,6 +45,11 @@ class Guest:
         )
         self.current_guest: Optional[GuestData] = None
 
+    @property
+    def all_guests(self):
+        """Allows agent to directly read all possible Guest values."""
+        return self._all_guests
+
     def _load_and_index_guests(self, filepath: str) -> Dict[int, GuestData]:
         """Loads the JSON file and indexes the guest data by ID."""
         try:

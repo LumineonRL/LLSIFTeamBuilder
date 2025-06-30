@@ -40,6 +40,11 @@ class Deck:
         """
         return self._gallery
 
+    @property
+    def entries(self):
+        """Allows agent to directly read Deck entries."""
+        return self._entries
+
     @gallery.setter
     def gallery(self, new_gallery: Gallery):
         """Sets new gallery stats for the deck and re-creates all cards to use it."""
