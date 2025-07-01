@@ -3,6 +3,8 @@ This module manages the state and execution of a single simulation trial by
 orchestrating specialized handlers.
 """
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
 import numpy as np

@@ -7,6 +7,8 @@ for different skill types (Amplify / Encore / Other). It also manages the state
 and trigger conditions for skills like Score-based Scorers or  Year Group skills.
 """
 
+from __future__ import annotations
+
 import logging
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 

@@ -6,6 +6,8 @@ skill trigger. They are responsible for modifying the trial's state and
 scheduling end events for any duration-based effects.
 """
 
+from __future__ import annotations
+
 import math
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple

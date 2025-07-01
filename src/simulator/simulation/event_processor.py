@@ -6,6 +6,8 @@ to the appropriate logic for handling state changes, scoring, and skill
 activations.
 """
 
+from __future__ import annotations
+
 import math
 from typing import TYPE_CHECKING, Any, Dict, List
 
