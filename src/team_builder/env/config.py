@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any
 
+
 import numpy as np
 import numpy.typing as npt
 
@@ -33,11 +34,13 @@ class EnvConfig:
     """
 
     MAX_CARDS_IN_DECK = 500
+    MAX_ACCESSORIES_IN_INVENTORY = 500
     MAX_SKILL_LIST_ENTRIES = 16
     MAX_SKILL_LEVEL = 8
     MAX_SIS_SLOTS = 8
 
     MAX_STAT_VALUE = 250000.0
+    MAX_ACCESSORY_STAT = 8500.0
     MAX_LS_VALUE = 0.15
     MAX_SKILL_DURATION = 50.0
 
@@ -45,19 +48,58 @@ class EnvConfig:
     MAX_SKILL_VALUE_PERCENT = 4.0  # For "Appeal Boost", "Skill Rate Up"
     MAX_SKILL_VALUE_AMP = 16.0  # For "Amplify"
     MAX_SKILL_VALUE_HEAL = 70.0  # For "Healer"
-    MAX_SKILL_VALUE_FLAT = 12000.0  # For "Combo Bonus Up", "Perfect Score Up"
+    MAX_SKILL_VALUE_FLAT = 12000.0  # For "Combo Bonus Up", "Perfect Score Up", "Spark"
 
     MAX_SKILL_THRESHOLD_DEFAULT = 92.0  # For most types (Notes, Combo, Perfect)
     MAX_SKILL_THRESHOLD_SCORE = 20000.0  # For "Score"
     MAX_SKILL_THRESHOLD_TIME = 30.0  # For "Time"
+    MAX_ACC_SKILL_THRESHOLD = 10.0  # For "Spark"
 
     RARITY_MAP = {"N": 0, "R": 1, "SR": 2, "SSR": 3, "UR": 4}
     ATTRIBUTE_MAP = {"Smile": 0, "Pure": 1, "Cool": 2}
     LEADER_ATTRIBUTE_MAP = {"Smile": 0, "Pure": 1, "Cool": 2, "None": 3}
+    ACCESSORY_SKILL_TYPE_MAP = {
+        "Appeal Boost": 0,
+        "Healer": 1,
+        "Perfect Lock": 2,
+        "Sync": 3,
+        "Perfect Score Up": 4,
+        "Skill Rate Up": 5,
+        "Combo Bonus Up": 6,
+        "Encore": 7,
+        "Amplify": 8,
+        "Scorer": 9,
+        "Spark": 10,
+    }
+
+    ACCESSORY_SKILL_TARGET_MAP = {
+        "Ayase Eli": 0,
+        "Hazuki Ren": 1,
+        "Hoshizora Rin": 2,
+        "Koizumi Hanayo": 3,
+        "Kosaka Honoka": 4,
+        "Kunikida Hanamaru": 5,
+        "Kurosawa Dia": 6,
+        "Kurosawa Ruby": 7,
+        "Matsuura Kanan": 8,
+        "Minami Kotori": 9,
+        "Nishikino Maki": 10,
+        "Ohara Mari": 11,
+        "Sakurauchi Riko": 12,
+        "Shibuya Kanon": 13,
+        "Sonoda Umi": 14,
+        "Takami Chika": 15,
+        "Tang Keke": 16,
+        "Tojo Nozomi": 17,
+        "Tsushima Yoshiko": 18,
+        "Watanabe You": 19,
+        "Yazawa Nico": 20,
+    }
 
     def __init__(self, data_path: str = "data"):
         """
         Initializes the configuration by loading data and creating mappings.
+
 
         Args:
             data_path: Path to the directory containing required data files.
@@ -103,6 +145,7 @@ class EnvConfig:
     def _create_character_map(main_characters: List[str]) -> Dict[str, int]:
         """
         Creates a mapping for main characters, reserving index 0 for 'Other'.
+
 
         "Main characters" are characters from u's, Aquours, Niji, and Liella.
         Note that this currently treats characters such as the N-version of

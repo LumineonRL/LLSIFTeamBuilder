@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Callable, Se
 import numpy as np
 from gymnasium import spaces
 
-from src.simulator import Card, Team
+from src.simulator import Accessory, Card, Team
 from src.team_builder.env.build_phase import BuildPhase
 
 if TYPE_CHECKING:
@@ -32,6 +32,7 @@ class ObservationManager:
         self.config = config
         self.env = env
         self.card_feature_size = self._calculate_card_feature_size()
+        self.accessory_feature_size = self._calculate_accessory_feature_size()
 
     # --- Action Space Definition ---
 
@@ -90,7 +91,22 @@ class ObservationManager:
                     shape=(self.config.MAX_CARDS_IN_DECK, self.card_feature_size),
                     dtype=np.float32,
                 ),
-                # TODO: Implement other observation components (team, accessories, SIS)
+                "team": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(Team.NUM_SLOTS, self.card_feature_size),
+                    dtype=np.float32,
+                ),
+                "accessories": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(
+                        self.config.MAX_ACCESSORIES_IN_INVENTORY,
+                        self.accessory_feature_size,
+                    ),
+                    dtype=np.float32,
+                ),
+                # TODO: Implement SIS observation component
                 "build_phase": spaces.Discrete(len(BuildPhase)),
                 "current_slot": spaces.Discrete(Team.NUM_SLOTS),
             }
@@ -103,12 +119,15 @@ class ObservationManager:
         Returns:
             A dictionary containing the serialized state:
                 - 'deck': Serialized deck information as a numpy array.
+                - 'team': Serialized team information as a numpy array.
+                - 'accessories': Serialized accessory info as a numpy array.
                 - 'build_phase': The current build phase index (0-4).
                 - 'current_slot': The current team slot index being filled.
 
         Raises:
             ValueError: If the deck contains invalid data or fails serialization.
         """
+        # Deck observation
         deck_obs = np.zeros(
             (self.config.MAX_CARDS_IN_DECK, self.card_feature_size),
             dtype=np.float32,
@@ -122,8 +141,34 @@ class ObservationManager:
                 break
             deck_obs[i] = self._serialize_card(entry.card)
 
+        # Team observation
+        team_obs = np.zeros((Team.NUM_SLOTS, self.card_feature_size), dtype=np.float32)
+        if self.env.state.team:
+            for i, slot in enumerate(self.env.state.team.slots):
+                if slot.card:
+                    team_obs[i] = self._serialize_card(slot.card)
+
+        # Accessory observation
+        accessories_obs = np.zeros(
+            (
+                self.config.MAX_ACCESSORIES_IN_INVENTORY,
+                self.accessory_feature_size,
+            ),
+            dtype=np.float32,
+        )
+        sorted_accessories = sorted(
+            self.env.accessory_manager.accessories.values(),
+            key=lambda pa: pa.manager_internal_id,
+        )
+        for i, player_accessory in enumerate(sorted_accessories):
+            if i >= self.config.MAX_ACCESSORIES_IN_INVENTORY:
+                break
+            accessories_obs[i] = self._serialize_accessory(player_accessory.accessory)
+
         return {
             "deck": deck_obs,
+            "team": team_obs,
+            "accessories": accessories_obs,
             "build_phase": int(self.env.state.build_phase),
             "current_slot": self.env.state.current_slot_idx,
         }
@@ -204,6 +249,23 @@ class ObservationManager:
         ]
         return sum(parts)
 
+    def _calculate_accessory_feature_size(self) -> int:
+        """Calculates the size of the feature vector for a single accessory."""
+        c = self.config
+        parts = [
+            len(c.character_map) + 1,  # Character
+            1,  # Has card_id
+            3,  # Stats (Smile, Pure, Cool)
+            1,  # Skill Level
+            len(c.ACCESSORY_SKILL_TARGET_MAP),  # Skill Target
+            len(c.ACCESSORY_SKILL_TYPE_MAP),  # Skill Type
+            c.MAX_SKILL_LIST_ENTRIES,  # Skill Chances
+            1,  # Skill Threshold
+            c.MAX_SKILL_LIST_ENTRIES,  # Skill Durations
+            c.MAX_SKILL_LIST_ENTRIES,  # Skill Values
+        ]
+        return sum(parts)
+
     def _get_unassigned_deck_ids(self) -> List[int]:
         """Helper to get a sorted list of deck IDs not assigned to the team."""
         if self.env.state.team is None:
@@ -269,6 +331,8 @@ class ObservationManager:
                 )
             )
 
+            print(skill.chances)
+
             features.extend(
                 self._pad_and_normalize(skill.chances, c.MAX_SKILL_LIST_ENTRIES, 1.0)
             )
@@ -306,6 +370,93 @@ class ObservationManager:
             return np.array(features, dtype=np.float32)
         except (AttributeError, KeyError, TypeError) as e:
             raise ValueError(f"Failed to serialize card_id={card.card_id}: {e}") from e
+
+    def _serialize_accessory(self, accessory: Accessory) -> np.ndarray:
+        """
+        Converts an Accessory object into a normalized, flat numpy array.
+
+        Raises:
+            ValueError: If the accessory is None or an error occurs during serialization.
+        """
+        if accessory is None:
+            raise ValueError("Input accessory cannot be None.")
+
+        try:
+            features = []
+            c = self.config
+            skill = accessory.skill
+
+            # --- Basic Features ---
+            num_total_characters = len(c.character_map) + 1
+            char_one_hot = np.zeros(num_total_characters, dtype=np.float32)
+            char_index = c.character_map.get(
+                accessory.character, c.character_other_index
+            )
+            char_one_hot[char_index] = 1.0
+            features.extend(char_one_hot)
+
+            features.append(1.0 if accessory.card_id else 0.0)
+            features.append(accessory.stats.smile / c.MAX_ACCESSORY_STAT)
+            features.append(accessory.stats.pure / c.MAX_ACCESSORY_STAT)
+            features.append(accessory.stats.cool / c.MAX_ACCESSORY_STAT)
+
+            # # --- Skill ---
+            features.append(accessory.skill_level / c.MAX_SKILL_LEVEL)
+
+            # # Skill Target
+            num_targets = len(c.ACCESSORY_SKILL_TARGET_MAP)
+            target_vector = np.zeros(num_targets, dtype=np.float32)
+            if skill.target == "All":
+                target_vector = np.ones(num_targets, dtype=np.float32)
+            elif skill.target and skill.target in c.ACCESSORY_SKILL_TARGET_MAP:
+                idx = c.ACCESSORY_SKILL_TARGET_MAP[skill.target]
+                target_vector[idx] = 1.0
+            features.extend(target_vector)
+
+            features.extend(self._one_hot(skill.type, c.ACCESSORY_SKILL_TYPE_MAP))
+
+            modified_chances = [chance / 100 for chance in skill.chances]
+
+            features.extend(
+                self._pad_and_normalize(modified_chances, c.MAX_SKILL_LIST_ENTRIES, 1.0)
+            )
+
+            features.append(
+                (accessory.skill_threshold or 0.0) / c.MAX_ACC_SKILL_THRESHOLD
+            )
+
+            features.extend(
+                self._pad_and_normalize(
+                    skill.durations, c.MAX_SKILL_LIST_ENTRIES, c.MAX_SKILL_DURATION
+                )
+            )
+
+            if skill.type in ["Appeal Boost", "Skill Rate Up"]:
+                skill_value = [values / 100 for values in skill.values]
+                value_norm_factor = c.MAX_SKILL_VALUE_PERCENT
+            elif skill.type == "Amplify":
+                skill_value = skill.values
+                value_norm_factor = c.MAX_SKILL_VALUE_AMP
+            elif skill.type == "Healer":
+                skill_value = skill.values
+                value_norm_factor = c.MAX_SKILL_VALUE_HEAL
+            elif skill.type in ["Combo Bonus Up", "Perfect Score Up", "Spark"]:
+                skill_value = skill.values
+                value_norm_factor = c.MAX_SKILL_VALUE_FLAT
+            else:  # "Scorer" and any other default
+                skill_value = skill.values
+                value_norm_factor = c.MAX_SKILL_VALUE_DEFAULT
+            features.extend(
+                self._pad_and_normalize(
+                    skill_value, c.MAX_SKILL_LIST_ENTRIES, value_norm_factor
+                )
+            )
+
+            return np.array(features, dtype=np.float32)
+        except (AttributeError, KeyError, TypeError) as e:
+            raise ValueError(
+                f"Failed to serialize accessory_id={accessory.accessory_id}: {e}"
+            ) from e
 
     def _one_hot(
         self,
