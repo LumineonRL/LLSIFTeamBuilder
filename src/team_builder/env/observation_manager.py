@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Callable, Se
 import numpy as np
 from gymnasium import spaces
 
-from src.simulator import Accessory, Card, Team
+from src.simulator import Accessory, Card, Team, SIS
 from src.team_builder.env.build_phase import BuildPhase
 
 if TYPE_CHECKING:
@@ -33,6 +33,7 @@ class ObservationManager:
         self.env = env
         self.card_feature_size = self._calculate_card_feature_size()
         self.accessory_feature_size = self._calculate_accessory_feature_size()
+        self.sis_feature_size = self._calculate_sis_feature_size()
 
     # --- Action Space Definition ---
 
@@ -106,7 +107,16 @@ class ObservationManager:
                     ),
                     dtype=np.float32,
                 ),
-                # TODO: Implement SIS observation component
+                "sis": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(
+                        self.config.MAX_SIS_IN_INVENTORY,
+                        self.sis_feature_size,
+                    ),
+                    dtype=np.float32,
+                ),
+                # TODO, flesh out Team. Add Guest and Song
                 "build_phase": spaces.Discrete(len(BuildPhase)),
                 "current_slot": spaces.Discrete(Team.NUM_SLOTS),
             }
@@ -121,6 +131,7 @@ class ObservationManager:
                 - 'deck': Serialized deck information as a numpy array.
                 - 'team': Serialized team information as a numpy array.
                 - 'accessories': Serialized accessory info as a numpy array.
+                - 'sis': Serialized SIS info as a numpy array.
                 - 'build_phase': The current build phase index (0-4).
                 - 'current_slot': The current team slot index being filled.
 
@@ -165,10 +176,28 @@ class ObservationManager:
                 break
             accessories_obs[i] = self._serialize_accessory(player_accessory.accessory)
 
+        # SIS observation
+        sis_obs = np.zeros(
+            (
+                self.config.MAX_SIS_IN_INVENTORY,
+                self.sis_feature_size,
+            ),
+            dtype=np.float32,
+        )
+        sorted_sis = sorted(
+            self.env.sis_manager.skills.values(),
+            key=lambda ps: ps.manager_internal_id,
+        )
+        for i, player_sis in enumerate(sorted_sis):
+            if i >= self.config.MAX_SIS_IN_INVENTORY:
+                break
+            sis_obs[i] = self._serialize_sis(player_sis.sis)
+
         return {
             "deck": deck_obs,
             "team": team_obs,
             "accessories": accessories_obs,
+            "sis": sis_obs,
             "build_phase": int(self.env.state.build_phase),
             "current_slot": self.env.state.current_slot_idx,
         }
@@ -263,6 +292,22 @@ class ObservationManager:
             1,  # Skill Threshold
             c.MAX_SKILL_LIST_ENTRIES,  # Skill Durations
             c.MAX_SKILL_LIST_ENTRIES,  # Skill Values
+        ]
+        return sum(parts)
+
+    def _calculate_sis_feature_size(self) -> int:
+        """Calculates the size of the feature vector for a single SIS."""
+        c = self.config
+        num_chars_and_other = len(c.character_map) + 1
+        num_attributes = len(c.ATTRIBUTE_MAP)
+        parts = [
+            len(c.SIS_EFFECT_MAP),  # effect (one-hot)
+            1,  # slots
+            num_attributes,  # attribute (one-hot)
+            len(c.SIS_GROUP_MAP),  # group (one-hot)
+            num_chars_and_other + num_attributes,  # equip_restriction (multi-hot)
+            1,  # target (binary)
+            1,  # value (normalized)
         ]
         return sum(parts)
 
@@ -457,6 +502,66 @@ class ObservationManager:
             raise ValueError(
                 f"Failed to serialize accessory_id={accessory.accessory_id}: {e}"
             ) from e
+
+    def _serialize_sis(self, sis: SIS) -> np.ndarray:
+        """
+        Converts a SIS object into a normalized, flat numpy array.
+
+        Raises:
+            ValueError: If the sis is None or an error occurs during serialization.
+        """
+        if sis is None:
+            raise ValueError("Input SIS cannot be None.")
+
+        try:
+            features = []
+            c = self.config
+
+            # Effect (one-hot)
+            features.extend(self._one_hot(sis.effect, c.SIS_EFFECT_MAP))
+
+            # Slots (normalized)
+            features.append(sis.slots / c.MAX_SIS_SLOTS)
+
+            # Attribute (one-hot)
+            features.extend(self._one_hot(sis.attribute, c.ATTRIBUTE_MAP))
+
+            # Group (one-hot, handles '' or None as all-zeros)
+            features.extend(self._one_hot(sis.group, c.SIS_GROUP_MAP))
+
+            # Equip Restriction (multi-hot)
+            restriction = sis.equip_restriction or ""
+            restriction_vector = c.sis_equip_restriction_map.get(
+                restriction, c.sis_equip_restriction_default_vector
+            )
+            features.extend(restriction_vector)
+
+            # Target (binary: 0.0 for 'self', 1.0 for 'all')
+            features.append(1.0 if sis.target == "all" else 0.0)
+
+            # Value (normalized by effect type)
+            norm_factor = 1.0
+            if sis.effect == "all percent boost":
+                norm_factor = c.MAX_SIS_VALUE_ALL_PERCENT
+            elif sis.effect == "charm":
+                norm_factor = c.MAX_SIS_VALUE_CHARM
+            elif sis.effect == "heal":
+                norm_factor = c.MAX_SIS_VALUE_HEAL
+            elif sis.effect == "self flat boost":
+                norm_factor = c.MAX_SIS_VALUE_SELF_FLAT
+            elif sis.effect == "self percent boost":
+                norm_factor = c.MAX_SIS_VALUE_SELF_PERCENT
+            elif sis.effect == "trick":
+                norm_factor = c.MAX_SIS_VALUE_TRICK
+
+            normalized_value = (
+                (sis.value or 0.0) / norm_factor if norm_factor > 0 else 0.0
+            )
+            features.append(normalized_value)
+
+            return np.array(features, dtype=np.float32)
+        except (AttributeError, KeyError, TypeError) as e:
+            raise ValueError(f"Failed to serialize sis_id={sis.id}: {e}") from e
 
     def _one_hot(
         self,
