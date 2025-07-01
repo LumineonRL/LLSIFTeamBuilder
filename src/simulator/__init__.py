@@ -7,7 +7,7 @@ from .accessory.accessory_manager import AccessoryManager
 from .sis.sis import SIS
 from .sis.sis_factory import SISFactory
 from .sis.sis_manager import SISManager
-from .team.guest import Guest
+from .team.guest import Guest, GuestData
 from .team.team import Team
 from .song.song import Song
 from .song.song_factory import SongFactory
@@ -26,6 +26,7 @@ __all__ = [
     "SISFactory",
     "SISManager",
     "Guest",
+    "GuestData",
     "Team",
     "Song",
     "SongFactory",

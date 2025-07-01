@@ -4,8 +4,9 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Callable, Se
 import numpy as np
 from gymnasium import spaces
 
-from src.simulator import Accessory, Card, Team, SIS
+from src.simulator import Accessory, Card, Team, SIS, GuestData
 from src.team_builder.env.build_phase import BuildPhase
+
 
 if TYPE_CHECKING:
     from .config import EnvConfig
@@ -34,6 +35,7 @@ class ObservationManager:
         self.card_feature_size = self._calculate_card_feature_size()
         self.accessory_feature_size = self._calculate_accessory_feature_size()
         self.sis_feature_size = self._calculate_sis_feature_size()
+        self.guest_feature_size = self._calculate_guest_feature_size()
         self.team_feature_size = 3 + Team.NUM_SLOTS
 
     # --- Action Space Definition ---
@@ -78,7 +80,8 @@ class ObservationManager:
     def _get_max_guest_actions(self) -> int:
         """Calculates actions for the guest selection phase."""
         if self.env.enable_guests and self.env.guest_manager:
-            return len(self.env.guest_manager.all_guests)
+            if self.env.guest_manager.all_guests:
+                return max(self.env.guest_manager.all_guests.keys()) + 1
         return 1
 
     # --- Observation Space Definition ---
@@ -118,7 +121,13 @@ class ObservationManager:
                     ),
                     dtype=np.float32,
                 ),
-                # TODO: Add Guest and Song
+                "guest": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(self.config.MAX_GUESTS, self.guest_feature_size),
+                    dtype=np.float32,
+                ),
+                # TODO: Add Song
                 "build_phase": spaces.Discrete(len(BuildPhase)),
                 "current_slot": spaces.Discrete(Team.NUM_SLOTS),
             }
@@ -134,6 +143,7 @@ class ObservationManager:
                 - 'team': Serialized team information as a numpy array.
                 - 'accessories': Serialized accessory info as a numpy array.
                 - 'sis': Serialized SIS info as a numpy array.
+                - 'guest': Serialized guest info as a numpy array.
                 - 'build_phase': The current build phase index (0-4).
                 - 'current_slot': The current team slot index being filled.
 
@@ -191,14 +201,37 @@ class ObservationManager:
                 break
             sis_obs[i] = self._serialize_sis(player_sis.sis)
 
+        # Guest observation
+        guest_obs = np.zeros(
+            (self.config.MAX_GUESTS, self.guest_feature_size), dtype=np.float32
+        )
+        if self.env.enable_guests and self.env.guest_manager:
+            sorted_guests = sorted(
+                self.env.guest_manager.all_guests.values(),
+                key=lambda g: g.leader_skill_id,
+            )
+            for i, guest in enumerate(sorted_guests):
+                if i >= self.config.MAX_GUESTS:
+                    break
+                guest_obs[i] = self._serialize_guest(guest)
+
         return {
             "deck": deck_obs,
             "team": team_obs,
             "accessories": accessories_obs,
             "sis": sis_obs,
+            "guest": guest_obs,
             "build_phase": int(self.env.state.build_phase),
             "current_slot": self.env.state.current_slot_idx,
         }
+
+    def _get_unassigned_deck_ids(self) -> List[int]:
+        """Helper to get a sorted list of deck IDs not assigned to the team."""
+        if self.env.state.team is None:
+            return []
+        all_deck_ids = set(self.env.deck.entries.keys())
+        unassigned_ids = all_deck_ids - self.env.state.team.assigned_deck_ids
+        return sorted(list(unassigned_ids))
 
     # --- Agent Rendering ---
 
@@ -248,7 +281,7 @@ class ObservationManager:
         """Provides rendering data for the approach rate selection phase."""
         return list(range(1, self.APPROACH_RATE_CHOICES + 1))
 
-    # --- Serialization and Helper Methods ---
+        # --- Serialization and Helper Methods ---
 
     def _calculate_card_feature_size(self) -> int:
         """Calculates the size of the feature vector for a single card."""
@@ -309,13 +342,18 @@ class ObservationManager:
         ]
         return sum(parts)
 
-    def _get_unassigned_deck_ids(self) -> List[int]:
-        """Helper to get a sorted list of deck IDs not assigned to the team."""
-        if self.env.state.team is None:
-            return []
-        all_deck_ids = set(self.env.deck.entries.keys())
-        unassigned_ids = all_deck_ids - self.env.state.team.assigned_deck_ids
-        return sorted(list(unassigned_ids))
+    def _calculate_guest_feature_size(self) -> int:
+        """Calculates the size of the feature vector for a single guest."""
+        c = self.config
+        parts = [
+            len(c.LEADER_ATTRIBUTE_MAP),  # LS Attribute
+            len(c.LEADER_ATTRIBUTE_MAP),  # LS Secondary Attribute
+            1,  # LS Value
+            len(c.LEADER_ATTRIBUTE_MAP),  # LS Extra Attribute
+            len(c.character_map) + 1,  # LS Extra Target
+            1,  # LS Extra Value
+        ]
+        return sum(parts)
 
     def _serialize_card(self, card: Card) -> np.ndarray:
         """
@@ -560,6 +598,47 @@ class ObservationManager:
             return np.array(features, dtype=np.float32)
         except (AttributeError, KeyError, TypeError) as e:
             raise ValueError(f"Failed to serialize sis_id={sis.id}: {e}") from e
+
+    def _serialize_guest(self, guest: GuestData) -> np.ndarray:
+        """
+        Converts a GuestData object into a normalized, flat numpy array.
+
+        Raises:
+            ValueError: If the guest is None or an error occurs during serialization.
+        """
+        if guest is None:
+            raise ValueError("Input guest cannot be None.")
+
+        try:
+            features = []
+            c = self.config
+            ls_attr_map = c.LEADER_ATTRIBUTE_MAP
+
+            # --- Leader Skill Features ---
+            features.extend(self._one_hot(guest.leader_attribute, ls_attr_map, "None"))
+            features.extend(
+                self._one_hot(guest.leader_secondary_attribute, ls_attr_map, "None")
+            )
+            features.append((guest.leader_value or 0.0) / c.MAX_LS_VALUE)
+            features.extend(
+                self._one_hot(guest.leader_extra_attribute, ls_attr_map, "None")
+            )
+
+            if guest.leader_extra_target is not None:
+                extra_target_vector = c.ls_extra_target_map.get(
+                    guest.leader_extra_target, c.ls_extra_target_default_vector
+                )
+            else:
+                extra_target_vector = c.ls_extra_target_default_vector
+            features.extend(extra_target_vector)
+
+            features.append((guest.leader_extra_value or 0.0) / c.MAX_LS_VALUE)
+
+            return np.array(features, dtype=np.float32)
+        except (AttributeError, KeyError, TypeError) as e:
+            raise ValueError(
+                f"Failed to serialize guest_id={guest.leader_skill_id}: {e}"
+            ) from e
 
     def _one_hot(
         self,
