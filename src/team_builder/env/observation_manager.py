@@ -34,6 +34,7 @@ class ObservationManager:
         self.card_feature_size = self._calculate_card_feature_size()
         self.accessory_feature_size = self._calculate_accessory_feature_size()
         self.sis_feature_size = self._calculate_sis_feature_size()
+        self.team_feature_size = 3 + Team.NUM_SLOTS
 
     # --- Action Space Definition ---
 
@@ -84,6 +85,7 @@ class ObservationManager:
 
     def define_observation_space(self) -> spaces.Dict:
         """Defines the observation space for the environment."""
+        team_feature_size = 3 + Team.NUM_SLOTS  # 3 for total stats, 9 for SIS slots
         return spaces.Dict(
             {
                 "deck": spaces.Box(
@@ -95,7 +97,7 @@ class ObservationManager:
                 "team": spaces.Box(
                     low=0.0,
                     high=1.0,
-                    shape=(Team.NUM_SLOTS, self.card_feature_size),
+                    shape=(team_feature_size,),
                     dtype=np.float32,
                 ),
                 "accessories": spaces.Box(
@@ -116,7 +118,7 @@ class ObservationManager:
                     ),
                     dtype=np.float32,
                 ),
-                # TODO, flesh out Team. Add Guest and Song
+                # TODO: Add Guest and Song
                 "build_phase": spaces.Discrete(len(BuildPhase)),
                 "current_slot": spaces.Discrete(Team.NUM_SLOTS),
             }
@@ -153,11 +155,7 @@ class ObservationManager:
             deck_obs[i] = self._serialize_card(entry.card)
 
         # Team observation
-        team_obs = np.zeros((Team.NUM_SLOTS, self.card_feature_size), dtype=np.float32)
-        if self.env.state.team:
-            for i, slot in enumerate(self.env.state.team.slots):
-                if slot.card:
-                    team_obs[i] = self._serialize_card(slot.card)
+        team_obs = self._serialize_team(self.env.state.team)
 
         # Accessory observation
         accessories_obs = np.zeros(
@@ -591,6 +589,27 @@ class ObservationManager:
         index = c.character_map.get(card.character, c.character_other_index)
         one_hot[index] = 1.0
         return one_hot
+
+    def _serialize_team(self, team: Optional[Team]) -> np.ndarray:
+        """Converts the Team object into a normalized, flat numpy array."""
+        team_obs = np.zeros(self.team_feature_size, dtype=np.float32)
+        if not team:
+            return team_obs
+
+        # First 3 features: Total team stats
+        team_obs[0] = team.total_team_smile / self.config.MAX_TEAM_STAT_VALUE
+        team_obs[1] = team.total_team_pure / self.config.MAX_TEAM_STAT_VALUE
+        team_obs[2] = team.total_team_cool / self.config.MAX_TEAM_STAT_VALUE
+
+        # Next 9 features: SIS slot usage per team slot
+        for i, slot in enumerate(team.slots):
+            if slot.card_sis_capacity > 0:
+                sis_usage_ratio = slot.total_sis_slots_used / slot.card_sis_capacity
+            else:
+                sis_usage_ratio = 0.0
+            team_obs[3 + i] = sis_usage_ratio
+
+        return team_obs
 
     @staticmethod
     def _pad_and_normalize(
