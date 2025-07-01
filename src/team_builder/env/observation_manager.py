@@ -76,7 +76,6 @@ class ObservationManager:
         """Calculates actions for the guest selection phase."""
         if self.env.enable_guests and self.env.guest_manager:
             return len(self.env.guest_manager.all_guests)
-        # If guests are disabled, there's effectively one 'no-op' or default choice.
         return 1
 
     # --- Observation Space Definition ---
@@ -134,7 +133,7 @@ class ObservationManager:
     def get_agent_render_data(self) -> List:
         """
         Returns data structures for the 'agent' render mode based on the
-        current build phase, using a strategy pattern for clarity.
+        current build phase.
         """
         render_strategies: Dict[BuildPhase, Callable[[], List]] = {
             BuildPhase.CARD_SELECTION: self._render_deck_phase,
@@ -201,6 +200,7 @@ class ObservationManager:
             c.MAX_SKILL_LIST_ENTRIES,  # Skill Chances
             c.MAX_SKILL_LIST_ENTRIES,  # Skill Values
             c.MAX_SKILL_LIST_ENTRIES,  # Skill Durations
+            len(c.character_map) + 1,  # Skill Target
         ]
         return sum(parts)
 
@@ -238,7 +238,7 @@ class ObservationManager:
             features.append(card.stats.cool / c.MAX_STAT_VALUE)
             features.append(card.current_sis_slots / c.MAX_SIS_SLOTS)
 
-            # # --- Leader Skill ---
+            # --- Leader Skill ---
             features.extend(self._one_hot(ls.attribute, ls_attr_map, "None"))
             features.extend(self._one_hot(ls.secondary_attribute, ls_attr_map, "None"))
             features.append((ls.value or 0.0) / c.MAX_LS_VALUE)
@@ -252,7 +252,7 @@ class ObservationManager:
             features.extend(extra_target_vector)
             features.append((ls.extra_value or 0.0) / c.MAX_LS_VALUE)
 
-            # # --- Card Skill ---
+            # --- Card Skill ---
             features.append((card.current_skill_level or 0) / c.MAX_SKILL_LEVEL)
             features.extend(self._one_hot(skill.type, c.skill_type_map))
             features.extend(self._one_hot(skill.activation, c.skill_activation_map))
@@ -263,7 +263,6 @@ class ObservationManager:
                 threshold_norm_factor = c.MAX_SKILL_THRESHOLD_TIME
             else:
                 threshold_norm_factor = c.MAX_SKILL_THRESHOLD_DEFAULT
-
             features.extend(
                 self._pad_and_normalize(
                     skill.thresholds, c.MAX_SKILL_LIST_ENTRIES, threshold_norm_factor
@@ -284,7 +283,6 @@ class ObservationManager:
                 value_norm_factor = c.MAX_SKILL_VALUE_FLAT
             else:  # "Scorer" and any other default
                 value_norm_factor = c.MAX_SKILL_VALUE_DEFAULT
-
             features.extend(
                 self._pad_and_normalize(
                     skill.values, c.MAX_SKILL_LIST_ENTRIES, value_norm_factor
@@ -296,6 +294,14 @@ class ObservationManager:
                     skill.durations, c.MAX_SKILL_LIST_ENTRIES, c.MAX_SKILL_DURATION
                 )
             )
+
+            if skill.target and skill.target.strip():
+                target_vector = c.skill_target_map.get(
+                    skill.target, c.skill_target_default_vector
+                )
+            else:
+                target_vector = c.skill_target_default_vector
+            features.extend(target_vector)
 
             return np.array(features, dtype=np.float32)
         except (AttributeError, KeyError, TypeError) as e:
@@ -324,12 +330,9 @@ class ObservationManager:
         it is mapped to the 'other' category at index 0.
         """
         c = self.config
-
         num_total_characters = len(c.character_map) + 1
         one_hot = np.zeros(num_total_characters, dtype=np.float32)
-
         index = c.character_map.get(card.character, c.character_other_index)
-
         one_hot[index] = 1.0
         return one_hot
 

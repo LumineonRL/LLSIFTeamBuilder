@@ -47,9 +47,7 @@ class EnvConfig:
     MAX_SKILL_VALUE_HEAL = 70.0  # For "Healer"
     MAX_SKILL_VALUE_FLAT = 12000.0  # For "Combo Bonus Up", "Perfect Score Up"
 
-    MAX_SKILL_THRESHOLD_DEFAULT = (
-        92.0  # For most types (Rhythm Icons, Combo, Perfect, etc)
-    )
+    MAX_SKILL_THRESHOLD_DEFAULT = 92.0  # For most types (Notes, Combo, Perfect)
     MAX_SKILL_THRESHOLD_SCORE = 20000.0  # For "Score"
     MAX_SKILL_THRESHOLD_TIME = 30.0  # For "Time"
 
@@ -67,6 +65,7 @@ class EnvConfig:
         base_path = Path(data_path)
         card_data = _load_json(base_path / "cards.json")
         ls_map_data = _load_json(base_path / "additional_leader_skill_map.json")
+        skill_target_map_data = _load_json(base_path / "year_group_target.json")
 
         main_characters = ls_map_data.get("All", [])
         if not main_characters:
@@ -85,6 +84,16 @@ class EnvConfig:
         self.ls_extra_target_default_vector: npt.NDArray[np.float32] = np.zeros(
             len(self.character_map) + 1, dtype=np.float32
         )
+
+        self.skill_target_map: Dict[str, npt.NDArray[np.float32]] = (
+            self._create_multi_hot_target_map(
+                skill_target_map_data, self.character_map, self.character_other_index
+            )
+        )
+        self.skill_target_default_vector: npt.NDArray[np.float32] = np.zeros(
+            len(self.character_map) + 1, dtype=np.float32
+        )
+
         self.skill_type_map = _get_skill_related_map(card_data, "skill", "type")
         self.skill_activation_map = _get_skill_related_map(
             card_data, "skill", "activation"
@@ -104,7 +113,7 @@ class EnvConfig:
 
     @staticmethod
     def _create_multi_hot_target_map(
-        ls_map_data: Dict[str, List[str]],
+        map_data: Dict[str, List[str]],
         character_map: Dict[str, int],
         character_other_index: int,
     ) -> Dict[str, npt.NDArray[np.float32]]:
@@ -116,7 +125,7 @@ class EnvConfig:
         multi_hot_map: Dict[str, npt.NDArray[np.float32]] = {}
         num_characters = len(character_map) + 1  # +1 for 'Other'
 
-        for group_name, character_list in ls_map_data.items():
+        for group_name, character_list in map_data.items():
             if group_name == "All":
                 continue
 
