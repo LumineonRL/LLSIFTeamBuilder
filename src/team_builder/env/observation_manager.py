@@ -287,14 +287,20 @@ class ObservationManager:
         return one_hot
 
     def _one_hot_character(self, card: Card) -> np.ndarray:
-        """Creates a one-hot encoded vector for characters, excluding 'N' rarity."""
+        """
+        Creates a one-hot encoded vector for the card's character.
+
+        If the character is not in the main list defined in the config,
+        it is mapped to the 'other' category at index 0.
+        """
         c = self.config
-        one_hot = np.zeros(len(c.character_map) + 1, dtype=np.float32)
-        if card.rarity == "N":
-            one_hot[c.character_other_index] = 1.0
-        else:
-            idx = c.character_map.get(card.character, c.character_other_index)
-            one_hot[idx] = 1.0
+
+        num_total_characters = len(c.character_map) + 1
+        one_hot = np.zeros(num_total_characters, dtype=np.float32)
+
+        index = c.character_map.get(card.character, c.character_other_index)
+
+        one_hot[index] = 1.0
         return one_hot
 
     @staticmethod

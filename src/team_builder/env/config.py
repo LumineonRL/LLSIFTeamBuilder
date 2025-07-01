@@ -56,19 +56,30 @@ class EnvConfig:
         """
         base_path = Path(data_path)
         card_data = _load_json(base_path / "cards.json")
-        ls_target_data = _load_json(base_path / "additional_leader_skill_map.json")
+        ls_map_data = _load_json(base_path / "additional_leader_skill_map.json")
 
-        # --- Dynamic Categorical Mappings ---
-        self.character_map = self._create_character_map(card_data)
-        self.character_other_index = len(self.character_map)
-        self.ls_extra_target_map = _create_map_from_list(list(ls_target_data.keys()))
+        main_characters = ls_map_data.get("All", [])
+        if not main_characters:
+            raise ValueError("'All' key not found or empty in additional_leader_skill_map.json")
+        
+        self.character_map = self._create_character_map(main_characters)
+        self.character_other_index = 0
+
+        self.ls_extra_target_map = _create_map_from_list(list(ls_map_data.keys()))
         self.skill_type_map = _get_skill_related_map(card_data, "skill", "type")
         self.skill_activation_map = _get_skill_related_map(
             card_data, "skill", "activation"
         )
 
     @staticmethod
-    def _create_character_map(card_data: List[Dict]) -> Dict[str, int]:
-        """Returns a list of unique character names among all non-N cards."""
-        characters = set(c["character"] for c in card_data if c["rarity"] != "N")
-        return _create_map_from_list(list(characters))
+    def _create_character_map(main_characters: List[str]) -> Dict[str, int]:
+        """
+        Creates a mapping for main characters, reserving index 0 for 'Other'.
+
+        "Main characters" are characters from u's, Aquours, Niji, and Liella.
+        Note that this currently treats characters such as the N-version of
+        the Niji girls or April Fools versions of u's and Aqours as the
+        same character when it shouldn't.
+        """
+        return {name: i + 1 for i, name in enumerate(sorted(main_characters))}
+
