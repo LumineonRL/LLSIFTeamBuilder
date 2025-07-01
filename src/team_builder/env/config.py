@@ -39,9 +39,19 @@ class EnvConfig:
 
     MAX_STAT_VALUE = 250000.0
     MAX_LS_VALUE = 0.15
-    MAX_SKILL_THRESHOLD = 18000.0
-    MAX_SKILL_VALUE = 150000.0
     MAX_SKILL_DURATION = 50.0
+
+    MAX_SKILL_VALUE_DEFAULT = 150000.0  # For "Scorer"
+    MAX_SKILL_VALUE_PERCENT = 4.0  # For "Appeal Boost", "Skill Rate Up"
+    MAX_SKILL_VALUE_AMP = 16.0  # For "Amplify"
+    MAX_SKILL_VALUE_HEAL = 70.0  # For "Healer"
+    MAX_SKILL_VALUE_FLAT = 12000.0  # For "Combo Bonus Up", "Perfect Score Up"
+
+    MAX_SKILL_THRESHOLD_DEFAULT = (
+        92.0  # For most types (Rhythm Icons, Combo, Perfect, etc)
+    )
+    MAX_SKILL_THRESHOLD_SCORE = 20000.0  # For "Score"
+    MAX_SKILL_THRESHOLD_TIME = 30.0  # For "Time"
 
     RARITY_MAP = {"N": 0, "R": 1, "SR": 2, "SSR": 3, "UR": 4}
     ATTRIBUTE_MAP = {"Smile": 0, "Pure": 1, "Cool": 2}

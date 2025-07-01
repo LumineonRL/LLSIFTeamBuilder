@@ -187,7 +187,7 @@ class ObservationManager:
             len(c.ATTRIBUTE_MAP),  # Attribute
             len(c.character_map) + 1,  # Character
             3,  # Stats (Smile, Pure, Cool)
-            1, # SIS Slots
+            1,  # SIS Slots
             len(c.LEADER_ATTRIBUTE_MAP),  # LS Attribute
             len(c.LEADER_ATTRIBUTE_MAP),  # LS Secondary Attribute
             1,  # LS Value
@@ -257,20 +257,40 @@ class ObservationManager:
             features.extend(self._one_hot(skill.type, c.skill_type_map))
             features.extend(self._one_hot(skill.activation, c.skill_activation_map))
 
-            # --- Padded Skill Lists ---
+            if skill.activation == "Score":
+                threshold_norm_factor = c.MAX_SKILL_THRESHOLD_SCORE
+            elif skill.activation == "Time":
+                threshold_norm_factor = c.MAX_SKILL_THRESHOLD_TIME
+            else:
+                threshold_norm_factor = c.MAX_SKILL_THRESHOLD_DEFAULT
+
             features.extend(
                 self._pad_and_normalize(
-                    skill.thresholds, c.MAX_SKILL_LIST_ENTRIES, c.MAX_SKILL_THRESHOLD
+                    skill.thresholds, c.MAX_SKILL_LIST_ENTRIES, threshold_norm_factor
                 )
             )
+
             features.extend(
                 self._pad_and_normalize(skill.chances, c.MAX_SKILL_LIST_ENTRIES, 1.0)
             )
+
+            if skill.type in ["Appeal Boost", "Skill Rate Up"]:
+                value_norm_factor = c.MAX_SKILL_VALUE_PERCENT
+            elif skill.type == "Amplify":
+                value_norm_factor = c.MAX_SKILL_VALUE_AMP
+            elif skill.type == "Healer":
+                value_norm_factor = c.MAX_SKILL_VALUE_HEAL
+            elif skill.type in ["Combo Bonus Up", "Perfect Score Up"]:
+                value_norm_factor = c.MAX_SKILL_VALUE_FLAT
+            else:  # "Scorer" and any other default
+                value_norm_factor = c.MAX_SKILL_VALUE_DEFAULT
+
             features.extend(
                 self._pad_and_normalize(
-                    skill.values, c.MAX_SKILL_LIST_ENTRIES, c.MAX_SKILL_VALUE
+                    skill.values, c.MAX_SKILL_LIST_ENTRIES, value_norm_factor
                 )
             )
+
             features.extend(
                 self._pad_and_normalize(
                     skill.durations, c.MAX_SKILL_LIST_ENTRIES, c.MAX_SKILL_DURATION
