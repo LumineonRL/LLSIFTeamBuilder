@@ -36,7 +36,6 @@ class ObservationManager:
         self.accessory_feature_size = self._calculate_accessory_feature_size()
         self.sis_feature_size = self._calculate_sis_feature_size()
         self.guest_feature_size = self._calculate_guest_feature_size()
-        self.team_feature_size = 3 + Team.NUM_SLOTS
 
     # --- Action Space Definition ---
 
@@ -88,7 +87,6 @@ class ObservationManager:
 
     def define_observation_space(self) -> spaces.Dict:
         """Defines the observation space for the environment."""
-        team_feature_size = 3 + Team.NUM_SLOTS  # 3 for total stats, 9 for SIS slots
         return spaces.Dict(
             {
                 "deck": spaces.Box(
@@ -97,11 +95,36 @@ class ObservationManager:
                     shape=(self.config.MAX_CARDS_IN_DECK, self.card_feature_size),
                     dtype=np.float32,
                 ),
-                "team": spaces.Box(
-                    low=0.0,
-                    high=1.0,
-                    shape=(team_feature_size,),
-                    dtype=np.float32,
+                "team": spaces.Dict(
+                    {
+                        "cards": spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(Team.NUM_SLOTS, self.card_feature_size),
+                            dtype=np.float32,
+                        ),
+                        "accessories": spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(Team.NUM_SLOTS, self.accessory_feature_size),
+                            dtype=np.float32,
+                        ),
+                        "sis": spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(
+                                Team.NUM_SLOTS * self.config.MAX_EQUIPPABLE_SIS,
+                                self.sis_feature_size,
+                            ),
+                            dtype=np.float32,
+                        ),
+                        "guest": spaces.Box(
+                            low=0.0,
+                            high=1.0,
+                            shape=(1, self.guest_feature_size),
+                            dtype=np.float32,
+                        ),
+                    }
                 ),
                 "accessories": spaces.Box(
                     low=0.0,
@@ -140,7 +163,7 @@ class ObservationManager:
         Returns:
             A dictionary containing the serialized state:
                 - 'deck': Serialized deck information as a numpy array.
-                - 'team': Serialized team information as a numpy array.
+                - 'team': Serialized team information as a dictionary of numpy arrays.
                 - 'accessories': Serialized accessory info as a numpy array.
                 - 'sis': Serialized SIS info as a numpy array.
                 - 'guest': Serialized guest info as a numpy array.
@@ -597,26 +620,54 @@ class ObservationManager:
         except (AttributeError, KeyError, TypeError) as e:
             raise ValueError(f"Failed to serialize sis_id={sis.id}: {e}") from e
 
-    def _serialize_team(self, team: Optional[Team]) -> np.ndarray:
-        """Converts the Team object into a normalized, flat numpy array."""
-        team_obs = np.zeros(self.team_feature_size, dtype=np.float32)
-        if not team:
-            return team_obs
+    def _serialize_team(self, team: Optional[Team]) -> Dict[str, np.ndarray]:
+        """Converts the Team object into a dictionary of observation arrays."""
+        team_cards_obs = np.zeros(
+            (Team.NUM_SLOTS, self.card_feature_size), dtype=np.float32
+        )
+        team_accessories_obs = np.zeros(
+            (Team.NUM_SLOTS, self.accessory_feature_size), dtype=np.float32
+        )
+        team_sis_obs = np.zeros(
+            (
+                Team.NUM_SLOTS * self.config.MAX_EQUIPPABLE_SIS,
+                self.sis_feature_size,
+            ),
+            dtype=np.float32,
+        )
+        team_guest_obs = np.zeros((1, self.guest_feature_size), dtype=np.float32)
 
-        # First 3 features: Total team stats
-        team_obs[0] = team.total_team_smile / self.config.MAX_TEAM_STAT_VALUE
-        team_obs[1] = team.total_team_pure / self.config.MAX_TEAM_STAT_VALUE
-        team_obs[2] = team.total_team_cool / self.config.MAX_TEAM_STAT_VALUE
+        if team:
+            # Serialize Cards in team slots
+            for i, slot in enumerate(team.slots):
+                if slot.card:
+                    team_cards_obs[i] = self._serialize_card(slot.card)
 
-        # Next 9 features: SIS slot usage per team slot
-        for i, slot in enumerate(team.slots):
-            if slot.card_sis_capacity > 0:
-                sis_usage_ratio = slot.total_sis_slots_used / slot.card_sis_capacity
-            else:
-                sis_usage_ratio = 0.0
-            team_obs[3 + i] = sis_usage_ratio
+            # Serialize Accessories in team slots
+            for i, slot in enumerate(team.slots):
+                if slot.accessory:
+                    team_accessories_obs[i] = self._serialize_accessory(slot.accessory)
 
-        return team_obs
+            # Serialize all SIS equipped on the team
+            sis_obs_idx = 0
+            for slot in team.slots:
+                for sis_entry in slot.sis_entries:
+                    if sis_obs_idx < (Team.NUM_SLOTS * self.config.MAX_EQUIPPABLE_SIS):
+                        team_sis_obs[sis_obs_idx] = self._serialize_sis(sis_entry.sis)
+                        sis_obs_idx += 1
+
+            # Serialize the selected Guest
+            if team.guest_manager and team.guest_manager.current_guest:
+                team_guest_obs[0] = self._serialize_guest(
+                    team.guest_manager.current_guest
+                )
+
+        return {
+            "cards": team_cards_obs,
+            "accessories": team_accessories_obs,
+            "sis": team_sis_obs,
+            "guest": team_guest_obs,
+        }
 
     def _serialize_guest(self, guest: GuestData) -> np.ndarray:
         """
