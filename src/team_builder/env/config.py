@@ -2,6 +2,9 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any
 
+import numpy as np
+import numpy.typing as npt
+
 
 def _load_json(path: Path) -> Any:
     """Loads a JSON file."""
@@ -10,11 +13,6 @@ def _load_json(path: Path) -> Any:
             return json.load(f)
     except FileNotFoundError as e:
         raise RuntimeError(f"Could not load required data file: {e}") from e
-
-
-def _create_map_from_list(items: List[str]) -> Dict[str, int]:
-    """Creates a dictionary mapping items to their indices."""
-    return {name: i for i, name in enumerate(sorted(items))}
 
 
 def _get_skill_related_map(
@@ -26,7 +24,7 @@ def _get_skill_related_map(
     items = set(
         c[key][sub_key] for c in card_data if c.get(key) and c[key].get(sub_key)
     )
-    return _create_map_from_list(list(items))
+    return {name: i for i, name in enumerate(sorted(items))}
 
 
 class EnvConfig:
@@ -34,8 +32,10 @@ class EnvConfig:
     Configuration class for the environment, holding constants and mappings.
     """
 
-    MAX_CARDS_IN_DECK = 200
+    MAX_CARDS_IN_DECK = 500
     MAX_SKILL_LIST_ENTRIES = 16
+    MAX_SKILL_LEVEL = 8
+    MAX_SIS_SLOTS = 8
 
     MAX_STAT_VALUE = 250000.0
     MAX_LS_VALUE = 0.15
@@ -60,12 +60,21 @@ class EnvConfig:
 
         main_characters = ls_map_data.get("All", [])
         if not main_characters:
-            raise ValueError("'All' key not found or empty in additional_leader_skill_map.json")
-        
+            raise ValueError(
+                "'All' key not found or empty in additional_leader_skill_map.json"
+            )
+
         self.character_map = self._create_character_map(main_characters)
         self.character_other_index = 0
 
-        self.ls_extra_target_map = _create_map_from_list(list(ls_map_data.keys()))
+        self.ls_extra_target_map: Dict[str, npt.NDArray[np.float32]] = (
+            self._create_multi_hot_target_map(
+                ls_map_data, self.character_map, self.character_other_index
+            )
+        )
+        self.ls_extra_target_default_vector: npt.NDArray[np.float32] = np.zeros(
+            len(self.character_map) + 1, dtype=np.float32
+        )
         self.skill_type_map = _get_skill_related_map(card_data, "skill", "type")
         self.skill_activation_map = _get_skill_related_map(
             card_data, "skill", "activation"
@@ -83,3 +92,33 @@ class EnvConfig:
         """
         return {name: i + 1 for i, name in enumerate(sorted(main_characters))}
 
+    @staticmethod
+    def _create_multi_hot_target_map(
+        ls_map_data: Dict[str, List[str]],
+        character_map: Dict[str, int],
+        character_other_index: int,
+    ) -> Dict[str, npt.NDArray[np.float32]]:
+        """
+        Creates a map from a group name (e.g., 'first-year') to a pre-computed
+        multi-hot vector representing the characters in that group.
+        The vector's order and length are determined by the main character_map.
+        """
+        multi_hot_map: Dict[str, npt.NDArray[np.float32]] = {}
+        num_characters = len(character_map) + 1  # +1 for 'Other'
+
+        for group_name, character_list in ls_map_data.items():
+            if group_name == "All":
+                continue
+
+            group_vector: npt.NDArray[np.float32] = np.zeros(
+                num_characters, dtype=np.float32
+            )
+            for character_name in character_list:
+                char_index = character_map.get(character_name, character_other_index)
+
+                if char_index != character_other_index:
+                    group_vector[char_index] = 1.0
+
+            multi_hot_map[group_name] = group_vector
+
+        return multi_hot_map

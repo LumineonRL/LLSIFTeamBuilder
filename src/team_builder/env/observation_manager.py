@@ -187,12 +187,14 @@ class ObservationManager:
             len(c.ATTRIBUTE_MAP),  # Attribute
             len(c.character_map) + 1,  # Character
             3,  # Stats (Smile, Pure, Cool)
+            1, # SIS Slots
             len(c.LEADER_ATTRIBUTE_MAP),  # LS Attribute
             len(c.LEADER_ATTRIBUTE_MAP),  # LS Secondary Attribute
             1,  # LS Value
             len(c.LEADER_ATTRIBUTE_MAP),  # LS Extra Attribute
-            len(c.ls_extra_target_map),  # LS Extra Target
+            len(c.character_map) + 1,  # LS Extra Target
             1,  # LS Extra Value
+            1,  # Skill level
             len(c.skill_type_map),  # Skill Type
             len(c.skill_activation_map),  # Skill Activation
             c.MAX_SKILL_LIST_ENTRIES,  # Skill Thresholds
@@ -234,16 +236,24 @@ class ObservationManager:
             features.append(card.stats.smile / c.MAX_STAT_VALUE)
             features.append(card.stats.pure / c.MAX_STAT_VALUE)
             features.append(card.stats.cool / c.MAX_STAT_VALUE)
+            features.append(card.current_sis_slots / c.MAX_SIS_SLOTS)
 
-            # --- Leader Skill ---
+            # # --- Leader Skill ---
             features.extend(self._one_hot(ls.attribute, ls_attr_map, "None"))
             features.extend(self._one_hot(ls.secondary_attribute, ls_attr_map, "None"))
             features.append((ls.value or 0.0) / c.MAX_LS_VALUE)
             features.extend(self._one_hot(ls.extra_attribute, ls_attr_map, "None"))
-            features.extend(self._one_hot(ls.extra_target, c.ls_extra_target_map))
+            if ls.extra_target is not None:
+                extra_target_vector = c.ls_extra_target_map.get(
+                    ls.extra_target, c.ls_extra_target_default_vector
+                )
+            else:
+                extra_target_vector = c.ls_extra_target_default_vector
+            features.extend(extra_target_vector)
             features.append((ls.extra_value or 0.0) / c.MAX_LS_VALUE)
 
-            # --- Card Skill ---
+            # # --- Card Skill ---
+            features.append((card.current_skill_level or 0) / c.MAX_SKILL_LEVEL)
             features.extend(self._one_hot(skill.type, c.skill_type_map))
             features.extend(self._one_hot(skill.activation, c.skill_activation_map))
 
