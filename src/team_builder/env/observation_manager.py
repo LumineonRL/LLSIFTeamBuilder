@@ -225,6 +225,8 @@ class ObservationManager:
             "current_slot": self.env.state.current_slot_idx,
         }
 
+    # --- Agent Rendering ---
+
     def _get_unassigned_deck_ids(self) -> List[int]:
         """Helper to get a sorted list of deck IDs not assigned to the team."""
         if self.env.state.team is None:
@@ -232,8 +234,6 @@ class ObservationManager:
         all_deck_ids = set(self.env.deck.entries.keys())
         unassigned_ids = all_deck_ids - self.env.state.team.assigned_deck_ids
         return sorted(list(unassigned_ids))
-
-    # --- Agent Rendering ---
 
     def get_agent_render_data(self) -> List:
         """
@@ -292,10 +292,10 @@ class ObservationManager:
             len(c.character_map) + 1,  # Character
             3,  # Stats (Smile, Pure, Cool)
             1,  # SIS Slots
-            len(c.LEADER_ATTRIBUTE_MAP),  # LS Attribute
-            len(c.LEADER_ATTRIBUTE_MAP),  # LS Secondary Attribute
+            len(c.ATTRIBUTE_MAP),  # LS Attribute
+            len(c.ATTRIBUTE_MAP),  # LS Secondary Attribute
             1,  # LS Value
-            len(c.LEADER_ATTRIBUTE_MAP),  # LS Extra Attribute
+            len(c.ATTRIBUTE_MAP),  # LS Extra Attribute
             len(c.character_map) + 1,  # LS Extra Target
             1,  # LS Extra Value
             1,  # Skill level
@@ -346,10 +346,10 @@ class ObservationManager:
         """Calculates the size of the feature vector for a single guest."""
         c = self.config
         parts = [
-            len(c.LEADER_ATTRIBUTE_MAP),  # LS Attribute
-            len(c.LEADER_ATTRIBUTE_MAP),  # LS Secondary Attribute
+            len(c.ATTRIBUTE_MAP),  # LS Attribute
+            len(c.ATTRIBUTE_MAP),  # LS Secondary Attribute
             1,  # LS Value
-            len(c.LEADER_ATTRIBUTE_MAP),  # LS Extra Attribute
+            len(c.ATTRIBUTE_MAP),  # LS Extra Attribute
             len(c.character_map) + 1,  # LS Extra Target
             1,  # LS Extra Value
         ]
@@ -370,7 +370,7 @@ class ObservationManager:
             c = self.config
             ls = card.leader_skill
             skill = card.skill
-            ls_attr_map = c.LEADER_ATTRIBUTE_MAP
+            ls_attr_map = c.ATTRIBUTE_MAP
 
             # --- Basic Features ---
             features.append(c.RARITY_MAP.get(card.rarity, 0) / (len(c.RARITY_MAP) - 1))
@@ -382,10 +382,10 @@ class ObservationManager:
             features.append(card.current_sis_slots / c.MAX_SIS_SLOTS)
 
             # --- Leader Skill ---
-            features.extend(self._one_hot(ls.attribute, ls_attr_map, "None"))
-            features.extend(self._one_hot(ls.secondary_attribute, ls_attr_map, "None"))
+            features.extend(self._one_hot(ls.attribute, ls_attr_map))
+            features.extend(self._one_hot(ls.secondary_attribute, ls_attr_map))
             features.append((ls.value or 0.0) / c.MAX_LS_VALUE)
-            features.extend(self._one_hot(ls.extra_attribute, ls_attr_map, "None"))
+            features.extend(self._one_hot(ls.extra_attribute, ls_attr_map))
             if ls.extra_target is not None:
                 extra_target_vector = c.ls_extra_target_map.get(
                     ls.extra_target, c.ls_extra_target_default_vector
@@ -411,8 +411,6 @@ class ObservationManager:
                     skill.thresholds, c.MAX_SKILL_LIST_ENTRIES, threshold_norm_factor
                 )
             )
-
-            print(skill.chances)
 
             features.extend(
                 self._pad_and_normalize(skill.chances, c.MAX_SKILL_LIST_ENTRIES, 1.0)
@@ -599,6 +597,27 @@ class ObservationManager:
         except (AttributeError, KeyError, TypeError) as e:
             raise ValueError(f"Failed to serialize sis_id={sis.id}: {e}") from e
 
+    def _serialize_team(self, team: Optional[Team]) -> np.ndarray:
+        """Converts the Team object into a normalized, flat numpy array."""
+        team_obs = np.zeros(self.team_feature_size, dtype=np.float32)
+        if not team:
+            return team_obs
+
+        # First 3 features: Total team stats
+        team_obs[0] = team.total_team_smile / self.config.MAX_TEAM_STAT_VALUE
+        team_obs[1] = team.total_team_pure / self.config.MAX_TEAM_STAT_VALUE
+        team_obs[2] = team.total_team_cool / self.config.MAX_TEAM_STAT_VALUE
+
+        # Next 9 features: SIS slot usage per team slot
+        for i, slot in enumerate(team.slots):
+            if slot.card_sis_capacity > 0:
+                sis_usage_ratio = slot.total_sis_slots_used / slot.card_sis_capacity
+            else:
+                sis_usage_ratio = 0.0
+            team_obs[3 + i] = sis_usage_ratio
+
+        return team_obs
+
     def _serialize_guest(self, guest: GuestData) -> np.ndarray:
         """
         Converts a GuestData object into a normalized, flat numpy array.
@@ -612,17 +631,15 @@ class ObservationManager:
         try:
             features = []
             c = self.config
-            ls_attr_map = c.LEADER_ATTRIBUTE_MAP
+            ls_attr_map = c.ATTRIBUTE_MAP
 
             # --- Leader Skill Features ---
-            features.extend(self._one_hot(guest.leader_attribute, ls_attr_map, "None"))
+            features.extend(self._one_hot(guest.leader_attribute, ls_attr_map))
             features.extend(
-                self._one_hot(guest.leader_secondary_attribute, ls_attr_map, "None")
+                self._one_hot(guest.leader_secondary_attribute, ls_attr_map)
             )
             features.append((guest.leader_value or 0.0) / c.MAX_LS_VALUE)
-            features.extend(
-                self._one_hot(guest.leader_extra_attribute, ls_attr_map, "None")
-            )
+            features.extend(self._one_hot(guest.leader_extra_attribute, ls_attr_map))
 
             if guest.leader_extra_target is not None:
                 extra_target_vector = c.ls_extra_target_map.get(
@@ -668,27 +685,6 @@ class ObservationManager:
         index = c.character_map.get(card.character, c.character_other_index)
         one_hot[index] = 1.0
         return one_hot
-
-    def _serialize_team(self, team: Optional[Team]) -> np.ndarray:
-        """Converts the Team object into a normalized, flat numpy array."""
-        team_obs = np.zeros(self.team_feature_size, dtype=np.float32)
-        if not team:
-            return team_obs
-
-        # First 3 features: Total team stats
-        team_obs[0] = team.total_team_smile / self.config.MAX_TEAM_STAT_VALUE
-        team_obs[1] = team.total_team_pure / self.config.MAX_TEAM_STAT_VALUE
-        team_obs[2] = team.total_team_cool / self.config.MAX_TEAM_STAT_VALUE
-
-        # Next 9 features: SIS slot usage per team slot
-        for i, slot in enumerate(team.slots):
-            if slot.card_sis_capacity > 0:
-                sis_usage_ratio = slot.total_sis_slots_used / slot.card_sis_capacity
-            else:
-                sis_usage_ratio = 0.0
-            team_obs[3 + i] = sis_usage_ratio
-
-        return team_obs
 
     @staticmethod
     def _pad_and_normalize(

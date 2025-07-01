@@ -67,7 +67,6 @@ class EnvConfig:
 
     RARITY_MAP = {"N": 0, "R": 1, "SR": 2, "SSR": 3, "UR": 4}
     ATTRIBUTE_MAP = {"Smile": 0, "Pure": 1, "Cool": 2}
-    LEADER_ATTRIBUTE_MAP = {"Smile": 0, "Pure": 1, "Cool": 2, "None": 3}
 
     SIS_EFFECT_MAP = {
         "all percent boost": 0,
@@ -235,13 +234,11 @@ class EnvConfig:
         vector_size = num_characters + num_attributes
         multi_hot_map: Dict[str, npt.NDArray[np.float32]] = {}
 
-        # Handle attribute restrictions first ('Smile', 'Pure', 'Cool')
         for attribute_name, attribute_index in attribute_map.items():
             vector = np.zeros(vector_size, dtype=np.float32)
             vector[num_characters + attribute_index] = 1.0
             multi_hot_map[attribute_name] = vector
 
-        # Handle character/group restrictions from the map data
         for group_name, character_list in map_data.items():
             if group_name == "All":
                 continue
