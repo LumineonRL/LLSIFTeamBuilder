@@ -97,37 +97,6 @@ class ObservationManager:
                     shape=(self.config.MAX_CARDS_IN_DECK, self.card_feature_size),
                     dtype=np.float32,
                 ),
-                "team": spaces.Dict(
-                    {
-                        "cards": spaces.Box(
-                            low=0.0,
-                            high=1.0,
-                            shape=(Team.NUM_SLOTS, self.card_feature_size),
-                            dtype=np.float32,
-                        ),
-                        "accessories": spaces.Box(
-                            low=0.0,
-                            high=1.0,
-                            shape=(Team.NUM_SLOTS, self.accessory_feature_size),
-                            dtype=np.float32,
-                        ),
-                        "sis": spaces.Box(
-                            low=0.0,
-                            high=1.0,
-                            shape=(
-                                Team.NUM_SLOTS * self.config.MAX_EQUIPPABLE_SIS,
-                                self.sis_feature_size,
-                            ),
-                            dtype=np.float32,
-                        ),
-                        "guest": spaces.Box(
-                            low=0.0,
-                            high=1.0,
-                            shape=(1, self.guest_feature_size),
-                            dtype=np.float32,
-                        ),
-                    }
-                ),
                 "accessories": spaces.Box(
                     low=0.0,
                     high=1.0,
@@ -152,6 +121,33 @@ class ObservationManager:
                     shape=(self.config.MAX_GUESTS, self.guest_feature_size),
                     dtype=np.float32,
                 ),
+                "team_cards": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(Team.NUM_SLOTS, self.card_feature_size),
+                    dtype=np.float32,
+                ),
+                "team_accessories": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(Team.NUM_SLOTS, self.accessory_feature_size),
+                    dtype=np.float32,
+                ),
+                "team_sis": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(
+                        Team.NUM_SLOTS * self.config.MAX_EQUIPPABLE_SIS,
+                        self.sis_feature_size,
+                    ),
+                    dtype=np.float32,
+                ),
+                "team_guest": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(1, self.guest_feature_size),
+                    dtype=np.float32,
+                ),
                 "song": spaces.Box(
                     low=0.0,
                     high=1.0,
@@ -168,18 +164,8 @@ class ObservationManager:
         Constructs the current observation from the environment state.
 
         Returns:
-            A dictionary containing the serialized state:
-                - 'deck': Serialized deck information as a numpy array.
-                - 'team': Serialized team information as a dictionary of numpy arrays.
-                - 'accessories': Serialized accessory info as a numpy array.
-                - 'sis': Serialized SIS info as a numpy array.
-                - 'guest': Serialized guest info as a numpy array.
-                - 'song': Serialized song info as a numpy array.
-                - 'build_phase': The current build phase index (0-4).
-                - 'current_slot': The current team slot index being filled.
-
-        Raises:
-            ValueError: If the deck contains invalid data or fails serialization.
+            A dictionary containing the serialized state matching the
+            flattened observation space.
         """
         # Deck observation
         deck_obs = np.zeros(
@@ -195,8 +181,8 @@ class ObservationManager:
                 break
             deck_obs[i] = self._serialize_card(entry.card)
 
-         # Team observation
-        team_obs = self._serialize_team(self.env.state.team)
+        # Team observation
+        team_obs_dict = self._serialize_team(self.env.state.team)
 
         # Accessory observation
         accessories_obs = np.zeros(
@@ -249,19 +235,21 @@ class ObservationManager:
         # Song observation
         song_obs = self._serialize_song(self.env.song)
 
-
         return {
             "deck": deck_obs,
-            "team": team_obs,
             "accessories": accessories_obs,
             "sis": sis_obs,
             "guest": guest_obs,
+            "team_cards": team_obs_dict["cards"],
+            "team_accessories": team_obs_dict["accessories"],
+            "team_sis": team_obs_dict["sis"],
+            "team_guest": team_obs_dict["guest"],
             "song": song_obs,
             "build_phase": int(self.env.state.build_phase),
             "current_slot": self.env.state.current_slot_idx,
         }
 
-     # --- Agent Rendering ---
+    # --- Agent Rendering ---
 
     def _get_unassigned_deck_ids(self) -> List[int]:
         """Helper to get a sorted list of deck IDs not assigned to the team."""
@@ -503,7 +491,7 @@ class ObservationManager:
             return np.array(features, dtype=np.float32)
         except (AttributeError, KeyError, TypeError) as e:
             raise ValueError(f"Failed to serialize card_id={card.card_id}: {e}") from e
-        
+
     def _serialize_accessory(self, accessory: Accessory) -> np.ndarray:
         """
         Converts an Accessory object into a normalized, flat numpy array.
