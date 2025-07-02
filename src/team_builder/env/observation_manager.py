@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, Callable, Se
 import numpy as np
 from gymnasium import spaces
 
-from src.simulator import Accessory, Card, Team, SIS, GuestData
+from src.simulator import Accessory, Card, Team, SIS, GuestData, Song, Note
 from src.team_builder.env.build_phase import BuildPhase
 
 
@@ -36,6 +36,8 @@ class ObservationManager:
         self.accessory_feature_size = self._calculate_accessory_feature_size()
         self.sis_feature_size = self._calculate_sis_feature_size()
         self.guest_feature_size = self._calculate_guest_feature_size()
+        self.note_feature_size = self._calculate_note_feature_size()
+        self.song_feature_size = self._calculate_song_feature_size()
 
     # --- Action Space Definition ---
 
@@ -150,7 +152,12 @@ class ObservationManager:
                     shape=(self.config.MAX_GUESTS, self.guest_feature_size),
                     dtype=np.float32,
                 ),
-                # TODO: Add Song
+                "song": spaces.Box(
+                    low=0.0,
+                    high=1.0,
+                    shape=(self.song_feature_size,),
+                    dtype=np.float32,
+                ),
                 "build_phase": spaces.Discrete(len(BuildPhase)),
                 "current_slot": spaces.Discrete(Team.NUM_SLOTS),
             }
@@ -167,6 +174,7 @@ class ObservationManager:
                 - 'accessories': Serialized accessory info as a numpy array.
                 - 'sis': Serialized SIS info as a numpy array.
                 - 'guest': Serialized guest info as a numpy array.
+                - 'song': Serialized song info as a numpy array.
                 - 'build_phase': The current build phase index (0-4).
                 - 'current_slot': The current team slot index being filled.
 
@@ -187,7 +195,7 @@ class ObservationManager:
                 break
             deck_obs[i] = self._serialize_card(entry.card)
 
-        # Team observation
+         # Team observation
         team_obs = self._serialize_team(self.env.state.team)
 
         # Accessory observation
@@ -238,17 +246,22 @@ class ObservationManager:
                     break
                 guest_obs[i] = self._serialize_guest(guest)
 
+        # Song observation
+        song_obs = self._serialize_song(self.env.song)
+
+
         return {
             "deck": deck_obs,
             "team": team_obs,
             "accessories": accessories_obs,
             "sis": sis_obs,
             "guest": guest_obs,
+            "song": song_obs,
             "build_phase": int(self.env.state.build_phase),
             "current_slot": self.env.state.current_slot_idx,
         }
 
-    # --- Agent Rendering ---
+     # --- Agent Rendering ---
 
     def _get_unassigned_deck_ids(self) -> List[int]:
         """Helper to get a sorted list of deck IDs not assigned to the team."""
@@ -304,7 +317,7 @@ class ObservationManager:
         """Provides rendering data for the approach rate selection phase."""
         return list(range(1, self.APPROACH_RATE_CHOICES + 1))
 
-        # --- Serialization and Helper Methods ---
+    # --- Serialization and Helper Methods ---
 
     def _calculate_card_feature_size(self) -> int:
         """Calculates the size of the feature vector for a single card."""
@@ -377,6 +390,24 @@ class ObservationManager:
             1,  # LS Extra Value
         ]
         return sum(parts)
+
+    def _calculate_note_feature_size(self) -> int:
+        """Calculates the size of the feature vector for a single note."""
+        # start_time, end_time, position (one-hot 9), is_star, is_swing
+        return 1 + 1 + 9 + 1 + 1
+
+    def _calculate_song_feature_size(self) -> int:
+        """Calculates the size of the feature vector for a song."""
+        c = self.config
+        parts = [
+            1,  # Length
+            len(c.SIS_GROUP_MAP),  # Group
+            len(c.ATTRIBUTE_MAP),  # Attribute
+            c.MAX_NOTE_COUNT * self.note_feature_size,  # Notes
+        ]
+        return sum(parts)
+
+    # some functions omited for brevity
 
     def _serialize_card(self, card: Card) -> np.ndarray:
         """
@@ -472,7 +503,7 @@ class ObservationManager:
             return np.array(features, dtype=np.float32)
         except (AttributeError, KeyError, TypeError) as e:
             raise ValueError(f"Failed to serialize card_id={card.card_id}: {e}") from e
-
+        
     def _serialize_accessory(self, accessory: Accessory) -> np.ndarray:
         """
         Converts an Accessory object into a normalized, flat numpy array.
@@ -707,6 +738,63 @@ class ObservationManager:
             raise ValueError(
                 f"Failed to serialize guest_id={guest.leader_skill_id}: {e}"
             ) from e
+
+    def _serialize_note(self, note: "Note") -> np.ndarray:
+        """Converts a Note object into a normalized, flat numpy array."""
+        c = self.config
+        features = []
+
+        # Time is normalized by max song length
+        features.append(note.start_time / c.MAX_SONG_LENGTH)
+        features.append(note.end_time / c.MAX_SONG_LENGTH)
+
+        # Position is a one-hot vector of size 9 (for positions 1-9)
+        position_one_hot = np.zeros(9, dtype=np.float32)
+        if 1 <= note.position <= 9:
+            position_one_hot[note.position - 1] = 1.0
+        features.extend(position_one_hot)
+
+        # Boolean flags are converted to floats
+        features.append(float(note.is_star))
+        features.append(float(note.is_swing))
+
+        return np.array(features, dtype=np.float32)
+
+    def _serialize_song(self, song: Optional["Song"]) -> np.ndarray:
+        """
+        Converts a Song object into a normalized, flat numpy array.
+
+        Returns a zero vector of the correct size if the song is None.
+
+        Raises:
+            ValueError: If an error occurs during serialization of a valid song.
+        """
+        if song is None:
+            return np.zeros(self.song_feature_size, dtype=np.float32)
+
+        try:
+            features = []
+            c = self.config
+
+            # --- Basic Song Info ---
+            features.append(song.length / c.MAX_SONG_LENGTH)
+            features.extend(self._one_hot(song.group, c.SIS_GROUP_MAP))
+            features.extend(self._one_hot(song.attribute, c.ATTRIBUTE_MAP))
+
+            # --- Notes ---
+            notes_features = np.zeros(
+                (c.MAX_NOTE_COUNT, self.note_feature_size), dtype=np.float32
+            )
+            # Truncate if there are more notes than MAX_NOTE_COUNT
+            for i, note in enumerate(song.notes[: c.MAX_NOTE_COUNT]):
+                notes_features[i] = self._serialize_note(note)
+
+            features.extend(notes_features.flatten())
+
+            return np.array(features, dtype=np.float32)
+
+        except (AttributeError, KeyError, TypeError) as e:
+            raise ValueError(f"Failed to serialize song_id={song.song_id}: {e}") from e
 
     def _one_hot(
         self,
