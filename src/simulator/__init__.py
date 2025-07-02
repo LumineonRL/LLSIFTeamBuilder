@@ -10,6 +10,7 @@ from .sis.sis_manager import SISManager
 from .team.guest import Guest, GuestData
 from .team.team import Team
 from .song.song import Song
+from .song.note import Note
 from .song.song_factory import SongFactory
 from .simulation.play_config import PlayConfig
 from .simulation.game_data import GameData
@@ -29,6 +30,7 @@ __all__ = [
     "GuestData",
     "Team",
     "Song",
+    "Note",
     "SongFactory",
     "PlayConfig",
     "GameData",

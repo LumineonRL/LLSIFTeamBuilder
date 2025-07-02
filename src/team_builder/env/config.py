@@ -66,6 +66,9 @@ class EnvConfig:
     MAX_SIS_VALUE_SELF_PERCENT = 0.53
     MAX_SIS_VALUE_TRICK = 0.33
 
+    MAX_SONG_LENGTH = 175.0
+    MAX_NOTE_COUNT = 1061
+
     RARITY_MAP = {"N": 0, "R": 1, "SR": 2, "SSR": 3, "UR": 4}
     ATTRIBUTE_MAP = {"Smile": 0, "Pure": 1, "Cool": 2}
 
