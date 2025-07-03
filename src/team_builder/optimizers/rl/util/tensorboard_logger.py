@@ -7,9 +7,8 @@ from stable_baselines3.common.logger import TensorBoardOutputFormat
 
 class TeamLogCallback(BaseCallback):
     """
-    Callback that properly tracks the best reward, retrieves detailed team data
-    from the info dict, and logs it to the console and as formatted Markdown
-    text to TensorBoard.
+    Callback that tracks the best reward, logs detailed team data,
+    and all other standard Stable Baselines3 metrics.
     """
 
     def __init__(self, verbose: int = 0):
@@ -21,6 +20,19 @@ class TeamLogCallback(BaseCallback):
         super().__init__(verbose)
         self.best_reward = -np.inf
         self.best_team_data: Optional[Dict[str, Any]] = None
+        self.tb_writer = None
+
+    def _on_training_start(self) -> None:
+        """
+        This method is called before the first rollout starts.
+        It's a good place to get the TensorBoard writer instance.
+        """
+        for output_format in self.logger.output_formats:
+            if isinstance(output_format, TensorBoardOutputFormat):
+                self.tb_writer = output_format.writer
+                break
+        if not self.tb_writer and self.verbose > 1:
+            print("TensorBoard writer not found. Skipping text log.")
 
     def _on_step(self) -> bool:
         """
@@ -28,9 +40,8 @@ class TeamLogCallback(BaseCallback):
         It checks for completed episodes and logs team data if a new best
         reward is found.
         """
-        dones = self.locals.get("dones", [])
-        if np.any(dones):
-            for i, done in enumerate(dones):
+        if "dones" in self.locals and np.any(self.locals["dones"]):
+            for i, done in enumerate(self.locals["dones"]):
                 if not done:
                     continue
 
@@ -41,21 +52,20 @@ class TeamLogCallback(BaseCallback):
                     if episode_reward > self.best_reward:
                         self.best_reward = episode_reward
 
+                        self.logger.record("custom/best_reward", self.best_reward)
+
                         if "final_team_data" in info:
                             self.best_team_data = info["final_team_data"]
-
                             if self.verbose > 0:
                                 print(
                                     f"\n>>> Step {self.num_timesteps}: New Best Score Found: {self.best_reward:,.2f} <<<"
                                 )
-
                             self._log_best_team_composition()
                         elif self.verbose > 0:
                             print(
                                 f"Warning: New best score {self.best_reward} found at step {self.num_timesteps}, "
                                 "but 'final_team_data' was not in the info dict."
                             )
-
         self.logger.record("custom/best_reward", self.best_reward)
         return True
 
@@ -73,20 +83,11 @@ class TeamLogCallback(BaseCallback):
             console_text = self._format_for_console(self.best_team_data)
             print(console_text)
 
-        writer = None
-        for output_format in self.logger.output_formats:
-            if isinstance(output_format, TensorBoardOutputFormat):
-                writer = output_format.writer
-                break
-
-        if writer:
+        if self.tb_writer:
             markdown_text = self._format_for_tensorboard(self.best_team_data)
-            writer.add_text(
+            self.tb_writer.add_text(
                 "Best Team Composition", markdown_text, global_step=self.num_timesteps
             )
-            writer.flush()
-        elif self.verbose > 1:
-            print("TensorBoard writer not found. Skipping text log.")
 
     def _format_for_tensorboard(self, team_data: Dict[str, Any]) -> str:
         """
@@ -116,7 +117,6 @@ class TeamLogCallback(BaseCallback):
                     f"- **Stats (S/P/C):** {slot_stats.get('smile', 0)}/{slot_stats.get('pure', 0)}/{slot_stats.get('cool', 0)}",
                 ]
             )
-
             acc_name = slot.get("accessory", "None")
             acc_id = slot.get("accessory_id")
             if acc_id is not None:
@@ -150,7 +150,6 @@ class TeamLogCallback(BaseCallback):
         lines.append(
             f"Total Stats: S/P/C {stats.get('smile', 0)}/{stats.get('pure', 0)}/{stats.get('cool', 0)}"
         )
-
         for slot in team_data.get("slots", []):
             lines.append(f"\n[ Slot {slot.get('slot_number', 'N/A')} ]")
             lines.append(
@@ -160,14 +159,12 @@ class TeamLogCallback(BaseCallback):
             lines.append(
                 f"  Stats: S/P/C {slot_stats.get('smile', 0)}/{slot_stats.get('pure', 0)}/{slot_stats.get('cool', 0)}"
             )
-
             acc_name = slot.get("accessory", "None")
             acc_id = slot.get("accessory_id")
             accessory_str = f"  Accessory: {acc_name}"
             if acc_id is not None:
                 accessory_str += f" (Manager ID: {acc_id})"
             lines.append(accessory_str)
-
             sis_used = slot.get("sis_slots_used", 0)
             sis_max = slot.get("sis_slots_max", 0)
             lines.append(f"  SIS ({sis_used}/{sis_max} slots used):")
@@ -175,12 +172,10 @@ class TeamLogCallback(BaseCallback):
             if sis_list:
                 for sis_name in sis_list:
                     lines.append(f"    - {sis_name}")
-
         lines.append("--------------------------")
         final_rate = team_data.get("final_approach_rate")
         if final_rate is not None:
             lines.append(f"Final Approach Rate: {final_rate}")
-
         return "\n".join(lines)
 
     def on_training_end(self) -> None:
