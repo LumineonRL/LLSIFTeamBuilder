@@ -121,12 +121,13 @@ class LLSIFTeamBuildingEnv(gym.Env):
             return 0.0
 
         play_config = PlayConfig(
-            accuracy=self.accuracy, approach_rate=approach_rate, seed=self.seed
+            accuracy=self.accuracy,
+            approach_rate=approach_rate,
+            seed=self.seed,
+            enable_logging=False,
         )
         simulation = Play(self.state.team, self.song, play_config, self.game_data)
-        scores = simulation.simulate(
-            n_trials=self.SINGLE_TRIAL, log_level=self.DEFAULT_LOG_LEVEL
-        )
+        scores = simulation.simulate(n_trials=self.SINGLE_TRIAL)
         return float(scores[0]) if scores else 0.0
 
     def _get_final_team_data(self) -> Dict[str, Any]:

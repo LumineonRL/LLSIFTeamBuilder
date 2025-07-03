@@ -147,7 +147,7 @@ class AgentTrainer:
                 eval_env,
                 best_model_save_path=str(self.model_dir),
                 log_path=str(self.log_dir),
-                eval_freq=max(10_000 // self.n_envs, 1),
+                eval_freq=max(10000 // self.n_envs, 1),
                 n_eval_episodes=20,
                 deterministic=True,
             )
@@ -156,7 +156,7 @@ class AgentTrainer:
                 eval_env,
                 best_model_save_path=str(self.model_dir),
                 log_path=str(self.log_dir),
-                eval_freq=max(10_000 // self.n_envs, 1),
+                eval_freq=max(10000 // self.n_envs, 1),
                 n_eval_episodes=20,
                 deterministic=True,
             )

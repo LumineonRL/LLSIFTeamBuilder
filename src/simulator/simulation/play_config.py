@@ -22,11 +22,17 @@ class PlayConfig:
         seed (Optional[int]): An optional seed for the random number
                               generator to ensure reproducibility.
                               Defaults to None.
+        enable_logging (bool): Whether to write detailed simulation logs to file.
+                               Defaults to False.
+        log_level (int): The logging level to use when logging is enabled.
+                         Defaults to logging.INFO.
     """
 
     accuracy: float = 0.9
     approach_rate: int = 9
     seed: Optional[int] = None
+    enable_logging: bool = False
+    log_level: int = 20
 
     def __post_init__(self):
         """Validate parameters after initialization."""

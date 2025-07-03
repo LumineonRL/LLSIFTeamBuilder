@@ -10,7 +10,7 @@ import math
 import time
 import warnings
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -74,24 +74,30 @@ class Play:
             team_total_stat
         )
 
-    def simulate(self, n_trials: int = 1, log_level: int = logging.INFO) -> List[int]:
+    def simulate(self, n_trials: int = 1, log_level: Optional[int] = None) -> List[int]:
         """
         Runs the simulation for a specified number of trials.
 
         Args:
             n_trials: The number of trials to run.
             log_level: The logging level to use (e.g., logging.INFO).
+                    If None, uses the level from PlayConfig.
 
         Returns:
             A list of the final integer scores for each trial.
         """
-        self.logger = self._setup_logger(log_level)
+        effective_log_level = (
+            log_level if log_level is not None else self.config.log_level
+        )
+        self.logger = self._setup_logger(effective_log_level)
         trial_scores: List[int] = []
         trial_uptimes: List[float] = []
 
-        self.logger.info("--- Starting Simulation for %s ---", self)
+        self.logger.debug("--- Starting Simulation for %s ---", self)
         for i in range(n_trials):
-            self.logger.info("--- Starting Simulation Trial %d/%d ---", i + 1, n_trials)
+            self.logger.debug(
+                "--- Starting Simulation Trial %d/%d ---", i + 1, n_trials
+            )
 
             trial = Trial(self, self.random_state)
             trial.run()
@@ -101,7 +107,7 @@ class Play:
             trial_uptimes.append(total_uptime)
             self._log_trial_summary(trial, total_uptime)
 
-            self.logger.info(
+            self.logger.debug(
                 "--- Trial %d Finished. Final Score: %s ---",
                 i + 1,
                 f"{trial.total_score:,}",
@@ -168,6 +174,15 @@ class Play:
 
     def _setup_logger(self, log_level: int) -> logging.Logger:
         """Configures a logger to write simulation results to a file."""
+        logger = logging.getLogger("simulation_logger")
+
+        if not self.config.enable_logging:
+            if logger.hasHandlers():
+                logger.handlers.clear()
+            logger.addHandler(logging.NullHandler())
+            logger.setLevel(logging.CRITICAL + 1)
+            return logger
+
         log_dir = Path("./logs")
         log_dir.mkdir(exist_ok=True)
 
@@ -181,7 +196,6 @@ class Play:
         )
         log_filepath = log_dir / log_filename
 
-        logger = logging.getLogger("simulation_logger")
         logger.setLevel(log_level)
         logger.propagate = False
 
@@ -199,8 +213,8 @@ class Play:
         if not self.logger:
             return
 
-        self.logger.info("--- Trial Summary ---")
-        self.logger.info("Final Score: %s", f"{trial.total_score:,}")
+        self.logger.debug("--- Trial Summary ---")
+        self.logger.debug("Final Score: %s", f"{trial.total_score:,}")
 
         hold_starts = len(trial.hold_note_start_results)
         total_judgements = trial.notes_hit + hold_starts
@@ -212,13 +226,13 @@ class Play:
             (total_uptime / self.song.length * 100) if self.song.length > 0 else 0
         )
 
-        self.logger.info(
+        self.logger.debug(
             "Perfect Ratio: %d / %d (%.2f%%)",
             trial.perfect_hits,
             total_judgements,
             ratio_percent,
         )
-        self.logger.info(
+        self.logger.debug(
             "Perfect Lock Uptime: %.2fs (%.2f%%)", total_uptime, uptime_percent
         )
 
@@ -227,19 +241,19 @@ class Play:
         if not self.logger:
             return
 
-        self.logger.info("\n--- Overall Simulation Summary ---")
-        self.logger.info("Trials Run: %d", len(scores))
-        self.logger.info("Average Score: %s", f"{np.mean(scores):,.0f}")
-        self.logger.info("Max Score: %s", f"{np.max(scores):,}")
-        self.logger.info("Min Score: %s", f"{np.min(scores):,}")
-        self.logger.info("Standard Deviation: %.2f", np.std(scores))
+        self.logger.debug("\n--- Overall Simulation Summary ---")
+        self.logger.debug("Trials Run: %d", len(scores))
+        self.logger.debug("Average Score: %s", f"{np.mean(scores):,.0f}")
+        self.logger.debug("Max Score: %s", f"{np.max(scores):,}")
+        self.logger.debug("Min Score: %s", f"{np.min(scores):,}")
+        self.logger.debug("Standard Deviation: %.2f", np.std(scores))
 
         avg_uptime = np.mean(uptimes)
         avg_uptime_percent = (
             (avg_uptime / self.song.length * 100) if self.song.length > 0 else 0
         )
 
-        self.logger.info(
+        self.logger.debug(
             "Average Perfect Lock Uptime: %.2fs (%.2f%%)",
             avg_uptime,
             avg_uptime_percent,
