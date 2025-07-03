@@ -87,6 +87,9 @@ class LLSIFTeamBuildingEnv(gym.Env):
         self.seed = seed
         self.reward_mode = reward_mode
 
+        self._consecutive_invalid_actions = 0
+        self._max_consecutive_invalid_actions = 2
+
         data_dir = Path(data_path)
         self.guest_manager = (
             Guest(str(data_dir / "unique_leader_skills.json"))
@@ -126,28 +129,6 @@ class LLSIFTeamBuildingEnv(gym.Env):
         )
         return float(scores[0]) if scores else 0.0
 
-    def _is_terminated(self) -> bool:
-        """Determines if the episode has reached its terminal state."""
-        return self.state.build_phase == BuildPhase.SCORE_SIMULATION
-
-    def _compute_reward(self, terminated: bool, action: int) -> float:
-        """
-        Calculates the reward for the current step based on the reward mode.
-        """
-        approach_rate = action + 1 if terminated else self.DEFAULT_APPROACH_RATE
-        if terminated:
-            self.state.final_approach_rate = approach_rate
-
-        reward = 0.0
-        if self.reward_mode == "dense":
-            current_score = self._run_simulation(approach_rate)
-            reward = current_score - self.state.last_score
-            self.state.last_score = current_score
-        elif self.reward_mode == "sparse" and terminated:
-            reward = self._run_simulation(approach_rate)
-
-        return reward
-
     def _get_info(self, terminated: bool, raw_action: int) -> Dict[str, Any]:
         """Packages supplementary information for the current step."""
         info = {}
@@ -156,22 +137,25 @@ class LLSIFTeamBuildingEnv(gym.Env):
             info["raw_final_action"] = raw_action
         return info
 
+    def _validate_action(self, action: int) -> bool:
+        """
+        Validates if an action is currently valid.
+        Returns True if valid, False otherwise.
+        """
+        action_mask = self.action_masks()
+        return 0 <= action < len(action_mask) and action_mask[action]
+
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
     ) -> tuple[dict[str, Any], dict[str, Any]]:
         """
         Resets the environment to its initial state.
-
-        Args:
-            seed: An optional seed to reset the environment's random generator.
-            options: Optional dictionary to configure the reset.
-
-        Returns:
-            A tuple containing the initial observation and an empty info dictionary.
         """
         super().reset(seed=seed)
         if seed is not None:
             self.seed = seed
+
+        self._consecutive_invalid_actions = 0
 
         team = Team(
             self.deck, self.accessory_manager, self.sis_manager, self.guest_manager
@@ -185,25 +169,61 @@ class LLSIFTeamBuildingEnv(gym.Env):
     ) -> Tuple[Dict[str, Any], float, bool, bool, Dict[str, Any]]:
         """
         Executes one time step within the environment.
-
-        Args:
-            action: An integer representing the action taken by the agent.
-
-        Returns:
-            A tuple containing the observation, reward, terminated flag,
-            truncated flag (always False), and an info dictionary.
         """
-        terminated = self._is_terminated()
+        if not self._validate_action(action):
+            self._consecutive_invalid_actions += 1
+            print(
+                f"Invalid action {action} (consecutive: {self._consecutive_invalid_actions})"
+            )
 
-        if not terminated:
-            self.action_handler.handle_action(action)
+            if (
+                self._consecutive_invalid_actions
+                >= self._max_consecutive_invalid_actions
+            ):
+                raise RuntimeError(
+                    f"Too many consecutive invalid actions ({self._consecutive_invalid_actions}). "
+                    f"Last invalid action: {action}. "
+                    f"Current phase: {self.state.build_phase.name}. "
+                    f"This suggests a problem with action masking implementation."
+                )
 
-        reward = self._compute_reward(terminated, action)
+            obs = self.obs_manager.get_obs()
+            info = self._get_info(False, action)
+            return obs, 0.0, False, False, info
+        else:
+            self._consecutive_invalid_actions = 0
 
+        truncated = False
+
+        if self.state.build_phase == BuildPhase.SCORE_SIMULATION:
+            final_approach_rate = action + 1
+            self.state.final_approach_rate = final_approach_rate
+
+            final_score = self._run_simulation(final_approach_rate)
+            if self.reward_mode == "dense":
+                reward = final_score - self.state.last_score
+            else:  # sparse
+                reward = final_score
+
+            terminated = True
+            obs = self.obs_manager.get_obs()
+            info = self._get_info(terminated, action)
+
+            return obs, reward, terminated, truncated, info
+
+        self.action_handler.handle_action(action)
+
+        reward = 0.0
+        if self.reward_mode == "dense":
+            current_score = self._run_simulation(self.DEFAULT_APPROACH_RATE)
+            reward = current_score - self.state.last_score
+            self.state.last_score = current_score
+
+        terminated = False
         obs = self.obs_manager.get_obs()
         info = self._get_info(terminated, action)
 
-        return obs, reward, terminated, False, info
+        return obs, reward, terminated, truncated, info
 
     def render(self, mode: str = "human") -> Optional[Union[List[Any], Dict[str, Any]]]:
         """

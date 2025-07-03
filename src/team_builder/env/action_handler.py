@@ -106,7 +106,7 @@ class ActionHandler:
             action = acc_entry.manager_internal_id
             if action < self.pass_action:
                 with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", UserWarning)
+                    # warnings.simplefilter("ignore", UserWarning)
                     is_valid = self.env.state.team.check_accessory_id_restriction(
                         current_slot.card, acc_entry.accessory
                     )
@@ -155,6 +155,23 @@ class ActionHandler:
 
     def handle_action(self, action: int) -> None:
         """Applies the given action to modify the environment's state."""
+        # FIXED: Add explicit action validation
+        action_mask = self.get_action_mask()
+        if action >= len(action_mask) or not action_mask[action]:
+            valid_actions = np.where(action_mask)[0]
+            if len(valid_actions) > 20:  # Truncate for readability
+                valid_str = (
+                    f"{valid_actions[:10].tolist()}...{valid_actions[-10:].tolist()}"
+                )
+            else:
+                valid_str = str(valid_actions.tolist())
+            raise ValueError(
+                f"Action {action} is not valid. Valid actions: {valid_str}. "
+                f"Current phase: {self.env.state.build_phase.name}, "
+                f"Current slot: {self.env.state.current_slot_idx + 1}, "
+                f"Action space size: {self._action_space_size}"
+            )
+
         try:
             phase = self.env.state.build_phase
             handler = self._action_handlers[phase]
