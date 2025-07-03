@@ -1,127 +1,195 @@
-import json
-from typing import Dict, Any
-
+from typing import Dict, Any, Optional
 
 import numpy as np
 from stable_baselines3.common.callbacks import BaseCallback
-from stable_baselines3.common.vec_env import VecEnv
+from stable_baselines3.common.logger import TensorBoardOutputFormat
 
 
 class TeamLogCallback(BaseCallback):
     """
-    Logs the best team composition to TensorBoard's text section when a new
-    best reward is found during training.
+    Callback that properly tracks the best reward, retrieves detailed team data
+    from the info dict, and logs it to the console and as formatted Markdown
+    text to TensorBoard.
     """
 
     def __init__(self, verbose: int = 0):
+        """
+        Initializes the callback.
+        Args:
+            verbose: The verbosity level: 0 for no output, 1 for info messages, 2 for debug messages.
+        """
         super().__init__(verbose)
         self.best_reward = -np.inf
-        self.training_env: VecEnv
-        self.num_calls: int = 0
+        self.best_team_data: Optional[Dict[str, Any]] = None
 
     def _on_step(self) -> bool:
-        """Checks for finished episodes and logs info if a new best reward is found."""
+        """
+        This method is called after each step in the environment.
+        It checks for completed episodes and logs team data if a new best
+        reward is found.
+        """
         dones = self.locals.get("dones", [])
-        if not np.any(dones):
-            return True
+        if np.any(dones):
+            for i, done in enumerate(dones):
+                if not done:
+                    continue
 
-        for idx, done in enumerate(dones):
-            if done:
-                info = self.locals["infos"][idx]
+                info = self.locals["infos"][i]
                 if "episode" in info:
                     episode_reward = info["episode"]["r"]
+
                     if episode_reward > self.best_reward:
                         self.best_reward = episode_reward
-                        if self.verbose > 0:
-                            print(
-                                f"\nNew best reward found: {self.best_reward:.2f} at step {self.num_calls}"
-                            )
-                        env = self.training_env.get_attr("unwrapped", indices=[idx])[0]
-                        render_data = env.render(mode="agent")
 
-                        if render_data:
-                            log_text = self._format_render_data(
-                                render_data, episode_reward
-                            )
+                        if "final_team_data" in info:
+                            self.best_team_data = info["final_team_data"]
 
                             if self.verbose > 0:
-                                self._print_team_summary(render_data)
-
-                            writer = getattr(self.logger, "writer", None)
-
-                            if writer is not None:
-                                writer.add_text(
-                                    "best_team_composition",
-                                    log_text,
-                                    global_step=self.num_calls,
+                                print(
+                                    f"\n>>> Step {self.num_timesteps}: New Best Score Found: {self.best_reward:,.2f} <<<"
                                 )
 
-                            self.logger.record("custom/best_reward", self.best_reward)
-                            self.logger.dump(step=self.num_calls)
+                            self._log_best_team_composition()
+                        elif self.verbose > 0:
+                            print(
+                                f"Warning: New best score {self.best_reward} found at step {self.num_timesteps}, "
+                                "but 'final_team_data' was not in the info dict."
+                            )
 
+        self.logger.record("custom/best_reward", self.best_reward)
         return True
 
-    def _format_render_data(self, data: Dict[str, Any], score: float) -> str:
-        """Formats the agent render data into a readable Markdown string."""
-        try:
-            team_details = data.get("team", {})
-            guest = data.get("guest", "None")
-            approach_rate = data.get("final_approach_rate", "N/A")
-            team_str = json.dumps(team_details, indent=2)
+    def _log_best_team_composition(self):
+        """
+        Logs the best team composition found so far to the console and
+        to TensorBoard as richly formatted Markdown text.
+        """
+        if not self.best_team_data:
+            if self.verbose > 0:
+                print("No best team data available to log.")
+            return
 
-            return (
-                f"### New Best Score: {score:.2f}\n\n"
-                f"**Global Step:** `{self.num_calls}`\n\n"
-                f"**Approach Rate:** `{approach_rate}`\n\n"
-                f"**Guest:** `{guest}`\n\n"
-                f"**Team Details:**\n\n"
-                f"```json\n{team_str}\n```"
+        if self.verbose > 0:
+            console_text = self._format_for_console(self.best_team_data)
+            print(console_text)
+
+        writer = None
+        for output_format in self.logger.output_formats:
+            if isinstance(output_format, TensorBoardOutputFormat):
+                writer = output_format.writer
+                break
+
+        if writer:
+            markdown_text = self._format_for_tensorboard(self.best_team_data)
+            writer.add_text(
+                "Best Team Composition", markdown_text, global_step=self.num_timesteps
+            )
+            writer.flush()
+        elif self.verbose > 1:
+            print("TensorBoard writer not found. Skipping text log.")
+
+    def _format_for_tensorboard(self, team_data: Dict[str, Any]) -> str:
+        """
+        Formats team details as rich Markdown for an excellent display
+        in TensorBoard's text panel.
+        """
+        stats = team_data.get("team_stats", {})
+        guest = team_data.get("guest", "None")
+        final_rate = team_data.get("final_approach_rate", "N/A")
+
+        markdown_parts = [
+            f"# Best Team (Score: {self.best_reward:,.2f})",
+            "---",
+            f"**Guest:** `{guest}`",
+            f"**Total Stats (S/P/C):** `{stats.get('smile', 0)}/{stats.get('pure', 0)}/{stats.get('cool', 0)}`",
+            f"**Final Approach Rate:** `{final_rate}`",
+            "---",
+            "## Team Details",
+        ]
+
+        for slot in team_data.get("slots", []):
+            slot_stats = slot.get("stats", {})
+            markdown_parts.extend(
+                [
+                    f"### Slot {slot.get('slot_number', 'N/A')}",
+                    f"- **Card:** {slot.get('card_name', 'Unknown')} (Deck ID: {slot.get('deck_id', 'N/A')})",
+                    f"- **Stats (S/P/C):** {slot_stats.get('smile', 0)}/{slot_stats.get('pure', 0)}/{slot_stats.get('cool', 0)}",
+                ]
             )
 
-        except (TypeError, AttributeError, KeyError) as e:
-            return f"Error formatting render data: {e}"
-
-    def _print_team_summary(self, data: Dict[str, Any]) -> None:
-        """Prints a concise team summary to console."""
-
-        _ = data
-        try:
-            print("\n--- Best Team Composition ---")
-            env = self.training_env.get_attr("unwrapped", indices=[0])[0]
-            if hasattr(env, "state") and env.state.team:
-                team = env.state.team
-                approach_rate = env.state.final_approach_rate
-                if approach_rate:
-                    print(f"Approach Rate: {approach_rate}")
-
-                if team.guest_manager and team.guest_manager.current_guest:
-                    guest = team.guest_manager.current_guest
-                    print(f"Guest: Leader Skill ID {guest.leader_skill_id}")
-                else:
-                    print("Guest: None")
-
-                print("\nTeam Cards:")
-
-                for i, slot in enumerate(team.slots):
-                    if slot.card:
-                        print(
-                            f"  Slot {i+1}: {slot.card.display_name} (Lv.{slot.card.level})"
-                        )
-                        if slot.accessory:
-                            print(f"    - Accessory: {slot.accessory.name}")
-                        if slot.sis_list:
-                            print(
-                                f"    - SIS: {', '.join([sis.name for sis in slot.sis_list])}"
-                            )
-                    else:
-                        print(f"  Slot {i+1}: [Empty]")
-
-                print(
-                    f"\nTeam Stats: S/P/C {team.total_team_smile}/{team.total_team_pure}/{team.total_team_cool}"
+            acc_name = slot.get("accessory", "None")
+            acc_id = slot.get("accessory_id")
+            if acc_id is not None:
+                markdown_parts.append(
+                    f"- **Accessory:** {acc_name} (Manager ID: {acc_id})"
                 )
+            else:
+                markdown_parts.append(f"- **Accessory:** {acc_name}")
 
-            print("-----------------------------\n")
+            sis_used = slot.get("sis_slots_used", 0)
+            sis_max = slot.get("sis_slots_max", 0)
+            markdown_parts.append(f"- **SIS ({sis_used}/{sis_max} slots):**")
 
-        except (AttributeError, IndexError, KeyError) as e:
-            if self.verbose > 0:
-                print(f"Error printing team summary: {e}")
+            sis_list = slot.get("sis_list", [])
+            if sis_list:
+                for sis in sis_list:
+                    markdown_parts.append(f"  - `{sis}`")
+            else:
+                markdown_parts.append("  - *None*")
+
+        return "\n".join(markdown_parts)
+
+    def _format_for_console(self, team_data: Dict[str, Any]) -> str:
+        """
+        Formats team details from a dictionary for clear, multi-line printing
+        to the standard console.
+        """
+        lines = ["--- Team Configuration ---"]
+        lines.append(f"Guest: {team_data.get('guest', 'None')}")
+        stats = team_data.get("team_stats", {})
+        lines.append(
+            f"Total Stats: S/P/C {stats.get('smile', 0)}/{stats.get('pure', 0)}/{stats.get('cool', 0)}"
+        )
+
+        for slot in team_data.get("slots", []):
+            lines.append(f"\n[ Slot {slot.get('slot_number', 'N/A')} ]")
+            lines.append(
+                f"  Card: {slot.get('card_name', 'Unknown')} (Deck ID: {slot.get('deck_id', 'N/A')})"
+            )
+            slot_stats = slot.get("stats", {})
+            lines.append(
+                f"  Stats: S/P/C {slot_stats.get('smile', 0)}/{slot_stats.get('pure', 0)}/{slot_stats.get('cool', 0)}"
+            )
+
+            acc_name = slot.get("accessory", "None")
+            acc_id = slot.get("accessory_id")
+            accessory_str = f"  Accessory: {acc_name}"
+            if acc_id is not None:
+                accessory_str += f" (Manager ID: {acc_id})"
+            lines.append(accessory_str)
+
+            sis_used = slot.get("sis_slots_used", 0)
+            sis_max = slot.get("sis_slots_max", 0)
+            lines.append(f"  SIS ({sis_used}/{sis_max} slots used):")
+            sis_list = slot.get("sis_list", [])
+            if sis_list:
+                for sis_name in sis_list:
+                    lines.append(f"    - {sis_name}")
+
+        lines.append("--------------------------")
+        final_rate = team_data.get("final_approach_rate")
+        if final_rate is not None:
+            lines.append(f"Final Approach Rate: {final_rate}")
+
+        return "\n".join(lines)
+
+    def on_training_end(self) -> None:
+        """
+        Logs the final best reward and total steps when training ends.
+        """
+        if self.verbose > 0:
+            print(f"\nTraining ended. Final best reward: {self.best_reward:.2f}")
+            print(f"Total steps completed: {self.num_timesteps}")
+
+        self.logger.record("custom/final_best_reward", float(self.best_reward))
+        self.logger.record("custom/total_steps", self.num_timesteps)

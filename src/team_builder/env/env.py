@@ -129,12 +129,81 @@ class LLSIFTeamBuildingEnv(gym.Env):
         )
         return float(scores[0]) if scores else 0.0
 
+    def _get_final_team_data(self) -> Dict[str, Any]:
+        """
+        Packages the final team state into a dictionary for logging.
+        This captures the team composition at the exact moment the episode ends.
+        """
+        if self.state.team is None:
+            return {
+                "team_stats": {"smile": 0, "pure": 0, "cool": 0},
+                "final_approach_rate": None,
+                "guest": "None",
+                "slots": [],
+            }
+
+        team = self.state.team
+        return {
+            "team_stats": {
+                "smile": team.total_team_smile,
+                "pure": team.total_team_pure,
+                "cool": team.total_team_cool,
+            },
+            "final_approach_rate": self.state.final_approach_rate,
+            "guest": self._format_guest_data(team.guest_manager),
+            "slots": self._format_slot_data(team.slots),
+        }
+
+    def _format_guest_data(self, guest_manager) -> str:
+        """Format guest data for logging."""
+        if guest_manager and guest_manager.current_guest:
+            guest = guest_manager.current_guest
+            return (
+                f"GuestData(leader_skill_id={guest.leader_skill_id}, "
+                f"leader_attribute='{guest.leader_attribute}', "
+                f"leader_secondary_attribute={guest.leader_secondary_attribute}, "
+                f"leader_value={guest.leader_value}, "
+                f"leader_extra_attribute='{guest.leader_extra_attribute}', "
+                f"leader_extra_target='{guest.leader_extra_target}', "
+                f"leader_extra_value={guest.leader_extra_value})"
+            )
+        return "None"
+
+    def _format_slot_data(self, slots) -> List[Dict[str, Any]]:
+        """Format slot data for logging."""
+        slot_data = []
+        for i, slot in enumerate(slots):
+            if slot.card:
+                slot_info = {
+                    "slot_number": i + 1,
+                    "card_name": slot.card.display_name,
+                    "deck_id": slot.card_entry.deck_id if slot.card_entry else None,
+                    "stats": {
+                        "smile": slot.total_smile,
+                        "pure": slot.total_pure,
+                        "cool": slot.total_cool,
+                    },
+                    "accessory": slot.accessory.name if slot.accessory else None,
+                    "accessory_id": (
+                        slot.accessory_entry.manager_internal_id
+                        if slot.accessory_entry
+                        else None
+                    ),
+                    "sis_count": len(slot.sis_entries),
+                    "sis_slots_used": sum(sis.sis.slots for sis in slot.sis_entries),
+                    "sis_slots_max": slot.card.current_sis_slots if slot.card else 0,
+                    "sis_list": [sis.sis.name for sis in slot.sis_entries],
+                }
+                slot_data.append(slot_info)
+        return slot_data
+
     def _get_info(self, terminated: bool, raw_action: int) -> Dict[str, Any]:
         """Packages supplementary information for the current step."""
         info = {}
         if terminated:
             info["final_approach_rate"] = self.state.final_approach_rate
             info["raw_final_action"] = raw_action
+            info["final_team_data"] = self._get_final_team_data()
         return info
 
     def _validate_action(self, action: int) -> bool:
