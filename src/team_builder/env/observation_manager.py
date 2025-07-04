@@ -43,47 +43,18 @@ class ObservationManager:
 
     def define_action_space(self) -> spaces.Discrete:
         """
-        Defines the action space for the environment by finding the maximum
-        number of actions possible across all build phases.
-
-        In other words, find whether the Deck, Accessory Manager, or SIS
-        Manager contains the most entries.
+        Defines the action space for the environment based on the maximum
+        possible items defined in the configuration to ensure a consistent
+        action space across environments
         """
         max_actions = max(
-            self._get_max_deck_actions(),
-            self._get_max_accessory_actions(),
-            self._get_max_sis_actions(),
-            self._get_max_guest_actions(),
+            self.config.MAX_CARDS_IN_DECK,
+            self.config.MAX_ACCESSORIES_IN_INVENTORY + self.ACTION_ID_OFFSET,
+            self.config.MAX_SIS_IN_INVENTORY + self.ACTION_ID_OFFSET,
+            self.config.MAX_GUESTS,
             self.APPROACH_RATE_CHOICES,
         )
         return spaces.Discrete(max_actions)
-
-    def _get_max_deck_actions(self) -> int:
-        """Calculates the number of actions for the deck selection phase."""
-        if not self.env.deck.entries:
-            return 0
-        return max(self.env.deck.entries.keys()) + 1
-
-    def _get_max_accessory_actions(self) -> int:
-        """Calculates actions for the accessory phase (items + pass)."""
-        if not self.env.accessory_manager.accessories:
-            return self.ACTION_ID_OFFSET
-        max_id = max(self.env.accessory_manager.accessories.keys())
-        return max_id + self.ACTION_ID_OFFSET
-
-    def _get_max_sis_actions(self) -> int:
-        """Calculates actions for the SIS phase (items + pass)."""
-        if not self.env.sis_manager.skills:
-            return self.ACTION_ID_OFFSET
-        max_id = max(self.env.sis_manager.skills.keys())
-        return max_id + self.ACTION_ID_OFFSET
-
-    def _get_max_guest_actions(self) -> int:
-        """Calculates actions for the guest selection phase."""
-        if self.env.enable_guests and self.env.guest_manager:
-            if self.env.guest_manager.all_guests:
-                return max(self.env.guest_manager.all_guests.keys()) + 1
-        return 1
 
     # --- Observation Space Definition ---
 
