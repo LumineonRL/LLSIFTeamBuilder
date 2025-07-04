@@ -1,0 +1,1200 @@
+{
+    "next_deck_id": 120,
+    "gallery": {
+        "smile": 0,
+        "pure": 0,
+        "cool": 0
+    },
+    "entries": [
+        {
+            "deck_id": 1,
+            "card_id": 2936,
+            "config": {
+                "idolized": true,
+                "level": 490,
+                "skill_level": 2,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 2,
+            "card_id": 329,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 3,
+            "card_id": 106,
+            "config": {
+                "idolized": true,
+                "level": 40,
+                "skill_level": 1,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 4,
+            "card_id": 805,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 7,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 5,
+            "card_id": 2477,
+            "config": {
+                "idolized": true,
+                "level": 253,
+                "skill_level": 1,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 6,
+            "card_id": 733,
+            "config": {
+                "idolized": true,
+                "level": 269,
+                "skill_level": 4,
+                "sis_slots": 7
+            }
+        },
+        {
+            "deck_id": 7,
+            "card_id": 1405,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 3
+            }
+        },
+        {
+            "deck_id": 8,
+            "card_id": 887,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 9,
+            "card_id": 2276,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 1,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 10,
+            "card_id": 597,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 5,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 11,
+            "card_id": 521,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 6,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 12,
+            "card_id": 3561,
+            "config": {
+                "idolized": true,
+                "level": 249,
+                "skill_level": 6,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 13,
+            "card_id": 583,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 14,
+            "card_id": 2365,
+            "config": {
+                "idolized": true,
+                "level": 448,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 15,
+            "card_id": 679,
+            "config": {
+                "idolized": false,
+                "level": 40,
+                "skill_level": 5,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 16,
+            "card_id": 3619,
+            "config": {
+                "idolized": true,
+                "level": 311,
+                "skill_level": 1,
+                "sis_slots": 8
+            }
+        },
+        {
+            "deck_id": 17,
+            "card_id": 1470,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 18,
+            "card_id": 2542,
+            "config": {
+                "idolized": true,
+                "level": 255,
+                "skill_level": 5,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 19,
+            "card_id": 794,
+            "config": {
+                "idolized": false,
+                "level": 40,
+                "skill_level": 2,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 20,
+            "card_id": 2551,
+            "config": {
+                "idolized": true,
+                "level": 447,
+                "skill_level": 6,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 21,
+            "card_id": 267,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 22,
+            "card_id": 2872,
+            "config": {
+                "idolized": true,
+                "level": 313,
+                "skill_level": 7,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 23,
+            "card_id": 474,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 7,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 24,
+            "card_id": 3537,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 25,
+            "card_id": 2419,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 3
+            }
+        },
+        {
+            "deck_id": 26,
+            "card_id": 961,
+            "config": {
+                "idolized": false,
+                "level": 30,
+                "skill_level": 2,
+                "sis_slots": 0
+            }
+        },
+        {
+            "deck_id": 27,
+            "card_id": 2259,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 28,
+            "card_id": 540,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 4,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 29,
+            "card_id": 768,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 30,
+            "card_id": 931,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 31,
+            "card_id": 1941,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 32,
+            "card_id": 1372,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 33,
+            "card_id": 165,
+            "config": {
+                "idolized": true,
+                "level": 107,
+                "skill_level": 5,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 34,
+            "card_id": 2128,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 5,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 35,
+            "card_id": 2499,
+            "config": {
+                "idolized": true,
+                "level": 111,
+                "skill_level": 2,
+                "sis_slots": 5
+            }
+        },
+        {
+            "deck_id": 36,
+            "card_id": 1941,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 37,
+            "card_id": 2906,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 38,
+            "card_id": 3145,
+            "config": {
+                "idolized": true,
+                "level": 458,
+                "skill_level": 4,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 39,
+            "card_id": 1458,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 3
+            }
+        },
+        {
+            "deck_id": 40,
+            "card_id": 849,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 41,
+            "card_id": 610,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 6,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 42,
+            "card_id": 345,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 5,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 43,
+            "card_id": 495,
+            "config": {
+                "idolized": false,
+                "level": 40,
+                "skill_level": 3,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 44,
+            "card_id": 1915,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 45,
+            "card_id": 2937,
+            "config": {
+                "idolized": true,
+                "level": 331,
+                "skill_level": 8,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 46,
+            "card_id": 1766,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 47,
+            "card_id": 2210,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 5,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 48,
+            "card_id": 453,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 49,
+            "card_id": 2763,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 5,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 50,
+            "card_id": 1808,
+            "config": {
+                "idolized": true,
+                "level": 428,
+                "skill_level": 6,
+                "sis_slots": 8
+            }
+        },
+        {
+            "deck_id": 51,
+            "card_id": 2564,
+            "config": {
+                "idolized": false,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 52,
+            "card_id": 1819,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 53,
+            "card_id": 2980,
+            "config": {
+                "idolized": true,
+                "level": 460,
+                "skill_level": 8,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 54,
+            "card_id": 94,
+            "config": {
+                "idolized": true,
+                "level": 377,
+                "skill_level": 6,
+                "sis_slots": 5
+            }
+        },
+        {
+            "deck_id": 55,
+            "card_id": 3302,
+            "config": {
+                "idolized": true,
+                "level": 357,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 56,
+            "card_id": 1775,
+            "config": {
+                "idolized": true,
+                "level": 479,
+                "skill_level": 7,
+                "sis_slots": 8
+            }
+        },
+        {
+            "deck_id": 57,
+            "card_id": 3614,
+            "config": {
+                "idolized": true,
+                "level": 211,
+                "skill_level": 4,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 58,
+            "card_id": 3752,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 6,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 59,
+            "card_id": 2098,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 60,
+            "card_id": 2106,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 6,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 61,
+            "card_id": 1445,
+            "config": {
+                "idolized": false,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 62,
+            "card_id": 2315,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 63,
+            "card_id": 2730,
+            "config": {
+                "idolized": false,
+                "level": 80,
+                "skill_level": 4,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 64,
+            "card_id": 969,
+            "config": {
+                "idolized": true,
+                "level": 40,
+                "skill_level": 5,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 65,
+            "card_id": 1318,
+            "config": {
+                "idolized": true,
+                "level": 249,
+                "skill_level": 7,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 66,
+            "card_id": 98,
+            "config": {
+                "idolized": true,
+                "level": 40,
+                "skill_level": 6,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 67,
+            "card_id": 3841,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 68,
+            "card_id": 2951,
+            "config": {
+                "idolized": true,
+                "level": 323,
+                "skill_level": 2,
+                "sis_slots": 6
+            }
+        },
+        {
+            "deck_id": 69,
+            "card_id": 1068,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 70,
+            "card_id": 471,
+            "config": {
+                "idolized": false,
+                "level": 30,
+                "skill_level": 6,
+                "sis_slots": 0
+            }
+        },
+        {
+            "deck_id": 71,
+            "card_id": 3132,
+            "config": {
+                "idolized": true,
+                "level": 294,
+                "skill_level": 5,
+                "sis_slots": 5
+            }
+        },
+        {
+            "deck_id": 72,
+            "card_id": 1527,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 4,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 73,
+            "card_id": 3634,
+            "config": {
+                "idolized": true,
+                "level": 365,
+                "skill_level": 7,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 74,
+            "card_id": 3666,
+            "config": {
+                "idolized": true,
+                "level": 248,
+                "skill_level": 6,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 75,
+            "card_id": 1901,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 6,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 76,
+            "card_id": 3083,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 5,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 77,
+            "card_id": 1294,
+            "config": {
+                "idolized": false,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 78,
+            "card_id": 202,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 79,
+            "card_id": 583,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 80,
+            "card_id": 1903,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 81,
+            "card_id": 3561,
+            "config": {
+                "idolized": true,
+                "level": 465,
+                "skill_level": 8,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 82,
+            "card_id": 3510,
+            "config": {
+                "idolized": true,
+                "level": 130,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 83,
+            "card_id": 111,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 84,
+            "card_id": 3579,
+            "config": {
+                "idolized": true,
+                "level": 141,
+                "skill_level": 4,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 85,
+            "card_id": 1129,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 86,
+            "card_id": 3395,
+            "config": {
+                "idolized": true,
+                "level": 185,
+                "skill_level": 3,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 87,
+            "card_id": 408,
+            "config": {
+                "idolized": true,
+                "level": 466,
+                "skill_level": 8,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 88,
+            "card_id": 2574,
+            "config": {
+                "idolized": false,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 89,
+            "card_id": 1285,
+            "config": {
+                "idolized": true,
+                "level": 40,
+                "skill_level": 8,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 90,
+            "card_id": 421,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 5,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 91,
+            "card_id": 229,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 92,
+            "card_id": 3447,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 93,
+            "card_id": 1120,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 94,
+            "card_id": 1665,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 95,
+            "card_id": 2708,
+            "config": {
+                "idolized": true,
+                "level": 60,
+                "skill_level": 7,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 96,
+            "card_id": 3554,
+            "config": {
+                "idolized": true,
+                "level": 145,
+                "skill_level": 6,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 97,
+            "card_id": 2518,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 98,
+            "card_id": 1798,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 99,
+            "card_id": 1793,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 1,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 100,
+            "card_id": 894,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 101,
+            "card_id": 1789,
+            "config": {
+                "idolized": true,
+                "level": 175,
+                "skill_level": 6,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 102,
+            "card_id": 1106,
+            "config": {
+                "idolized": false,
+                "level": 30,
+                "skill_level": 8,
+                "sis_slots": 0
+            }
+        },
+        {
+            "deck_id": 103,
+            "card_id": 274,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 104,
+            "card_id": 3893,
+            "config": {
+                "idolized": true,
+                "level": 326,
+                "skill_level": 8,
+                "sis_slots": 6
+            }
+        },
+        {
+            "deck_id": 105,
+            "card_id": 620,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 106,
+            "card_id": 2561,
+            "config": {
+                "idolized": true,
+                "level": 386,
+                "skill_level": 8,
+                "sis_slots": 7
+            }
+        },
+        {
+            "deck_id": 107,
+            "card_id": 183,
+            "config": {
+                "idolized": false,
+                "level": 30,
+                "skill_level": 2,
+                "sis_slots": 0
+            }
+        },
+        {
+            "deck_id": 108,
+            "card_id": 1414,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 7,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 109,
+            "card_id": 2731,
+            "config": {
+                "idolized": true,
+                "level": 417,
+                "skill_level": 7,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 110,
+            "card_id": 2115,
+            "config": {
+                "idolized": true,
+                "level": 312,
+                "skill_level": 5,
+                "sis_slots": 8
+            }
+        },
+        {
+            "deck_id": 111,
+            "card_id": 2392,
+            "config": {
+                "idolized": true,
+                "level": 204,
+                "skill_level": 4,
+                "sis_slots": 4
+            }
+        },
+        {
+            "deck_id": 112,
+            "card_id": 3346,
+            "config": {
+                "idolized": true,
+                "level": 291,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 113,
+            "card_id": 1570,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 2,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 114,
+            "card_id": 2775,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 115,
+            "card_id": 1280,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 3,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 116,
+            "card_id": 48,
+            "config": {
+                "idolized": false,
+                "level": 40,
+                "skill_level": 8,
+                "sis_slots": 1
+            }
+        },
+        {
+            "deck_id": 117,
+            "card_id": 1108,
+            "config": {
+                "idolized": true,
+                "level": 80,
+                "skill_level": 8,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 118,
+            "card_id": 1102,
+            "config": {
+                "idolized": false,
+                "level": 60,
+                "skill_level": 4,
+                "sis_slots": 2
+            }
+        },
+        {
+            "deck_id": 119,
+            "card_id": 1460,
+            "config": {
+                "idolized": false,
+                "level": 30,
+                "skill_level": 3,
+                "sis_slots": 0
+            }
+        }
+    ]
+}

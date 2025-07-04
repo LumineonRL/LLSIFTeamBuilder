@@ -1,0 +1,1457 @@
+{
+    "next_manager_internal_id": 364,
+    "skills": [
+        {
+            "manager_internal_id": 1,
+            "sid": 147
+        },
+        {
+            "manager_internal_id": 2,
+            "sid": 325
+        },
+        {
+            "manager_internal_id": 3,
+            "sid": 404
+        },
+        {
+            "manager_internal_id": 4,
+            "sid": 24
+        },
+        {
+            "manager_internal_id": 5,
+            "sid": 168
+        },
+        {
+            "manager_internal_id": 6,
+            "sid": 235
+        },
+        {
+            "manager_internal_id": 7,
+            "sid": 333
+        },
+        {
+            "manager_internal_id": 8,
+            "sid": 38
+        },
+        {
+            "manager_internal_id": 9,
+            "sid": 184
+        },
+        {
+            "manager_internal_id": 10,
+            "sid": 151
+        },
+        {
+            "manager_internal_id": 11,
+            "sid": 195
+        },
+        {
+            "manager_internal_id": 12,
+            "sid": 252
+        },
+        {
+            "manager_internal_id": 13,
+            "sid": 28
+        },
+        {
+            "manager_internal_id": 14,
+            "sid": 257
+        },
+        {
+            "manager_internal_id": 15,
+            "sid": 310
+        },
+        {
+            "manager_internal_id": 16,
+            "sid": 116
+        },
+        {
+            "manager_internal_id": 17,
+            "sid": 72
+        },
+        {
+            "manager_internal_id": 18,
+            "sid": 158
+        },
+        {
+            "manager_internal_id": 19,
+            "sid": 95
+        },
+        {
+            "manager_internal_id": 20,
+            "sid": 429
+        },
+        {
+            "manager_internal_id": 21,
+            "sid": 506
+        },
+        {
+            "manager_internal_id": 22,
+            "sid": 329
+        },
+        {
+            "manager_internal_id": 23,
+            "sid": 104
+        },
+        {
+            "manager_internal_id": 24,
+            "sid": 28
+        },
+        {
+            "manager_internal_id": 25,
+            "sid": 132
+        },
+        {
+            "manager_internal_id": 26,
+            "sid": 224
+        },
+        {
+            "manager_internal_id": 27,
+            "sid": 306
+        },
+        {
+            "manager_internal_id": 28,
+            "sid": 119
+        },
+        {
+            "manager_internal_id": 29,
+            "sid": 50
+        },
+        {
+            "manager_internal_id": 30,
+            "sid": 44
+        },
+        {
+            "manager_internal_id": 31,
+            "sid": 271
+        },
+        {
+            "manager_internal_id": 32,
+            "sid": 252
+        },
+        {
+            "manager_internal_id": 33,
+            "sid": 272
+        },
+        {
+            "manager_internal_id": 34,
+            "sid": 461
+        },
+        {
+            "manager_internal_id": 35,
+            "sid": 485
+        },
+        {
+            "manager_internal_id": 36,
+            "sid": 507
+        },
+        {
+            "manager_internal_id": 37,
+            "sid": 137
+        },
+        {
+            "manager_internal_id": 38,
+            "sid": 185
+        },
+        {
+            "manager_internal_id": 39,
+            "sid": 328
+        },
+        {
+            "manager_internal_id": 40,
+            "sid": 94
+        },
+        {
+            "manager_internal_id": 41,
+            "sid": 364
+        },
+        {
+            "manager_internal_id": 42,
+            "sid": 182
+        },
+        {
+            "manager_internal_id": 43,
+            "sid": 322
+        },
+        {
+            "manager_internal_id": 44,
+            "sid": 204
+        },
+        {
+            "manager_internal_id": 45,
+            "sid": 270
+        },
+        {
+            "manager_internal_id": 46,
+            "sid": 297
+        },
+        {
+            "manager_internal_id": 47,
+            "sid": 377
+        },
+        {
+            "manager_internal_id": 48,
+            "sid": 388
+        },
+        {
+            "manager_internal_id": 49,
+            "sid": 421
+        },
+        {
+            "manager_internal_id": 50,
+            "sid": 62
+        },
+        {
+            "manager_internal_id": 51,
+            "sid": 191
+        },
+        {
+            "manager_internal_id": 52,
+            "sid": 39
+        },
+        {
+            "manager_internal_id": 53,
+            "sid": 7
+        },
+        {
+            "manager_internal_id": 54,
+            "sid": 293
+        },
+        {
+            "manager_internal_id": 55,
+            "sid": 124
+        },
+        {
+            "manager_internal_id": 56,
+            "sid": 5
+        },
+        {
+            "manager_internal_id": 57,
+            "sid": 107
+        },
+        {
+            "manager_internal_id": 58,
+            "sid": 530
+        },
+        {
+            "manager_internal_id": 59,
+            "sid": 134
+        },
+        {
+            "manager_internal_id": 60,
+            "sid": 104
+        },
+        {
+            "manager_internal_id": 61,
+            "sid": 502
+        },
+        {
+            "manager_internal_id": 62,
+            "sid": 147
+        },
+        {
+            "manager_internal_id": 63,
+            "sid": 110
+        },
+        {
+            "manager_internal_id": 64,
+            "sid": 163
+        },
+        {
+            "manager_internal_id": 65,
+            "sid": 255
+        },
+        {
+            "manager_internal_id": 66,
+            "sid": 512
+        },
+        {
+            "manager_internal_id": 67,
+            "sid": 405
+        },
+        {
+            "manager_internal_id": 68,
+            "sid": 244
+        },
+        {
+            "manager_internal_id": 69,
+            "sid": 220
+        },
+        {
+            "manager_internal_id": 70,
+            "sid": 411
+        },
+        {
+            "manager_internal_id": 71,
+            "sid": 218
+        },
+        {
+            "manager_internal_id": 72,
+            "sid": 465
+        },
+        {
+            "manager_internal_id": 73,
+            "sid": 7
+        },
+        {
+            "manager_internal_id": 74,
+            "sid": 93
+        },
+        {
+            "manager_internal_id": 75,
+            "sid": 133
+        },
+        {
+            "manager_internal_id": 76,
+            "sid": 497
+        },
+        {
+            "manager_internal_id": 77,
+            "sid": 18
+        },
+        {
+            "manager_internal_id": 78,
+            "sid": 293
+        },
+        {
+            "manager_internal_id": 79,
+            "sid": 369
+        },
+        {
+            "manager_internal_id": 80,
+            "sid": 302
+        },
+        {
+            "manager_internal_id": 81,
+            "sid": 132
+        },
+        {
+            "manager_internal_id": 82,
+            "sid": 431
+        },
+        {
+            "manager_internal_id": 83,
+            "sid": 404
+        },
+        {
+            "manager_internal_id": 84,
+            "sid": 232
+        },
+        {
+            "manager_internal_id": 85,
+            "sid": 130
+        },
+        {
+            "manager_internal_id": 86,
+            "sid": 451
+        },
+        {
+            "manager_internal_id": 87,
+            "sid": 420
+        },
+        {
+            "manager_internal_id": 88,
+            "sid": 525
+        },
+        {
+            "manager_internal_id": 89,
+            "sid": 365
+        },
+        {
+            "manager_internal_id": 90,
+            "sid": 55
+        },
+        {
+            "manager_internal_id": 91,
+            "sid": 376
+        },
+        {
+            "manager_internal_id": 92,
+            "sid": 155
+        },
+        {
+            "manager_internal_id": 93,
+            "sid": 387
+        },
+        {
+            "manager_internal_id": 94,
+            "sid": 414
+        },
+        {
+            "manager_internal_id": 95,
+            "sid": 4
+        },
+        {
+            "manager_internal_id": 96,
+            "sid": 495
+        },
+        {
+            "manager_internal_id": 97,
+            "sid": 332
+        },
+        {
+            "manager_internal_id": 98,
+            "sid": 535
+        },
+        {
+            "manager_internal_id": 99,
+            "sid": 284
+        },
+        {
+            "manager_internal_id": 100,
+            "sid": 386
+        },
+        {
+            "manager_internal_id": 101,
+            "sid": 158
+        },
+        {
+            "manager_internal_id": 102,
+            "sid": 496
+        },
+        {
+            "manager_internal_id": 103,
+            "sid": 101
+        },
+        {
+            "manager_internal_id": 104,
+            "sid": 391
+        },
+        {
+            "manager_internal_id": 105,
+            "sid": 229
+        },
+        {
+            "manager_internal_id": 106,
+            "sid": 107
+        },
+        {
+            "manager_internal_id": 107,
+            "sid": 319
+        },
+        {
+            "manager_internal_id": 108,
+            "sid": 256
+        },
+        {
+            "manager_internal_id": 109,
+            "sid": 490
+        },
+        {
+            "manager_internal_id": 110,
+            "sid": 31
+        },
+        {
+            "manager_internal_id": 111,
+            "sid": 193
+        },
+        {
+            "manager_internal_id": 112,
+            "sid": 122
+        },
+        {
+            "manager_internal_id": 113,
+            "sid": 451
+        },
+        {
+            "manager_internal_id": 114,
+            "sid": 429
+        },
+        {
+            "manager_internal_id": 115,
+            "sid": 227
+        },
+        {
+            "manager_internal_id": 116,
+            "sid": 353
+        },
+        {
+            "manager_internal_id": 117,
+            "sid": 261
+        },
+        {
+            "manager_internal_id": 118,
+            "sid": 272
+        },
+        {
+            "manager_internal_id": 119,
+            "sid": 37
+        },
+        {
+            "manager_internal_id": 120,
+            "sid": 242
+        },
+        {
+            "manager_internal_id": 121,
+            "sid": 144
+        },
+        {
+            "manager_internal_id": 122,
+            "sid": 116
+        },
+        {
+            "manager_internal_id": 123,
+            "sid": 353
+        },
+        {
+            "manager_internal_id": 124,
+            "sid": 327
+        },
+        {
+            "manager_internal_id": 125,
+            "sid": 58
+        },
+        {
+            "manager_internal_id": 126,
+            "sid": 112
+        },
+        {
+            "manager_internal_id": 127,
+            "sid": 169
+        },
+        {
+            "manager_internal_id": 128,
+            "sid": 102
+        },
+        {
+            "manager_internal_id": 129,
+            "sid": 402
+        },
+        {
+            "manager_internal_id": 130,
+            "sid": 415
+        },
+        {
+            "manager_internal_id": 131,
+            "sid": 97
+        },
+        {
+            "manager_internal_id": 132,
+            "sid": 29
+        },
+        {
+            "manager_internal_id": 133,
+            "sid": 299
+        },
+        {
+            "manager_internal_id": 134,
+            "sid": 108
+        },
+        {
+            "manager_internal_id": 135,
+            "sid": 255
+        },
+        {
+            "manager_internal_id": 136,
+            "sid": 107
+        },
+        {
+            "manager_internal_id": 137,
+            "sid": 113
+        },
+        {
+            "manager_internal_id": 138,
+            "sid": 545
+        },
+        {
+            "manager_internal_id": 139,
+            "sid": 427
+        },
+        {
+            "manager_internal_id": 140,
+            "sid": 35
+        },
+        {
+            "manager_internal_id": 141,
+            "sid": 64
+        },
+        {
+            "manager_internal_id": 142,
+            "sid": 39
+        },
+        {
+            "manager_internal_id": 143,
+            "sid": 429
+        },
+        {
+            "manager_internal_id": 144,
+            "sid": 220
+        },
+        {
+            "manager_internal_id": 145,
+            "sid": 31
+        },
+        {
+            "manager_internal_id": 146,
+            "sid": 448
+        },
+        {
+            "manager_internal_id": 147,
+            "sid": 270
+        },
+        {
+            "manager_internal_id": 148,
+            "sid": 164
+        },
+        {
+            "manager_internal_id": 149,
+            "sid": 141
+        },
+        {
+            "manager_internal_id": 150,
+            "sid": 94
+        },
+        {
+            "manager_internal_id": 151,
+            "sid": 30
+        },
+        {
+            "manager_internal_id": 152,
+            "sid": 408
+        },
+        {
+            "manager_internal_id": 153,
+            "sid": 338
+        },
+        {
+            "manager_internal_id": 154,
+            "sid": 458
+        },
+        {
+            "manager_internal_id": 155,
+            "sid": 191
+        },
+        {
+            "manager_internal_id": 156,
+            "sid": 448
+        },
+        {
+            "manager_internal_id": 157,
+            "sid": 483
+        },
+        {
+            "manager_internal_id": 158,
+            "sid": 545
+        },
+        {
+            "manager_internal_id": 159,
+            "sid": 219
+        },
+        {
+            "manager_internal_id": 160,
+            "sid": 344
+        },
+        {
+            "manager_internal_id": 161,
+            "sid": 159
+        },
+        {
+            "manager_internal_id": 162,
+            "sid": 383
+        },
+        {
+            "manager_internal_id": 163,
+            "sid": 232
+        },
+        {
+            "manager_internal_id": 164,
+            "sid": 455
+        },
+        {
+            "manager_internal_id": 165,
+            "sid": 320
+        },
+        {
+            "manager_internal_id": 166,
+            "sid": 301
+        },
+        {
+            "manager_internal_id": 167,
+            "sid": 196
+        },
+        {
+            "manager_internal_id": 168,
+            "sid": 252
+        },
+        {
+            "manager_internal_id": 169,
+            "sid": 127
+        },
+        {
+            "manager_internal_id": 170,
+            "sid": 512
+        },
+        {
+            "manager_internal_id": 171,
+            "sid": 204
+        },
+        {
+            "manager_internal_id": 172,
+            "sid": 511
+        },
+        {
+            "manager_internal_id": 173,
+            "sid": 311
+        },
+        {
+            "manager_internal_id": 174,
+            "sid": 307
+        },
+        {
+            "manager_internal_id": 175,
+            "sid": 26
+        },
+        {
+            "manager_internal_id": 176,
+            "sid": 9
+        },
+        {
+            "manager_internal_id": 177,
+            "sid": 519
+        },
+        {
+            "manager_internal_id": 178,
+            "sid": 332
+        },
+        {
+            "manager_internal_id": 179,
+            "sid": 409
+        },
+        {
+            "manager_internal_id": 180,
+            "sid": 326
+        },
+        {
+            "manager_internal_id": 181,
+            "sid": 462
+        },
+        {
+            "manager_internal_id": 182,
+            "sid": 412
+        },
+        {
+            "manager_internal_id": 183,
+            "sid": 227
+        },
+        {
+            "manager_internal_id": 184,
+            "sid": 261
+        },
+        {
+            "manager_internal_id": 185,
+            "sid": 474
+        },
+        {
+            "manager_internal_id": 186,
+            "sid": 351
+        },
+        {
+            "manager_internal_id": 187,
+            "sid": 78
+        },
+        {
+            "manager_internal_id": 188,
+            "sid": 402
+        },
+        {
+            "manager_internal_id": 189,
+            "sid": 318
+        },
+        {
+            "manager_internal_id": 190,
+            "sid": 297
+        },
+        {
+            "manager_internal_id": 191,
+            "sid": 123
+        },
+        {
+            "manager_internal_id": 192,
+            "sid": 385
+        },
+        {
+            "manager_internal_id": 193,
+            "sid": 372
+        },
+        {
+            "manager_internal_id": 194,
+            "sid": 428
+        },
+        {
+            "manager_internal_id": 195,
+            "sid": 299
+        },
+        {
+            "manager_internal_id": 196,
+            "sid": 446
+        },
+        {
+            "manager_internal_id": 197,
+            "sid": 83
+        },
+        {
+            "manager_internal_id": 198,
+            "sid": 371
+        },
+        {
+            "manager_internal_id": 199,
+            "sid": 214
+        },
+        {
+            "manager_internal_id": 200,
+            "sid": 6
+        },
+        {
+            "manager_internal_id": 201,
+            "sid": 33
+        },
+        {
+            "manager_internal_id": 202,
+            "sid": 44
+        },
+        {
+            "manager_internal_id": 203,
+            "sid": 422
+        },
+        {
+            "manager_internal_id": 204,
+            "sid": 484
+        },
+        {
+            "manager_internal_id": 205,
+            "sid": 287
+        },
+        {
+            "manager_internal_id": 206,
+            "sid": 254
+        },
+        {
+            "manager_internal_id": 207,
+            "sid": 491
+        },
+        {
+            "manager_internal_id": 208,
+            "sid": 103
+        },
+        {
+            "manager_internal_id": 209,
+            "sid": 159
+        },
+        {
+            "manager_internal_id": 210,
+            "sid": 501
+        },
+        {
+            "manager_internal_id": 211,
+            "sid": 219
+        },
+        {
+            "manager_internal_id": 212,
+            "sid": 462
+        },
+        {
+            "manager_internal_id": 213,
+            "sid": 385
+        },
+        {
+            "manager_internal_id": 214,
+            "sid": 123
+        },
+        {
+            "manager_internal_id": 215,
+            "sid": 372
+        },
+        {
+            "manager_internal_id": 216,
+            "sid": 337
+        },
+        {
+            "manager_internal_id": 217,
+            "sid": 78
+        },
+        {
+            "manager_internal_id": 218,
+            "sid": 424
+        },
+        {
+            "manager_internal_id": 219,
+            "sid": 82
+        },
+        {
+            "manager_internal_id": 220,
+            "sid": 422
+        },
+        {
+            "manager_internal_id": 221,
+            "sid": 203
+        },
+        {
+            "manager_internal_id": 222,
+            "sid": 181
+        },
+        {
+            "manager_internal_id": 223,
+            "sid": 183
+        },
+        {
+            "manager_internal_id": 224,
+            "sid": 418
+        },
+        {
+            "manager_internal_id": 225,
+            "sid": 328
+        },
+        {
+            "manager_internal_id": 226,
+            "sid": 68
+        },
+        {
+            "manager_internal_id": 227,
+            "sid": 434
+        },
+        {
+            "manager_internal_id": 228,
+            "sid": 334
+        },
+        {
+            "manager_internal_id": 229,
+            "sid": 215
+        },
+        {
+            "manager_internal_id": 230,
+            "sid": 511
+        },
+        {
+            "manager_internal_id": 231,
+            "sid": 257
+        },
+        {
+            "manager_internal_id": 232,
+            "sid": 398
+        },
+        {
+            "manager_internal_id": 233,
+            "sid": 314
+        },
+        {
+            "manager_internal_id": 234,
+            "sid": 59
+        },
+        {
+            "manager_internal_id": 235,
+            "sid": 496
+        },
+        {
+            "manager_internal_id": 236,
+            "sid": 281
+        },
+        {
+            "manager_internal_id": 237,
+            "sid": 374
+        },
+        {
+            "manager_internal_id": 238,
+            "sid": 241
+        },
+        {
+            "manager_internal_id": 239,
+            "sid": 365
+        },
+        {
+            "manager_internal_id": 240,
+            "sid": 162
+        },
+        {
+            "manager_internal_id": 241,
+            "sid": 472
+        },
+        {
+            "manager_internal_id": 242,
+            "sid": 225
+        },
+        {
+            "manager_internal_id": 243,
+            "sid": 23
+        },
+        {
+            "manager_internal_id": 244,
+            "sid": 376
+        },
+        {
+            "manager_internal_id": 245,
+            "sid": 226
+        },
+        {
+            "manager_internal_id": 246,
+            "sid": 352
+        },
+        {
+            "manager_internal_id": 247,
+            "sid": 344
+        },
+        {
+            "manager_internal_id": 248,
+            "sid": 124
+        },
+        {
+            "manager_internal_id": 249,
+            "sid": 440
+        },
+        {
+            "manager_internal_id": 250,
+            "sid": 38
+        },
+        {
+            "manager_internal_id": 251,
+            "sid": 140
+        },
+        {
+            "manager_internal_id": 252,
+            "sid": 531
+        },
+        {
+            "manager_internal_id": 253,
+            "sid": 83
+        },
+        {
+            "manager_internal_id": 254,
+            "sid": 182
+        },
+        {
+            "manager_internal_id": 255,
+            "sid": 432
+        },
+        {
+            "manager_internal_id": 256,
+            "sid": 267
+        },
+        {
+            "manager_internal_id": 257,
+            "sid": 36
+        },
+        {
+            "manager_internal_id": 258,
+            "sid": 493
+        },
+        {
+            "manager_internal_id": 259,
+            "sid": 496
+        },
+        {
+            "manager_internal_id": 260,
+            "sid": 137
+        },
+        {
+            "manager_internal_id": 261,
+            "sid": 228
+        },
+        {
+            "manager_internal_id": 262,
+            "sid": 147
+        },
+        {
+            "manager_internal_id": 263,
+            "sid": 55
+        },
+        {
+            "manager_internal_id": 264,
+            "sid": 296
+        },
+        {
+            "manager_internal_id": 265,
+            "sid": 520
+        },
+        {
+            "manager_internal_id": 266,
+            "sid": 255
+        },
+        {
+            "manager_internal_id": 267,
+            "sid": 465
+        },
+        {
+            "manager_internal_id": 268,
+            "sid": 383
+        },
+        {
+            "manager_internal_id": 269,
+            "sid": 448
+        },
+        {
+            "manager_internal_id": 270,
+            "sid": 259
+        },
+        {
+            "manager_internal_id": 271,
+            "sid": 149
+        },
+        {
+            "manager_internal_id": 272,
+            "sid": 466
+        },
+        {
+            "manager_internal_id": 273,
+            "sid": 46
+        },
+        {
+            "manager_internal_id": 274,
+            "sid": 93
+        },
+        {
+            "manager_internal_id": 275,
+            "sid": 412
+        },
+        {
+            "manager_internal_id": 276,
+            "sid": 66
+        },
+        {
+            "manager_internal_id": 277,
+            "sid": 262
+        },
+        {
+            "manager_internal_id": 278,
+            "sid": 246
+        },
+        {
+            "manager_internal_id": 279,
+            "sid": 248
+        },
+        {
+            "manager_internal_id": 280,
+            "sid": 340
+        },
+        {
+            "manager_internal_id": 281,
+            "sid": 304
+        },
+        {
+            "manager_internal_id": 282,
+            "sid": 515
+        },
+        {
+            "manager_internal_id": 283,
+            "sid": 484
+        },
+        {
+            "manager_internal_id": 284,
+            "sid": 4
+        },
+        {
+            "manager_internal_id": 285,
+            "sid": 287
+        },
+        {
+            "manager_internal_id": 286,
+            "sid": 473
+        },
+        {
+            "manager_internal_id": 287,
+            "sid": 227
+        },
+        {
+            "manager_internal_id": 288,
+            "sid": 511
+        },
+        {
+            "manager_internal_id": 289,
+            "sid": 236
+        },
+        {
+            "manager_internal_id": 290,
+            "sid": 534
+        },
+        {
+            "manager_internal_id": 291,
+            "sid": 456
+        },
+        {
+            "manager_internal_id": 292,
+            "sid": 390
+        },
+        {
+            "manager_internal_id": 293,
+            "sid": 225
+        },
+        {
+            "manager_internal_id": 294,
+            "sid": 306
+        },
+        {
+            "manager_internal_id": 295,
+            "sid": 255
+        },
+        {
+            "manager_internal_id": 296,
+            "sid": 28
+        },
+        {
+            "manager_internal_id": 297,
+            "sid": 302
+        },
+        {
+            "manager_internal_id": 298,
+            "sid": 186
+        },
+        {
+            "manager_internal_id": 299,
+            "sid": 74
+        },
+        {
+            "manager_internal_id": 300,
+            "sid": 262
+        },
+        {
+            "manager_internal_id": 301,
+            "sid": 269
+        },
+        {
+            "manager_internal_id": 302,
+            "sid": 106
+        },
+        {
+            "manager_internal_id": 303,
+            "sid": 334
+        },
+        {
+            "manager_internal_id": 304,
+            "sid": 177
+        },
+        {
+            "manager_internal_id": 305,
+            "sid": 282
+        },
+        {
+            "manager_internal_id": 306,
+            "sid": 64
+        },
+        {
+            "manager_internal_id": 307,
+            "sid": 321
+        },
+        {
+            "manager_internal_id": 308,
+            "sid": 459
+        },
+        {
+            "manager_internal_id": 309,
+            "sid": 484
+        },
+        {
+            "manager_internal_id": 310,
+            "sid": 277
+        },
+        {
+            "manager_internal_id": 311,
+            "sid": 5
+        },
+        {
+            "manager_internal_id": 312,
+            "sid": 27
+        },
+        {
+            "manager_internal_id": 313,
+            "sid": 252
+        },
+        {
+            "manager_internal_id": 314,
+            "sid": 173
+        },
+        {
+            "manager_internal_id": 315,
+            "sid": 333
+        },
+        {
+            "manager_internal_id": 316,
+            "sid": 360
+        },
+        {
+            "manager_internal_id": 317,
+            "sid": 522
+        },
+        {
+            "manager_internal_id": 318,
+            "sid": 414
+        },
+        {
+            "manager_internal_id": 319,
+            "sid": 481
+        },
+        {
+            "manager_internal_id": 320,
+            "sid": 446
+        },
+        {
+            "manager_internal_id": 321,
+            "sid": 222
+        },
+        {
+            "manager_internal_id": 322,
+            "sid": 422
+        },
+        {
+            "manager_internal_id": 323,
+            "sid": 468
+        },
+        {
+            "manager_internal_id": 324,
+            "sid": 194
+        },
+        {
+            "manager_internal_id": 325,
+            "sid": 342
+        },
+        {
+            "manager_internal_id": 326,
+            "sid": 461
+        },
+        {
+            "manager_internal_id": 327,
+            "sid": 406
+        },
+        {
+            "manager_internal_id": 328,
+            "sid": 420
+        },
+        {
+            "manager_internal_id": 329,
+            "sid": 313
+        },
+        {
+            "manager_internal_id": 330,
+            "sid": 366
+        },
+        {
+            "manager_internal_id": 331,
+            "sid": 205
+        },
+        {
+            "manager_internal_id": 332,
+            "sid": 322
+        },
+        {
+            "manager_internal_id": 333,
+            "sid": 257
+        },
+        {
+            "manager_internal_id": 334,
+            "sid": 120
+        },
+        {
+            "manager_internal_id": 335,
+            "sid": 318
+        },
+        {
+            "manager_internal_id": 336,
+            "sid": 501
+        },
+        {
+            "manager_internal_id": 337,
+            "sid": 420
+        },
+        {
+            "manager_internal_id": 338,
+            "sid": 535
+        },
+        {
+            "manager_internal_id": 339,
+            "sid": 362
+        },
+        {
+            "manager_internal_id": 340,
+            "sid": 153
+        },
+        {
+            "manager_internal_id": 341,
+            "sid": 153
+        },
+        {
+            "manager_internal_id": 342,
+            "sid": 318
+        },
+        {
+            "manager_internal_id": 343,
+            "sid": 499
+        },
+        {
+            "manager_internal_id": 344,
+            "sid": 186
+        },
+        {
+            "manager_internal_id": 345,
+            "sid": 338
+        },
+        {
+            "manager_internal_id": 346,
+            "sid": 65
+        },
+        {
+            "manager_internal_id": 347,
+            "sid": 506
+        },
+        {
+            "manager_internal_id": 348,
+            "sid": 493
+        },
+        {
+            "manager_internal_id": 349,
+            "sid": 466
+        },
+        {
+            "manager_internal_id": 350,
+            "sid": 455
+        },
+        {
+            "manager_internal_id": 351,
+            "sid": 230
+        },
+        {
+            "manager_internal_id": 352,
+            "sid": 496
+        },
+        {
+            "manager_internal_id": 353,
+            "sid": 125
+        },
+        {
+            "manager_internal_id": 354,
+            "sid": 482
+        },
+        {
+            "manager_internal_id": 355,
+            "sid": 382
+        },
+        {
+            "manager_internal_id": 356,
+            "sid": 365
+        },
+        {
+            "manager_internal_id": 357,
+            "sid": 289
+        },
+        {
+            "manager_internal_id": 358,
+            "sid": 81
+        },
+        {
+            "manager_internal_id": 359,
+            "sid": 54
+        },
+        {
+            "manager_internal_id": 360,
+            "sid": 400
+        },
+        {
+            "manager_internal_id": 361,
+            "sid": 534
+        },
+        {
+            "manager_internal_id": 362,
+            "sid": 544
+        },
+        {
+            "manager_internal_id": 363,
+            "sid": 153
+        }
+    ]
+}

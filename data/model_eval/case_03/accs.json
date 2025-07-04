@@ -1,0 +1,1965 @@
+{
+    "next_manager_internal_id": 393,
+    "accessories": [
+        {
+            "manager_internal_id": 1,
+            "accessory_id": 31,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 2,
+            "accessory_id": 322,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 3,
+            "accessory_id": 376,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 4,
+            "accessory_id": 246,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 5,
+            "accessory_id": 404,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 6,
+            "accessory_id": 243,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 7,
+            "accessory_id": 284,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 8,
+            "accessory_id": 145,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 9,
+            "accessory_id": 509,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 10,
+            "accessory_id": 282,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 11,
+            "accessory_id": 353,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 12,
+            "accessory_id": 299,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 13,
+            "accessory_id": 341,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 14,
+            "accessory_id": 415,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 15,
+            "accessory_id": 7,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 16,
+            "accessory_id": 205,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 17,
+            "accessory_id": 433,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 18,
+            "accessory_id": 436,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 19,
+            "accessory_id": 141,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 20,
+            "accessory_id": 533,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 21,
+            "accessory_id": 176,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 22,
+            "accessory_id": 150,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 23,
+            "accessory_id": 62,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 24,
+            "accessory_id": 272,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 25,
+            "accessory_id": 102,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 26,
+            "accessory_id": 287,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 27,
+            "accessory_id": 366,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 28,
+            "accessory_id": 248,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 29,
+            "accessory_id": 240,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 30,
+            "accessory_id": 95,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 31,
+            "accessory_id": 339,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 32,
+            "accessory_id": 140,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 33,
+            "accessory_id": 211,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 34,
+            "accessory_id": 327,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 35,
+            "accessory_id": 335,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 36,
+            "accessory_id": 488,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 37,
+            "accessory_id": 143,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 38,
+            "accessory_id": 8,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 39,
+            "accessory_id": 111,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 40,
+            "accessory_id": 37,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 41,
+            "accessory_id": 414,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 42,
+            "accessory_id": 95,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 43,
+            "accessory_id": 367,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 44,
+            "accessory_id": 36,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 45,
+            "accessory_id": 492,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 46,
+            "accessory_id": 325,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 47,
+            "accessory_id": 224,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 48,
+            "accessory_id": 170,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 49,
+            "accessory_id": 396,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 50,
+            "accessory_id": 166,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 51,
+            "accessory_id": 344,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 52,
+            "accessory_id": 387,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 53,
+            "accessory_id": 280,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 54,
+            "accessory_id": 523,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 55,
+            "accessory_id": 472,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 56,
+            "accessory_id": 491,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 57,
+            "accessory_id": 539,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 58,
+            "accessory_id": 190,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 59,
+            "accessory_id": 193,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 60,
+            "accessory_id": 274,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 61,
+            "accessory_id": 8,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 62,
+            "accessory_id": 164,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 63,
+            "accessory_id": 70,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 64,
+            "accessory_id": 429,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 65,
+            "accessory_id": 296,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 66,
+            "accessory_id": 522,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 67,
+            "accessory_id": 527,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 68,
+            "accessory_id": 461,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 69,
+            "accessory_id": 40,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 70,
+            "accessory_id": 245,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 71,
+            "accessory_id": 223,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 72,
+            "accessory_id": 494,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 73,
+            "accessory_id": 407,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 74,
+            "accessory_id": 152,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 75,
+            "accessory_id": 94,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 76,
+            "accessory_id": 301,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 77,
+            "accessory_id": 196,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 78,
+            "accessory_id": 223,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 79,
+            "accessory_id": 185,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 80,
+            "accessory_id": 523,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 81,
+            "accessory_id": 438,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 82,
+            "accessory_id": 248,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 83,
+            "accessory_id": 222,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 84,
+            "accessory_id": 380,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 85,
+            "accessory_id": 272,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 86,
+            "accessory_id": 546,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 87,
+            "accessory_id": 377,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 88,
+            "accessory_id": 26,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 89,
+            "accessory_id": 441,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 90,
+            "accessory_id": 317,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 91,
+            "accessory_id": 59,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 92,
+            "accessory_id": 261,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 93,
+            "accessory_id": 224,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 94,
+            "accessory_id": 431,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 95,
+            "accessory_id": 196,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 96,
+            "accessory_id": 444,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 97,
+            "accessory_id": 390,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 98,
+            "accessory_id": 287,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 99,
+            "accessory_id": 381,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 100,
+            "accessory_id": 147,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 101,
+            "accessory_id": 325,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 102,
+            "accessory_id": 366,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 103,
+            "accessory_id": 338,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 104,
+            "accessory_id": 530,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 105,
+            "accessory_id": 469,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 106,
+            "accessory_id": 174,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 107,
+            "accessory_id": 153,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 108,
+            "accessory_id": 286,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 109,
+            "accessory_id": 224,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 110,
+            "accessory_id": 128,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 111,
+            "accessory_id": 175,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 112,
+            "accessory_id": 7,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 113,
+            "accessory_id": 401,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 114,
+            "accessory_id": 549,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 115,
+            "accessory_id": 185,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 116,
+            "accessory_id": 283,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 117,
+            "accessory_id": 296,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 118,
+            "accessory_id": 426,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 119,
+            "accessory_id": 138,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 120,
+            "accessory_id": 264,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 121,
+            "accessory_id": 530,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 122,
+            "accessory_id": 165,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 123,
+            "accessory_id": 391,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 124,
+            "accessory_id": 139,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 125,
+            "accessory_id": 364,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 126,
+            "accessory_id": 212,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 127,
+            "accessory_id": 534,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 128,
+            "accessory_id": 211,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 129,
+            "accessory_id": 264,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 130,
+            "accessory_id": 220,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 131,
+            "accessory_id": 269,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 132,
+            "accessory_id": 438,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 133,
+            "accessory_id": 236,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 134,
+            "accessory_id": 9,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 135,
+            "accessory_id": 224,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 136,
+            "accessory_id": 194,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 137,
+            "accessory_id": 80,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 138,
+            "accessory_id": 86,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 139,
+            "accessory_id": 517,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 140,
+            "accessory_id": 404,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 141,
+            "accessory_id": 119,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 142,
+            "accessory_id": 20,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 143,
+            "accessory_id": 8,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 144,
+            "accessory_id": 438,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 145,
+            "accessory_id": 393,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 146,
+            "accessory_id": 43,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 147,
+            "accessory_id": 62,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 148,
+            "accessory_id": 516,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 149,
+            "accessory_id": 346,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 150,
+            "accessory_id": 245,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 151,
+            "accessory_id": 7,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 152,
+            "accessory_id": 432,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 153,
+            "accessory_id": 353,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 154,
+            "accessory_id": 349,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 155,
+            "accessory_id": 506,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 156,
+            "accessory_id": 176,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 157,
+            "accessory_id": 397,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 158,
+            "accessory_id": 232,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 159,
+            "accessory_id": 205,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 160,
+            "accessory_id": 148,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 161,
+            "accessory_id": 222,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 162,
+            "accessory_id": 108,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 163,
+            "accessory_id": 332,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 164,
+            "accessory_id": 546,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 165,
+            "accessory_id": 104,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 166,
+            "accessory_id": 108,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 167,
+            "accessory_id": 49,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 168,
+            "accessory_id": 348,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 169,
+            "accessory_id": 193,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 170,
+            "accessory_id": 2,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 171,
+            "accessory_id": 249,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 172,
+            "accessory_id": 430,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 173,
+            "accessory_id": 206,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 174,
+            "accessory_id": 6,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 175,
+            "accessory_id": 387,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 176,
+            "accessory_id": 253,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 177,
+            "accessory_id": 541,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 178,
+            "accessory_id": 22,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 179,
+            "accessory_id": 518,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 180,
+            "accessory_id": 375,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 181,
+            "accessory_id": 333,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 182,
+            "accessory_id": 386,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 183,
+            "accessory_id": 200,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 184,
+            "accessory_id": 275,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 185,
+            "accessory_id": 518,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 186,
+            "accessory_id": 356,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 187,
+            "accessory_id": 271,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 188,
+            "accessory_id": 214,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 189,
+            "accessory_id": 194,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 190,
+            "accessory_id": 141,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 191,
+            "accessory_id": 164,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 192,
+            "accessory_id": 42,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 193,
+            "accessory_id": 457,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 194,
+            "accessory_id": 391,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 195,
+            "accessory_id": 370,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 196,
+            "accessory_id": 284,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 197,
+            "accessory_id": 46,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 198,
+            "accessory_id": 109,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 199,
+            "accessory_id": 390,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 200,
+            "accessory_id": 450,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 201,
+            "accessory_id": 180,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 202,
+            "accessory_id": 370,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 203,
+            "accessory_id": 87,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 204,
+            "accessory_id": 454,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 205,
+            "accessory_id": 11,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 206,
+            "accessory_id": 459,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 207,
+            "accessory_id": 316,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 208,
+            "accessory_id": 46,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 209,
+            "accessory_id": 249,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 210,
+            "accessory_id": 439,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 211,
+            "accessory_id": 512,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 212,
+            "accessory_id": 239,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 213,
+            "accessory_id": 377,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 214,
+            "accessory_id": 59,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 215,
+            "accessory_id": 432,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 216,
+            "accessory_id": 73,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 217,
+            "accessory_id": 93,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 218,
+            "accessory_id": 170,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 219,
+            "accessory_id": 539,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 220,
+            "accessory_id": 191,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 221,
+            "accessory_id": 285,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 222,
+            "accessory_id": 298,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 223,
+            "accessory_id": 68,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 224,
+            "accessory_id": 135,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 225,
+            "accessory_id": 409,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 226,
+            "accessory_id": 505,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 227,
+            "accessory_id": 254,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 228,
+            "accessory_id": 535,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 229,
+            "accessory_id": 462,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 230,
+            "accessory_id": 160,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 231,
+            "accessory_id": 509,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 232,
+            "accessory_id": 529,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 233,
+            "accessory_id": 376,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 234,
+            "accessory_id": 475,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 235,
+            "accessory_id": 112,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 236,
+            "accessory_id": 160,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 237,
+            "accessory_id": 167,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 238,
+            "accessory_id": 375,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 239,
+            "accessory_id": 49,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 240,
+            "accessory_id": 479,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 241,
+            "accessory_id": 484,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 242,
+            "accessory_id": 182,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 243,
+            "accessory_id": 504,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 244,
+            "accessory_id": 35,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 245,
+            "accessory_id": 81,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 246,
+            "accessory_id": 408,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 247,
+            "accessory_id": 392,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 248,
+            "accessory_id": 360,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 249,
+            "accessory_id": 349,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 250,
+            "accessory_id": 459,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 251,
+            "accessory_id": 8,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 252,
+            "accessory_id": 119,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 253,
+            "accessory_id": 152,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 254,
+            "accessory_id": 260,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 255,
+            "accessory_id": 348,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 256,
+            "accessory_id": 222,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 257,
+            "accessory_id": 353,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 258,
+            "accessory_id": 486,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 259,
+            "accessory_id": 390,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 260,
+            "accessory_id": 537,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 261,
+            "accessory_id": 46,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 262,
+            "accessory_id": 218,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 263,
+            "accessory_id": 181,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 264,
+            "accessory_id": 181,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 265,
+            "accessory_id": 114,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 266,
+            "accessory_id": 355,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 267,
+            "accessory_id": 66,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 268,
+            "accessory_id": 313,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 269,
+            "accessory_id": 118,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 270,
+            "accessory_id": 25,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 271,
+            "accessory_id": 408,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 272,
+            "accessory_id": 93,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 273,
+            "accessory_id": 361,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 274,
+            "accessory_id": 34,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 275,
+            "accessory_id": 544,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 276,
+            "accessory_id": 154,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 277,
+            "accessory_id": 192,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 278,
+            "accessory_id": 246,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 279,
+            "accessory_id": 147,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 280,
+            "accessory_id": 488,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 281,
+            "accessory_id": 264,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 282,
+            "accessory_id": 410,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 283,
+            "accessory_id": 307,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 284,
+            "accessory_id": 12,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 285,
+            "accessory_id": 254,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 286,
+            "accessory_id": 372,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 287,
+            "accessory_id": 174,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 288,
+            "accessory_id": 20,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 289,
+            "accessory_id": 379,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 290,
+            "accessory_id": 459,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 291,
+            "accessory_id": 121,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 292,
+            "accessory_id": 488,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 293,
+            "accessory_id": 143,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 294,
+            "accessory_id": 3,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 295,
+            "accessory_id": 52,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 296,
+            "accessory_id": 35,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 297,
+            "accessory_id": 288,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 298,
+            "accessory_id": 374,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 299,
+            "accessory_id": 337,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 300,
+            "accessory_id": 384,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 301,
+            "accessory_id": 109,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 302,
+            "accessory_id": 67,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 303,
+            "accessory_id": 157,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 304,
+            "accessory_id": 20,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 305,
+            "accessory_id": 528,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 306,
+            "accessory_id": 471,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 307,
+            "accessory_id": 537,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 308,
+            "accessory_id": 57,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 309,
+            "accessory_id": 270,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 310,
+            "accessory_id": 82,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 311,
+            "accessory_id": 301,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 312,
+            "accessory_id": 178,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 313,
+            "accessory_id": 532,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 314,
+            "accessory_id": 18,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 315,
+            "accessory_id": 427,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 316,
+            "accessory_id": 298,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 317,
+            "accessory_id": 517,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 318,
+            "accessory_id": 255,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 319,
+            "accessory_id": 511,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 320,
+            "accessory_id": 59,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 321,
+            "accessory_id": 359,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 322,
+            "accessory_id": 359,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 323,
+            "accessory_id": 516,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 324,
+            "accessory_id": 224,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 325,
+            "accessory_id": 308,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 326,
+            "accessory_id": 36,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 327,
+            "accessory_id": 96,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 328,
+            "accessory_id": 516,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 329,
+            "accessory_id": 349,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 330,
+            "accessory_id": 61,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 331,
+            "accessory_id": 365,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 332,
+            "accessory_id": 392,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 333,
+            "accessory_id": 230,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 334,
+            "accessory_id": 450,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 335,
+            "accessory_id": 69,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 336,
+            "accessory_id": 441,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 337,
+            "accessory_id": 54,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 338,
+            "accessory_id": 77,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 339,
+            "accessory_id": 445,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 340,
+            "accessory_id": 512,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 341,
+            "accessory_id": 335,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 342,
+            "accessory_id": 7,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 343,
+            "accessory_id": 69,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 344,
+            "accessory_id": 168,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 345,
+            "accessory_id": 19,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 346,
+            "accessory_id": 442,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 347,
+            "accessory_id": 390,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 348,
+            "accessory_id": 396,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 349,
+            "accessory_id": 430,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 350,
+            "accessory_id": 442,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 351,
+            "accessory_id": 480,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 352,
+            "accessory_id": 428,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 353,
+            "accessory_id": 46,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 354,
+            "accessory_id": 252,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 355,
+            "accessory_id": 369,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 356,
+            "accessory_id": 87,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 357,
+            "accessory_id": 189,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 358,
+            "accessory_id": 401,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 359,
+            "accessory_id": 17,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 360,
+            "accessory_id": 406,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 361,
+            "accessory_id": 363,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 362,
+            "accessory_id": 274,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 363,
+            "accessory_id": 474,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 364,
+            "accessory_id": 505,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 365,
+            "accessory_id": 435,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 366,
+            "accessory_id": 134,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 367,
+            "accessory_id": 111,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 368,
+            "accessory_id": 434,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 369,
+            "accessory_id": 350,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 370,
+            "accessory_id": 52,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 371,
+            "accessory_id": 510,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 372,
+            "accessory_id": 285,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 373,
+            "accessory_id": 42,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 374,
+            "accessory_id": 382,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 375,
+            "accessory_id": 275,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 376,
+            "accessory_id": 208,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 377,
+            "accessory_id": 370,
+            "skill_level": 3
+        },
+        {
+            "manager_internal_id": 378,
+            "accessory_id": 524,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 379,
+            "accessory_id": 4,
+            "skill_level": 6
+        },
+        {
+            "manager_internal_id": 380,
+            "accessory_id": 397,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 381,
+            "accessory_id": 380,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 382,
+            "accessory_id": 178,
+            "skill_level": 1
+        },
+        {
+            "manager_internal_id": 383,
+            "accessory_id": 44,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 384,
+            "accessory_id": 144,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 385,
+            "accessory_id": 235,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 386,
+            "accessory_id": 200,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 387,
+            "accessory_id": 270,
+            "skill_level": 4
+        },
+        {
+            "manager_internal_id": 388,
+            "accessory_id": 210,
+            "skill_level": 5
+        },
+        {
+            "manager_internal_id": 389,
+            "accessory_id": 11,
+            "skill_level": 2
+        },
+        {
+            "manager_internal_id": 390,
+            "accessory_id": 187,
+            "skill_level": 7
+        },
+        {
+            "manager_internal_id": 391,
+            "accessory_id": 93,
+            "skill_level": 8
+        },
+        {
+            "manager_internal_id": 392,
+            "accessory_id": 228,
+            "skill_level": 2
+        }
+    ]
+}
