@@ -1,4 +1,5 @@
 import json
+import random
 import warnings
 from typing import Dict, Optional, Any, Union, Tuple
 
@@ -86,3 +87,10 @@ class SongFactory:
             return None
 
         return Song(song_data)
+
+    def get_random_identifier(self) -> Optional[str]:
+        """Returns a random song_id from the loaded songs."""
+        if not self._song_data_by_id:
+            return None
+        all_ids = list(self._song_data_by_id.keys())
+        return random.choice(all_ids)
