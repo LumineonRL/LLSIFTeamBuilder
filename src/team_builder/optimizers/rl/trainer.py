@@ -1,3 +1,4 @@
+import copy
 from pathlib import Path
 from typing import Type, Dict, Any, Optional
 
@@ -10,9 +11,6 @@ from sb3_contrib import MaskablePPO
 from sb3_contrib.common.wrappers import ActionMasker
 from sb3_contrib.common.maskable.callbacks import (
     MaskableEvalCallback,
-)
-from sb3_contrib.common.maskable.evaluation import (
-    evaluate_policy,
 )
 
 from src.team_builder.env.env import LLSIFTeamBuildingEnv
@@ -89,8 +87,14 @@ class AgentTrainer:
         self.model = self._setup_model()
 
     def _make_env(self):
-        """Factory function to create a single environment instance."""
-        base_env = self.env_class(**self.env_kwargs)
+        """
+        Factory function to create a single environment instance.
+        It uses deepcopy to ensure each environment in the vector gets an
+        independent copy of the keyword arguments
+        """
+        env_kwargs_copy = copy.deepcopy(self.env_kwargs)
+        base_env = self.env_class(**env_kwargs_copy)
+
         if self.use_action_masking:
 
             def mask_fn(env):

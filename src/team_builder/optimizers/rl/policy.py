@@ -17,12 +17,14 @@ class ItemEncoder(nn.Module):
     def __init__(self, input_dim: int, embed_dim: int, dropout: float = 0.1):
         super().__init__()
         # A 1D CNN to capture local relationships in the feature vector.
-        # Permute from (N, L, C_in) to (N, C_in, L) as Conv1d expects channels first.
         self.cnn = nn.Conv1d(
             in_channels=input_dim, out_channels=embed_dim, kernel_size=3, padding=1
         )
         self.mlp = nn.Sequential(
-            nn.Linear(embed_dim, embed_dim),
+            nn.Linear(embed_dim, embed_dim * 2),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(embed_dim * 2, embed_dim),
             nn.ReLU(),
         )
         self.layer_norm = nn.LayerNorm(embed_dim)
@@ -48,22 +50,64 @@ class ItemEncoder(nn.Module):
         return x
 
 
+class TransformerEncoderBlock(nn.Module):
+    """
+    A single block of a Transformer encoder, consisting of multi-head self-attention
+    and a feed-forward network with residual connections and layer normalization.
+    """
+
+    def __init__(self, embed_dim: int, num_heads: int, ff_dim: int, dropout: float):
+        super().__init__()
+        self.attention = nn.MultiheadAttention(
+            embed_dim, num_heads, dropout=dropout, batch_first=True
+        )
+        self.norm1 = nn.LayerNorm(embed_dim)
+        self.norm2 = nn.LayerNorm(embed_dim)
+        self.ffn = nn.Sequential(
+            nn.Linear(embed_dim, ff_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(ff_dim, embed_dim),
+        )
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, src: torch.Tensor) -> torch.Tensor:
+        attn_output, _ = self.attention(src, src, src, need_weights=False)
+        src = src + self.dropout(attn_output)
+        src = self.norm1(src)
+
+        ff_output = self.ffn(src)
+        src = src + self.dropout(ff_output)
+        src = self.norm2(src)
+        return src
+
+
 class SetAggregator(nn.Module):
     """
     Aggregates a set of item embeddings into a single vector using a learnable
-    [CLS] token and a self-attention mechanism.
+    [CLS] token and a stack of Transformer encoder blocks for deep self-attention.
     """
 
-    def __init__(self, embed_dim: int, num_heads: int, dropout: float = 0.1):
+    def __init__(
+        self,
+        embed_dim: int,
+        num_heads: int,
+        num_layers: int = 2,
+        dropout: float = 0.1,
+    ):
         super().__init__()
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
-        self.attention = nn.MultiheadAttention(
-            embed_dim=embed_dim,
-            num_heads=num_heads,
-            dropout=dropout,
-            batch_first=True,  # Expects input shape (batch, seq, feature).
+        self.transformer_blocks = nn.ModuleList(
+            [
+                TransformerEncoderBlock(
+                    embed_dim=embed_dim,
+                    num_heads=num_heads,
+                    ff_dim=embed_dim * 4,
+                    dropout=dropout,
+                )
+                for _ in range(num_layers)
+            ]
         )
-        self.layer_norm = nn.LayerNorm(embed_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -73,18 +117,13 @@ class SetAggregator(nn.Module):
             torch.Tensor: An aggregated representation of shape (batch_size, embed_dim).
         """
         batch_size = x.size(0)
-
         cls_tokens = self.cls_token.expand(batch_size, -1, -1)
         x_with_cls = torch.cat((cls_tokens, x), dim=1)
 
-        attn_output, _ = self.attention(
-            x_with_cls, x_with_cls, x_with_cls, need_weights=False
-        )
+        for block in self.transformer_blocks:
+            x_with_cls = block(x_with_cls)
 
-        attn_output = self.layer_norm(attn_output)
-
-        cls_output = attn_output[:, 0, :]
-
+        cls_output = x_with_cls[:, 0, :]
         return cls_output
 
 
@@ -98,27 +137,37 @@ class LLSIFTeamBuildingNetwork(nn.Module):
     def __init__(
         self,
         observation_space: gym.spaces.Dict,
-        card_embed_dim: int = 128,
-        accessory_embed_dim: int = 64,
-        sis_embed_dim: int = 32,
-        guest_embed_dim: int = 32,
-        song_embed_dim: int = 256,
-        state_embed_dim: int = 16,
-        attention_heads: int = 4,
+        card_embed_dim: int = 256,
+        accessory_embed_dim: int = 128,
+        sis_embed_dim: int = 64,
+        guest_embed_dim: int = 64,
+        song_embed_dim: int = 512,
+        state_embed_dim: int = 32,
+        attention_heads: int = 8,
+        attention_layers: int = 2,
         dropout: float = 0.1,
     ):
         super().__init__()
         self.debug = False
 
         spaces = observation_space.spaces
+
+        assert isinstance(spaces["deck"], gym.spaces.Box)
+        assert isinstance(spaces["accessories"], gym.spaces.Box)
+        assert isinstance(spaces["sis"], gym.spaces.Box)
+        assert isinstance(spaces["guest"], gym.spaces.Box)
+        assert isinstance(spaces["song"], gym.spaces.Box)
+        assert isinstance(spaces["build_phase"], gym.spaces.Discrete)
+        assert isinstance(spaces["current_slot"], gym.spaces.Discrete)
+
         card_feat_size = spaces["deck"].shape[1]
         accessory_feat_size = spaces["accessories"].shape[1]
         sis_feat_size = spaces["sis"].shape[1]
         guest_feat_size = spaces["guest"].shape[1]
         song_feat_size = spaces["song"].shape[0]
 
-        build_phase_vocab_size = spaces["build_phase"].n
-        current_slot_vocab_size = spaces["current_slot"].n
+        build_phase_vocab_size = int(spaces["build_phase"].n)
+        current_slot_vocab_size = int(spaces["current_slot"].n)
 
         self.build_phase_processor = nn.Linear(build_phase_vocab_size, state_embed_dim)
         self.current_slot_processor = nn.Linear(
@@ -132,25 +181,21 @@ class LLSIFTeamBuildingNetwork(nn.Module):
         self.sis_encoder = ItemEncoder(sis_feat_size, sis_embed_dim, dropout)
         self.guest_encoder = ItemEncoder(guest_feat_size, guest_embed_dim, dropout)
 
-        self.deck_aggregator = SetAggregator(card_embed_dim, attention_heads, dropout)
-        self.accessories_aggregator = SetAggregator(
-            accessory_embed_dim, attention_heads, dropout
-        )
-        self.sis_aggregator = SetAggregator(sis_embed_dim, attention_heads, dropout)
-        self.guest_aggregator = SetAggregator(guest_embed_dim, attention_heads, dropout)
-
-        self.team_cards_aggregator = SetAggregator(
-            card_embed_dim, attention_heads, dropout
-        )
+        agg_kwargs = {
+            "num_heads": attention_heads,
+            "num_layers": attention_layers,
+            "dropout": dropout,
+        }
+        self.deck_aggregator = SetAggregator(card_embed_dim, **agg_kwargs)
+        self.accessories_aggregator = SetAggregator(accessory_embed_dim, **agg_kwargs)
+        self.sis_aggregator = SetAggregator(sis_embed_dim, **agg_kwargs)
+        self.guest_aggregator = SetAggregator(guest_embed_dim, **agg_kwargs)
+        self.team_cards_aggregator = SetAggregator(card_embed_dim, **agg_kwargs)
         self.team_accessories_aggregator = SetAggregator(
-            accessory_embed_dim, attention_heads, dropout
+            accessory_embed_dim, **agg_kwargs
         )
-        self.team_sis_aggregator = SetAggregator(
-            sis_embed_dim, attention_heads, dropout
-        )
-        self.team_guest_aggregator = SetAggregator(
-            guest_embed_dim, attention_heads, dropout
-        )
+        self.team_sis_aggregator = SetAggregator(sis_embed_dim, **agg_kwargs)
+        self.team_guest_aggregator = SetAggregator(guest_embed_dim, **agg_kwargs)
 
         self.song_mlp = nn.Sequential(
             nn.Linear(song_feat_size, song_embed_dim * 2),
@@ -160,7 +205,7 @@ class LLSIFTeamBuildingNetwork(nn.Module):
             nn.LayerNorm(song_embed_dim),
         )
 
-        self.features_dim = (
+        concatenated_dim = (
             card_embed_dim * 2
             + accessory_embed_dim * 2
             + sis_embed_dim * 2
@@ -168,33 +213,28 @@ class LLSIFTeamBuildingNetwork(nn.Module):
             + song_embed_dim
             + state_embed_dim * 2
         )
+        self.features_dim = concatenated_dim // 2
+        self.fusion_mlp = nn.Sequential(
+            nn.Linear(concatenated_dim, concatenated_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(concatenated_dim, self.features_dim),
+            nn.ReLU(),
+        )
 
     def forward(self, observations: Dict[str, torch.Tensor]) -> torch.Tensor:
-        if self.debug:
-            print("\n--- LLSIF Network Debug ---")
-            print(f"build_phase raw shape: {observations['build_phase'].shape}")
-            print(f"current_slot raw shape: {observations['current_slot'].shape}")
-
-        build_phase_obs = observations["build_phase"].float()
-        if build_phase_obs.ndim == 3:
-            build_phase_obs = build_phase_obs.squeeze(1)
-
-        current_slot_obs = observations["current_slot"].float()
-        if current_slot_obs.ndim == 3:
-            current_slot_obs = current_slot_obs.squeeze(1)
-
+        build_phase_obs = observations["build_phase"].float().squeeze(1)
+        current_slot_obs = observations["current_slot"].float().squeeze(1)
         build_phase_embed = self.build_phase_processor(build_phase_obs)
         current_slot_embed = self.current_slot_processor(current_slot_obs)
 
         song_embed = self.song_mlp(observations["song"])
-
         deck_agg = self.deck_aggregator(self.card_encoder(observations["deck"]))
         accs_agg = self.accessories_aggregator(
             self.accessory_encoder(observations["accessories"])
         )
         sis_agg = self.sis_aggregator(self.sis_encoder(observations["sis"]))
         guest_agg = self.guest_aggregator(self.guest_encoder(observations["guest"]))
-
         team_cards_agg = self.team_cards_aggregator(
             self.card_encoder(observations["team_cards"])
         )
@@ -208,29 +248,24 @@ class LLSIFTeamBuildingNetwork(nn.Module):
             self.guest_encoder(observations["team_guest"])
         )
 
-        all_features = {
-            "deck_agg": deck_agg,
-            "accs_agg": accs_agg,
-            "sis_agg": sis_agg,
-            "guest_agg": guest_agg,
-            "team_cards_agg": team_cards_agg,
-            "team_accs_agg": team_accs_agg,
-            "team_sis_agg": team_sis_agg,
-            "team_guest_agg": team_guest_agg,
-            "song_embed": song_embed,
-            "build_phase_embed": build_phase_embed,
-            "current_slot_embed": current_slot_embed,
-        }
+        all_features = [
+            deck_agg,
+            accs_agg,
+            sis_agg,
+            guest_agg,
+            team_cards_agg,
+            team_accs_agg,
+            team_sis_agg,
+            team_guest_agg,
+            song_embed,
+            build_phase_embed,
+            current_slot_embed,
+        ]
+        concatenated_features = torch.cat(all_features, dim=1)
 
-        if self.debug:
-            print("\n--- Tensors before concatenation ---")
-            for name, tensor in all_features.items():
-                print(
-                    f"{name:<25} | Shape: {str(tensor.shape):<25} | Dims: {tensor.ndim:<5} | Device: {tensor.device}"
-                )
-            print("-------------------------------------\n")
+        final_features = self.fusion_mlp(concatenated_features)
 
-        return torch.cat(list(all_features.values()), dim=1)
+        return final_features
 
 
 class CustomFeatureExtractor(BaseFeaturesExtractor):
