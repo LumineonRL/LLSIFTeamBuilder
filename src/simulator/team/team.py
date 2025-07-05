@@ -111,7 +111,9 @@ class Team:
         self.calculate_team_stats()
         return True
 
-    def check_accessory_id_restriction(self, card: Card, accessory: Accessory) -> bool:
+    def check_accessory_id_restriction(
+        self, card: Card, accessory: Accessory, issue_warning: bool = True
+    ) -> bool:
         """
         Checks if an accessory can be equipped to a card based on card_id.
         Returns True if allowed, False otherwise.
@@ -131,11 +133,12 @@ class Team:
             pass
 
         # If we reach here, the check failed.
-        warnings.warn(
-            f"Cannot equip accessory '{accessory.name}': "
-            f"ID mismatch. Accessory requires card ID '{accessory.card_id}', "
-            f"but card's ID is '{card.card_id}'."
-        )
+        if issue_warning:
+            warnings.warn(
+                f"Cannot equip accessory '{accessory.name}': "
+                f"ID mismatch. Accessory requires card ID '{accessory.card_id}', "
+                f"but card's ID is '{card.card_id}'."
+            )
         return False
 
     def equip_accessory_in_slot(
@@ -177,17 +180,22 @@ class Team:
             return True
         return False
 
-    def _check_sis_attribute_restriction(self, card: Card, sis: SIS) -> bool:
+    def _check_sis_attribute_restriction(
+        self, card: Card, sis: SIS, issue_warning: bool = True
+    ) -> bool:
         """Checks if a SIS attribute restriction is met."""
         if sis.equip_restriction == card.attribute:
             return True
-        warnings.warn(
-            f"Cannot equip SIS '{sis.name}': Attribute mismatch. "
-            f"SIS requires {sis.equip_restriction}, but card is {card.attribute}."
-        )
+        if issue_warning:
+            warnings.warn(
+                f"Cannot equip SIS '{sis.name}': Attribute mismatch. "
+                f"SIS requires {sis.equip_restriction}, but card is {card.attribute}."
+            )
         return False
 
-    def _check_sis_year_group_restriction(self, card: Card, sis: SIS) -> bool:
+    def _check_sis_year_group_restriction(
+        self, card: Card, sis: SIS, issue_warning: bool = True
+    ) -> bool:
         """Checks if a SIS year group restriction is met."""
         restriction = sis.equip_restriction
         if not restriction:
@@ -196,23 +204,29 @@ class Team:
         if card.character in self._year_group_mapping.get(restriction, set()):
             return True
 
-        warnings.warn(
-            f"Cannot equip SIS '{sis.name}': Year group mismatch. "
-            f"SIS is for {restriction}, but '{card.character}' is not."
-        )
+        if issue_warning:
+            warnings.warn(
+                f"Cannot equip SIS '{sis.name}': Year group mismatch. "
+                f"SIS is for {restriction}, but '{card.character}' is not."
+            )
         return False
 
-    def _check_sis_character_restriction(self, card: Card, sis: SIS) -> bool:
+    def _check_sis_character_restriction(
+        self, card: Card, sis: SIS, issue_warning: bool = True
+    ) -> bool:
         """Checks if a SIS character restriction is met."""
         if sis.equip_restriction == card.character:
             return True
-        warnings.warn(
-            f"Cannot equip SIS '{sis.name}': Character mismatch. "
-            f"SIS requires '{sis.equip_restriction}', but card is '{card.character}'."
-        )
+        if issue_warning:
+            warnings.warn(
+                f"Cannot equip SIS '{sis.name}': Character mismatch. "
+                f"SIS requires '{sis.equip_restriction}', but card is '{card.character}'."
+            )
         return False
 
-    def check_sis_equip_restriction(self, slot: TeamSlot, sis: SIS) -> bool:
+    def check_sis_equip_restriction(
+        self, slot: TeamSlot, sis: SIS, issue_warning: bool = True
+    ) -> bool:
         """
         Checks if a SIS can be equipped to a card in a specific slot by dispatching
         to the correct validator.
@@ -221,14 +235,16 @@ class Team:
         """
         card = slot.card
         if not card:
-            warnings.warn("Cannot check SIS restriction: No card in slot.")
+            if issue_warning:
+                warnings.warn("Cannot check SIS restriction: No card in slot.")
             return False
 
         if sis.slots > slot.available_sis_slots:
-            warnings.warn(
-                f"Cannot equip SIS '{sis.name}': Not enough slots. "
-                f"({sis.slots} required, {slot.available_sis_slots} available)"
-            )
+            if issue_warning:
+                warnings.warn(
+                    f"Cannot equip SIS '{sis.name}': Not enough slots. "
+                    f"({sis.slots} required, {slot.available_sis_slots} available)"
+                )
             return False
 
         restriction = sis.equip_restriction
@@ -236,13 +252,13 @@ class Team:
             return True
 
         if restriction in ["Smile", "Pure", "Cool"]:
-            return self._check_sis_attribute_restriction(card, sis)
+            return self._check_sis_attribute_restriction(card, sis, issue_warning)
 
         if restriction in self._year_group_mapping:
-            return self._check_sis_year_group_restriction(card, sis)
+            return self._check_sis_year_group_restriction(card, sis, issue_warning)
 
         # Default case is to assume a character-specific restriction
-        return self._check_sis_character_restriction(card, sis)
+        return self._check_sis_character_restriction(card, sis, issue_warning)
 
     def equip_sis_in_slot(self, slot_number: int, manager_internal_id: int) -> bool:
         """Equips a SIS to a card in a specific team slot (1-9)."""

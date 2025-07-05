@@ -1,4 +1,3 @@
-import warnings
 from typing import Dict, Callable, TYPE_CHECKING
 
 import numpy as np
@@ -105,11 +104,9 @@ class ActionHandler:
         for acc_entry in unassigned_accessories:
             action = acc_entry.manager_internal_id
             if action < self.pass_action:
-                with warnings.catch_warnings():
-                    # warnings.simplefilter("ignore", UserWarning)
-                    is_valid = self.env.state.team.check_accessory_id_restriction(
-                        current_slot.card, acc_entry.accessory
-                    )
+                is_valid = self.env.state.team.check_accessory_id_restriction(
+                    current_slot.card, acc_entry.accessory, issue_warning=False
+                )
                 if is_valid:
                     mask[action] = True
 
@@ -129,11 +126,9 @@ class ActionHandler:
         for sis_entry in unassigned_sis:
             action = sis_entry.manager_internal_id
             if action < self.pass_action and sis_entry.sis.id not in equipped_sis_ids:
-                with warnings.catch_warnings():
-                    warnings.simplefilter("ignore", UserWarning)
-                    is_valid = self.env.state.team.check_sis_equip_restriction(
-                        current_slot, sis_entry.sis
-                    )
+                is_valid = self.env.state.team.check_sis_equip_restriction(
+                    current_slot, sis_entry.sis, issue_warning=False
+                )
                 if is_valid:
                     mask[action] = True
 
@@ -155,7 +150,6 @@ class ActionHandler:
 
     def handle_action(self, action: int) -> None:
         """Applies the given action to modify the environment's state."""
-        # FIXED: Add explicit action validation
         action_mask = self.get_action_mask()
         if action >= len(action_mask) or not action_mask[action]:
             valid_actions = np.where(action_mask)[0]
