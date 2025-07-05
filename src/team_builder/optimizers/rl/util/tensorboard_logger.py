@@ -1,26 +1,34 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 import numpy as np
+import torch
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.logger import TensorBoardOutputFormat
+from stable_baselines3.common.utils import safe_mean
 
 
 class TeamLogCallback(BaseCallback):
     """
     Callback that tracks the best reward, logs detailed team data,
-    and all other standard Stable Baselines3 metrics.
+    gradient norms, individual loss components, and value predictions vs actual returns.
     """
 
-    def __init__(self, verbose: int = 0):
+    def __init__(self, verbose: int = 0, log_frequency: int = 100):
         """
         Initializes the callback.
         Args:
             verbose: The verbosity level: 0 for no output, 1 for info messages, 2 for debug messages.
+            log_frequency: How often to log gradient norms and detailed metrics (in steps).
         """
         super().__init__(verbose)
         self.best_reward = -np.inf
         self.best_team_data: Optional[Dict[str, Any]] = None
         self.tb_writer = None
+        self.log_frequency = log_frequency
+        self.episode_returns: List[float] = []
+        self.episode_lengths: List[int] = []
+        self.value_predictions: List[float] = []
+        self.actual_returns: List[float] = []
 
     def _on_training_start(self) -> None:
         """
@@ -33,6 +41,115 @@ class TeamLogCallback(BaseCallback):
                 break
         if not self.tb_writer and self.verbose > 1:
             print("TensorBoard writer not found. Skipping text log.")
+
+    def _on_rollout_end(self) -> None:
+        """
+        Called at the end of a rollout. Log gradient norms and training metrics.
+        """
+        if self.num_timesteps % self.log_frequency == 0:
+            self._log_gradient_norms()
+            self._log_loss_components()
+            self._log_value_predictions()
+
+    def _log_gradient_norms(self) -> None:
+        """
+        Log gradient norms for monitoring training stability.
+        """
+        if not hasattr(self.model, "policy"):
+            return
+
+        total_norm = 0.0
+        param_count = 0
+        grad_norms = {}
+
+        for name, param in self.model.policy.named_parameters():
+            if param.grad is not None:
+                param_norm = param.grad.data.norm(2).item()
+                total_norm += param_norm**2
+                param_count += 1
+
+                if "features_extractor" in name:
+                    component = "features_extractor"
+                elif "mlp_extractor" in name:
+                    component = "mlp_extractor"
+                elif "action_net" in name:
+                    component = "action_net"
+                elif "value_net" in name:
+                    component = "value_net"
+                else:
+                    component = "other"
+
+                if component not in grad_norms:
+                    grad_norms[component] = []
+                grad_norms[component].append(param_norm)
+
+        total_norm = np.sqrt(total_norm)
+
+        self.logger.record("gradients/total_norm", total_norm)
+
+        for component, norms in grad_norms.items():
+            self.logger.record(f"gradients/{component}_mean_norm", np.mean(norms))
+            self.logger.record(f"gradients/{component}_max_norm", np.max(norms))
+
+        if param_count > 0:
+            self.logger.record(
+                "gradients/mean_norm_per_param", total_norm / np.sqrt(param_count)
+            )
+
+    def _log_loss_components(self) -> None:
+        """
+        Log individual loss components from PPO training.
+        """
+        if hasattr(self, "locals") and "rollout_buffer" in self.locals:
+            rollout_buffer = self.locals["rollout_buffer"]
+
+            if hasattr(self.model, "logger") and self.model.logger is not None:
+                if hasattr(self.model, "_current_progress_remaining"):
+                    self.logger.record(
+                        "train/progress", 1 - self.model._current_progress_remaining
+                    )
+
+                if hasattr(self.model, "lr_schedule"):
+                    current_lr = self.model.lr_schedule(
+                        self.model._current_progress_remaining
+                    )
+                    self.logger.record("train/learning_rate", current_lr)
+
+    def _log_value_predictions(self) -> None:
+        """
+        Log value function predictions vs actual returns for diagnostics.
+        """
+        if hasattr(self, "locals") and "rollout_buffer" in self.locals:
+            rollout_buffer = self.locals["rollout_buffer"]
+
+            if hasattr(rollout_buffer, "values") and hasattr(rollout_buffer, "returns"):
+                values = rollout_buffer.values.flatten()
+                returns = rollout_buffer.returns.flatten()
+
+                if len(values) > 0 and len(returns) > 0:
+                    value_mean = np.mean(values)
+                    return_mean = np.mean(returns)
+                    value_std = np.std(values)
+                    return_std = np.std(returns)
+
+                    self.logger.record(
+                        "value_function/predicted_value_mean", value_mean
+                    )
+                    self.logger.record("value_function/actual_return_mean", return_mean)
+                    self.logger.record("value_function/predicted_value_std", value_std)
+                    self.logger.record("value_function/actual_return_std", return_std)
+
+                    mse = np.mean((values - returns) ** 2)
+                    mae = np.mean(np.abs(values - returns))
+                    self.logger.record("value_function/mean_squared_error", mse)
+                    self.logger.record("value_function/mean_absolute_error", mae)
+
+                    if len(values) > 1:
+                        correlation = np.corrcoef(values, returns)[0, 1]
+                        self.logger.record("value_function/correlation", correlation)
+
+                    self.value_predictions.extend(values[:100])
+                    self.actual_returns.extend(returns[:100])
 
     def _on_step(self) -> bool:
         """
@@ -48,6 +165,10 @@ class TeamLogCallback(BaseCallback):
                 info = self.locals["infos"][i]
                 if "episode" in info:
                     episode_reward = info["episode"]["r"]
+                    episode_length = info["episode"]["l"]
+
+                    self.episode_returns.append(episode_reward)
+                    self.episode_lengths.append(episode_length)
 
                     if episode_reward > self.best_reward:
                         self.best_reward = episode_reward
@@ -66,6 +187,38 @@ class TeamLogCallback(BaseCallback):
                                 f"Warning: New best score {self.best_reward} found at step {self.num_timesteps}, "
                                 "but 'final_team_data' was not in the info dict."
                             )
+
+        if (
+            self.num_timesteps % self.log_frequency == 0
+            and len(self.episode_returns) > 0
+        ):
+            self.logger.record("rollout/ep_rew_mean", safe_mean(self.episode_returns))
+            self.logger.record("rollout/ep_len_mean", safe_mean(self.episode_lengths))
+            self.logger.record(
+                "rollout/ep_rew_std",
+                np.std(self.episode_returns) if len(self.episode_returns) > 1 else 0,
+            )
+
+            if len(self.episode_returns) > 1000:
+                self.episode_returns = self.episode_returns[-100:]
+                self.episode_lengths = self.episode_lengths[-100:]
+
+        if self.tb_writer and self.num_timesteps % (self.log_frequency * 10) == 0:
+            if len(self.value_predictions) > 0:
+                self.tb_writer.add_histogram(
+                    "value_function/predictions",
+                    np.array(self.value_predictions),
+                    self.num_timesteps,
+                )
+                self.tb_writer.add_histogram(
+                    "value_function/actual_returns",
+                    np.array(self.actual_returns),
+                    self.num_timesteps,
+                )
+                # Clear after logging
+                self.value_predictions = []
+                self.actual_returns = []
+
         self.logger.record("custom/best_reward", self.best_reward)
         return True
 

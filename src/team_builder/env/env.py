@@ -271,7 +271,7 @@ class LLSIFTeamBuildingEnv(gym.Env):
 
             final_score = self._run_simulation(final_approach_rate)
             if self.reward_mode == "dense":
-                reward = final_score - self.state.last_score
+                reward = (final_score - self.state.last_score) / 10000.0
             else:  # sparse
                 reward = final_score
 
@@ -286,7 +286,7 @@ class LLSIFTeamBuildingEnv(gym.Env):
         reward = 0.0
         if self.reward_mode == "dense":
             current_score = self._run_simulation(self.DEFAULT_APPROACH_RATE)
-            reward = current_score - self.state.last_score
+            reward = (current_score - self.state.last_score) / 10000.0
             self.state.last_score = current_score
 
         terminated = False

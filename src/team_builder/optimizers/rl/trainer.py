@@ -35,16 +35,17 @@ class AgentTrainer:
         policy_kwargs: Optional[Dict[str, Any]] = None,
         learning_rate: float = 3e-4,
         n_steps: int = 2048,
-        batch_size: int = 64,
+        batch_size: int = 256,
         n_epochs: int = 10,
-        gamma: float = 1.0,
+        gamma: float = 0.99,
         gae_lambda: float = 0.95,
         clip_range: float = 0.2,
-        ent_coef: float = 0.0,
+        ent_coef: float = 0.02,
         vf_coef: float = 0.5,
         max_grad_norm: float = 0.5,
         device: str = "auto",
         use_action_masking: bool = True,
+        target_kl: Optional[float] = 0.015,
     ):
         self.env_class = env_class
         self.env_kwargs = env_kwargs
@@ -68,6 +69,7 @@ class AgentTrainer:
             "ent_coef": ent_coef,
             "vf_coef": vf_coef,
             "max_grad_norm": max_grad_norm,
+            "target_kl": target_kl,
         }
 
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -114,6 +116,13 @@ class AgentTrainer:
         if model_path and Path(model_path).exists():
             print(f"Loading model from {model_path}...")
             return self.algorithm.load(model_path, env=self.vec_env, device=self.device)
+        
+        def linear_schedule(progress_remaining: float) -> float:
+            """Linear learning rate schedule."""
+            return progress_remaining
+        
+        use_schedule = False
+        lr = linear_schedule if use_schedule else self.hyperparams["learning_rate"]
 
         print("Creating a new model with the following hyperparameters:")
         for key, val in self.hyperparams.items():
@@ -126,8 +135,25 @@ class AgentTrainer:
             verbose=1,
             device=self.device,
             tensorboard_log=str(self.log_dir),
-            **self.hyperparams,
+            learning_rate=lr,
+            **{k: v for k, v in self.hyperparams.items() if k != "learning_rate"},
         )
+
+    def continue_training(
+        self, model_path: str, additional_timesteps: int, model_save_name: str
+    ):
+        """Continue training from a saved model checkpoint."""
+        checkpoint_path = Path(model_path)
+        if not checkpoint_path.exists():
+            raise FileNotFoundError(f"Checkpoint not found: {model_path}")
+
+        print(f"Loading model from {checkpoint_path}...")
+        self.model = self.algorithm.load(
+            checkpoint_path, env=self.vec_env, device=self.device
+        )
+
+        print(f"Continuing training for {additional_timesteps} timesteps...")
+        self.train(additional_timesteps, model_save_name)
 
     def train(self, total_timesteps: int, model_save_name: str):
         """Starts the training process with evaluation and logging."""

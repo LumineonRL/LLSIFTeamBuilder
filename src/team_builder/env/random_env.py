@@ -1,4 +1,5 @@
 import random
+import warnings
 from typing import Any, Dict
 
 import numpy as np
@@ -58,6 +59,8 @@ class RandomLLSIFTeamBuildingEnv(LLSIFTeamBuildingEnv):
     def _randomize_environment(self):
         """Applies a new random configuration to the environment."""
         print("--- Randomizing environment for new episode ---")
+
+        warnings.filterwarnings("ignore", category=UserWarning)
 
         self.deck.delete_deck()
         all_card_ids = range(1, self.MAX_CARD_ID + 1)

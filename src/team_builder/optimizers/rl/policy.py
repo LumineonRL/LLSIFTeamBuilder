@@ -1,5 +1,6 @@
 from typing import Dict
 
+import numpy as np
 import gymnasium as gym
 import torch
 from torch import nn
@@ -14,21 +15,23 @@ class ItemEncoder(nn.Module):
     feature vector and then project it into a higher-dimensional embedding space.
     """
 
-    def __init__(self, input_dim: int, embed_dim: int, dropout: float = 0.1):
+    # def __init__(self, input_dim: int, embed_dim: int, dropout: float = 0.1):
+    def __init__(self, input_dim: int, output_dim: int, dropout: float = 0.1):
         super().__init__()
         # A 1D CNN to capture local relationships in the feature vector.
-        self.cnn = nn.Conv1d(
-            in_channels=input_dim, out_channels=embed_dim, kernel_size=3, padding=1
-        )
+        # self.cnn = nn.Conv1d(
+        #     in_channels=input_dim, out_channels=embed_dim, kernel_size=3, padding=1
+        # )
         self.mlp = nn.Sequential(
-            nn.Linear(embed_dim, embed_dim * 2),
+            nn.Linear(input_dim, output_dim),
+            nn.LayerNorm(output_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(embed_dim * 2, embed_dim),
-            nn.ReLU(),
         )
-        self.layer_norm = nn.LayerNorm(embed_dim)
-        self.dropout = nn.Dropout(dropout)
+        for module in self.mlp:
+            if isinstance(module, nn.Linear):
+                nn.init.orthogonal_(module.weight, gain=np.sqrt(2))
+                nn.init.constant_(module.bias, 0.0)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
@@ -37,17 +40,19 @@ class ItemEncoder(nn.Module):
         Returns:
             torch.Tensor: Encoded tensor of shape (batch_size, seq_len, embed_dim).
         """
+        return self.mlp(x)
+
         # Permute to (batch_size, input_dim, seq_len) for Conv1d
-        x = x.permute(0, 2, 1)
-        x = torch.relu(self.cnn(x))
-        # Permute back to (batch_size, seq_len, embed_dim)
-        x = x.permute(0, 2, 1)
+        # x = x.permute(0, 2, 1)
+        # x = torch.relu(self.cnn(x))
+        # # Permute back to (batch_size, seq_len, embed_dim)
+        # x = x.permute(0, 2, 1)
 
-        x = self.mlp(x)
-        x = self.dropout(x)
-        x = self.layer_norm(x)
+        # x = self.mlp(x)
+        # x = self.dropout(x)
+        # x = self.layer_norm(x)
 
-        return x
+        # return x
 
 
 class TransformerEncoderBlock(nn.Module):
@@ -214,6 +219,7 @@ class LLSIFTeamBuildingNetwork(nn.Module):
             + state_embed_dim * 2
         )
         self.features_dim = concatenated_dim // 2
+
         self.fusion_mlp = nn.Sequential(
             nn.Linear(concatenated_dim, concatenated_dim),
             nn.ReLU(),
@@ -221,6 +227,15 @@ class LLSIFTeamBuildingNetwork(nn.Module):
             nn.Linear(concatenated_dim, self.features_dim),
             nn.ReLU(),
         )
+
+        for i, layer in enumerate(self.fusion_mlp):
+            if isinstance(layer, nn.Linear):
+                if i == len(self.fusion_mlp) - 2:
+                    nn.init.orthogonal_(layer.weight, gain=1)
+                    nn.init.constant_(layer.bias, 0.0)
+                else:
+                    nn.init.orthogonal_(layer.weight, gain=int(np.sqrt(2)))
+                    nn.init.constant_(layer.bias, 0.0)
 
     def forward(self, observations: Dict[str, torch.Tensor]) -> torch.Tensor:
         build_phase_obs = observations["build_phase"].float().squeeze(1)
