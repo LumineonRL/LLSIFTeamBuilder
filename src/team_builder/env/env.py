@@ -20,7 +20,7 @@ from src.team_builder.env.build_phase import BuildPhase, GameState
 from src.team_builder.env.config import EnvConfig
 from src.team_builder.env.action_handler import ActionHandler
 from src.team_builder.env.observation_manager import ObservationManager
-from src.team_builder.env.render import render_human_mode
+from src.team_builder.env.render import render_human_mode, get_agent_render_data
 
 
 class LLSIFTeamBuildingEnv(gym.Env):
@@ -198,9 +198,33 @@ class LLSIFTeamBuildingEnv(gym.Env):
                 slot_data.append(slot_info)
         return slot_data
 
+    def _get_auxiliary_info(self) -> Dict[str, Any]:
+        """
+        Gathers ground truth data for auxiliary tasks.
+        """
+        ppn = 0.0
+        num_notes = len(self.song.notes)
+        if self.state.team and num_notes > 0:
+            team_stats = {
+                "Smile": self.state.team.total_team_smile,
+                "Pure": self.state.team.total_team_pure,
+                "Cool": self.state.team.total_team_cool,
+            }
+            song_attr = self.song.attribute
+            if song_attr in team_stats:
+                ppn = team_stats[song_attr] * 0.125
+
+        return {
+            "aux_ppn": ppn,
+            "aux_song_attribute": self.song.attribute,
+            "aux_song_group": self.song.group,
+            "aux_note_count": float(num_notes),
+            "aux_song_length": self.song.length,
+        }
+
     def _get_info(self, terminated: bool, raw_action: int) -> Dict[str, Any]:
         """Packages supplementary information for the current step."""
-        info = {}
+        info = self._get_auxiliary_info()
         if terminated:
             info["final_approach_rate"] = self.state.final_approach_rate
             info["raw_final_action"] = raw_action
@@ -271,7 +295,7 @@ class LLSIFTeamBuildingEnv(gym.Env):
 
             final_score = self._run_simulation(final_approach_rate)
             if self.reward_mode == "dense":
-                reward = (final_score - self.state.last_score) / 10000.0
+                reward = final_score - self.state.last_score
             else:  # sparse
                 reward = final_score
 
@@ -286,7 +310,7 @@ class LLSIFTeamBuildingEnv(gym.Env):
         reward = 0.0
         if self.reward_mode == "dense":
             current_score = self._run_simulation(self.DEFAULT_APPROACH_RATE)
-            reward = (current_score - self.state.last_score) / 10000.0
+            reward = current_score - self.state.last_score
             self.state.last_score = current_score
 
         terminated = False
@@ -310,7 +334,7 @@ class LLSIFTeamBuildingEnv(gym.Env):
             render_human_mode(self)
             return None
         if mode == "agent":
-            return self.obs_manager.get_agent_render_data()
+            return get_agent_render_data(self)
         return None
 
     def action_masks(self) -> np.ndarray:

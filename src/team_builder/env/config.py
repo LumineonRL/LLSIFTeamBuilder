@@ -2,7 +2,6 @@ import json
 from pathlib import Path
 from typing import Dict, List, Any
 
-
 import numpy as np
 import numpy.typing as npt
 
@@ -33,9 +32,9 @@ class EnvConfig:
     Configuration class for the environment, holding constants and mappings.
     """
 
-    MAX_CARDS_IN_DECK = 500
-    MAX_ACCESSORIES_IN_INVENTORY = 500
-    MAX_SIS_IN_INVENTORY = 500
+    MAX_CARDS_IN_DECK = 100
+    MAX_ACCESSORIES_IN_INVENTORY = 100
+    MAX_SIS_IN_INVENTORY = 150
     MAX_GUESTS = 313
     MAX_SKILL_LIST_ENTRIES = 16
     MAX_SKILL_LEVEL = 8
@@ -80,7 +79,6 @@ class EnvConfig:
         "self percent boost": 4,
         "trick": 5,
     }
-    SIS_GROUP_MAP = {"μ's": 0, "Aqours": 1, "Nijigasaki": 2, "Liella!": 3}
 
     ACCESSORY_SKILL_TYPE_MAP = {
         "Appeal Boost": 0,
@@ -94,30 +92,6 @@ class EnvConfig:
         "Amplify": 8,
         "Scorer": 9,
         "Spark": 10,
-    }
-
-    ACCESSORY_SKILL_TARGET_MAP = {
-        "Ayase Eli": 0,
-        "Hazuki Ren": 1,
-        "Hoshizora Rin": 2,
-        "Koizumi Hanayo": 3,
-        "Kosaka Honoka": 4,
-        "Kunikida Hanamaru": 5,
-        "Kurosawa Dia": 6,
-        "Kurosawa Ruby": 7,
-        "Matsuura Kanan": 8,
-        "Minami Kotori": 9,
-        "Nishikino Maki": 10,
-        "Ohara Mari": 11,
-        "Sakurauchi Riko": 12,
-        "Shibuya Kanon": 13,
-        "Sonoda Umi": 14,
-        "Takami Chika": 15,
-        "Tang Keke": 16,
-        "Tojo Nozomi": 17,
-        "Tsushima Yoshiko": 18,
-        "Watanabe You": 19,
-        "Yazawa Nico": 20,
     }
 
     def __init__(self, data_path: str = "data"):
@@ -140,36 +114,33 @@ class EnvConfig:
             )
 
         self.character_map = self._create_character_map(main_characters)
-        self.character_other_index = 0
 
         self.ls_extra_target_map: Dict[str, npt.NDArray[np.float32]] = (
-            self._create_multi_hot_target_map(
-                ls_map_data, self.character_map, self.character_other_index
-            )
+            self._create_multi_hot_target_map(ls_map_data, self.character_map)
         )
         self.ls_extra_target_default_vector: npt.NDArray[np.float32] = np.zeros(
-            len(self.character_map) + 1, dtype=np.float32
+            len(self.character_map), dtype=np.float32
         )
 
         self.skill_target_map: Dict[str, npt.NDArray[np.float32]] = (
-            self._create_multi_hot_target_map(
-                skill_target_map_data, self.character_map, self.character_other_index
-            )
+            self._create_multi_hot_target_map(skill_target_map_data, self.character_map)
         )
         self.skill_target_default_vector: npt.NDArray[np.float32] = np.zeros(
-            len(self.character_map) + 1, dtype=np.float32
+            len(self.character_map), dtype=np.float32
         )
 
         self.sis_equip_restriction_map: Dict[str, npt.NDArray[np.float32]] = (
-            self._create_sis_equip_restriction_map(
-                ls_map_data,
-                self.character_map,
-                self.character_other_index,
-                self.ATTRIBUTE_MAP,
-            )
+            self._create_sis_equip_restriction_map(ls_map_data, self.character_map)
         )
         self.sis_equip_restriction_default_vector: npt.NDArray[np.float32] = np.zeros(
-            len(self.character_map) + 1 + len(self.ATTRIBUTE_MAP), dtype=np.float32
+            len(self.character_map), dtype=np.float32
+        )
+
+        self.sis_group_map: Dict[str, npt.NDArray[np.float32]] = (
+            self._create_multi_hot_target_map(ls_map_data, self.character_map)
+        )
+        self.sis_group_default_vector: npt.NDArray[np.float32] = np.zeros(
+            len(self.character_map), dtype=np.float32
         )
 
         self.skill_type_map = _get_skill_related_map(card_data, "skill", "type")
@@ -180,7 +151,7 @@ class EnvConfig:
     @staticmethod
     def _create_character_map(main_characters: List[str]) -> Dict[str, int]:
         """
-        Creates a mapping for main characters, reserving index 0 for 'Other'.
+        Creates a mapping for main characters. An all-zero vector will represent 'Other'.
 
 
         "Main characters" are characters from u's, Aquours, Niji, and Liella.
@@ -188,13 +159,12 @@ class EnvConfig:
         the Niji girls or April Fools versions of u's and Aqours as the
         same character when it shouldn't.
         """
-        return {name: i + 1 for i, name in enumerate(sorted(main_characters))}
+        return {name: i for i, name in enumerate(sorted(main_characters))}
 
     @staticmethod
     def _create_multi_hot_target_map(
         map_data: Dict[str, List[str]],
         character_map: Dict[str, int],
-        character_other_index: int,
     ) -> Dict[str, npt.NDArray[np.float32]]:
         """
         Creates a map from a group name (e.g., 'first-year') to a pre-computed
@@ -202,7 +172,7 @@ class EnvConfig:
         The vector's order and length are determined by the main character_map.
         """
         multi_hot_map: Dict[str, npt.NDArray[np.float32]] = {}
-        num_characters = len(character_map) + 1  # +1 for 'Other'
+        num_characters = len(character_map)
 
         for group_name, character_list in map_data.items():
             if group_name == "All":
@@ -212,9 +182,8 @@ class EnvConfig:
                 num_characters, dtype=np.float32
             )
             for character_name in character_list:
-                char_index = character_map.get(character_name, character_other_index)
-
-                if char_index != character_other_index:
+                char_index = character_map.get(character_name)
+                if char_index is not None:
                     group_vector[char_index] = 1.0
 
             multi_hot_map[group_name] = group_vector
@@ -225,32 +194,26 @@ class EnvConfig:
     def _create_sis_equip_restriction_map(
         map_data: Dict[str, List[str]],
         character_map: Dict[str, int],
-        character_other_index: int,
-        attribute_map: Dict[str, int],
     ) -> Dict[str, npt.NDArray[np.float32]]:
         """
         Creates a map from an SIS equip restriction group to a pre-computed
-        multi-hot vector. This is for characters, years, and attributes.
-        The vector size is the number of characters + number of attributes + 'Other'.
+        multi-hot vector. This is for characters and years.
+        The vector size is the number of characters.
         """
-        num_characters = len(character_map) + 1  # +1 for 'Other'
-        num_attributes = len(attribute_map)
-        vector_size = num_characters + num_attributes
+        num_characters = len(character_map)
         multi_hot_map: Dict[str, npt.NDArray[np.float32]] = {}
-
-        for attribute_name, attribute_index in attribute_map.items():
-            vector = np.zeros(vector_size, dtype=np.float32)
-            vector[num_characters + attribute_index] = 1.0
-            multi_hot_map[attribute_name] = vector
 
         for group_name, character_list in map_data.items():
             if group_name == "All":
                 continue
 
-            group_vector = np.zeros(vector_size, dtype=np.float32)
+            if group_name in ["Smile", "Pure", "Cool"]:
+                continue
+
+            group_vector = np.zeros(num_characters, dtype=np.float32)
             for character_name in character_list:
-                char_index = character_map.get(character_name, character_other_index)
-                if char_index != character_other_index:
+                char_index = character_map.get(character_name)
+                if char_index is not None:
                     group_vector[char_index] = 1.0
             multi_hot_map[group_name] = group_vector
 
