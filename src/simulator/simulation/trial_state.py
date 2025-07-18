@@ -12,7 +12,7 @@ import numpy as np
 from src.simulator.card.card import Card
 
 
-@dataclass
+@dataclass(slots=True)
 class TrialState:
     """
     Holds all the mutable state for a single simulation run.
