@@ -31,6 +31,16 @@ class EventProcessor:
             play_context["random_state"], self.logger
         )
 
+        play = play_context["play"]
+        self.counter_skill_slots: Dict[str, List[int]] = {
+            "Rhythm Icons": [],
+            "Perfects": [],
+            "Combo": [],
+        }
+        for i, slot in enumerate(play.team.slots):
+            if slot.card and slot.card.skill.activation in self.counter_skill_slots:
+                self.counter_skill_slots[slot.card.skill.activation].append(i)
+
     def dispatch(
         self, event: Event, state: "TrialState", play: "Play", event_queue: List[Event]
     ):
@@ -237,16 +247,20 @@ class EventProcessor:
     def _process_counter_skill(
         self, activation_type: str, counter: int, current_time: float, context: Dict
     ):
-        """Checks and triggers skills based on a counter."""
-        triggered = []
-        for i, slot in enumerate(context["play"].team.slots):
-            card = slot.card
-            if not (card and card.skill.activation == activation_type):
-                continue
+        """
+        Checks and triggers skills based on a counter.
+        """
+        relevant_slot_indices = self.counter_skill_slots.get(activation_type, [])
+        if not relevant_slot_indices:
+            return  # Exit early if no cards have this skill.
 
-            threshold = card.skill_threshold
-            if threshold and counter > 0 and counter % threshold == 0:
-                triggered.append({"card": card, "slot_idx": i})
+        triggered = []
+        for slot_idx in relevant_slot_indices:
+            card = context["play"].team.slots[slot_idx].card
+            if card:
+                threshold = card.skill_threshold
+                if threshold and counter > 0 and counter % threshold == 0:
+                    triggered.append({"card": card, "slot_idx": slot_idx})
 
         if triggered:
             self.skill_handler.process_triggers(

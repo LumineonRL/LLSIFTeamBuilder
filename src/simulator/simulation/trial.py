@@ -50,6 +50,7 @@ class Trial:
             "game_data": self.game_data,
             "logger": self.logger,
             "random_state": random_state,
+            "play": play_instance,
         }
         self.processor = EventProcessor(processor_context)
 
@@ -91,7 +92,7 @@ class Trial:
                 )
 
     def _build_event_queue(self) -> Tuple[List[Event], float]:
-        """Creates and sorts the initial list of all events for the song."""
+        """Creates the initial list of all events for the song."""
         events: List[Event] = []
         on_screen_duration = self.game_data.note_speed_map.get(
             self.config.approach_rate, 1.0
