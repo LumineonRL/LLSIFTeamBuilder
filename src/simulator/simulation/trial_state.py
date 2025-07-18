@@ -3,6 +3,7 @@ This module defines the TrialState class, a data container for all dynamic
 aspects of a single simulation trial.
 """
 
+import uuid
 from dataclasses import InitVar, dataclass, field
 from typing import Any, Dict, List, Optional, Set, Tuple
 
@@ -41,11 +42,13 @@ class TrialState:
     active_sync_effects: Dict[int, Dict[str, Any]] = field(default_factory=dict)
     active_appeal_boost: Optional[Dict[str, Any]] = None
     active_sru_effect: Optional[Dict[str, Any]] = None
-    active_psu_effects: List[Dict[str, Any]] = field(default_factory=list)
-    active_cbu_effects: List[Dict[str, Any]] = field(default_factory=list)
+
+    active_psu_effects: Dict[uuid.UUID, Dict[str, Any]] = field(default_factory=dict)
+    active_cbu_effects: Dict[uuid.UUID, Dict[str, Any]] = field(default_factory=dict)
+    active_spark_effects: Dict[uuid.UUID, Dict[str, Any]] = field(default_factory=dict)
+
     active_amp_boost: int = 0
     spark_charges: int = 0
-    active_spark_effects: List[Dict[str, Any]] = field(default_factory=list)
 
     # --- Skill Activation State ---
     last_skill_info: Optional[Dict[str, Any]] = None

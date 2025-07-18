@@ -88,14 +88,15 @@ class EventProcessor:
         if event.payload.get("type") == "pl_end":
             self.logger.info("EVENT @ %.3fs: A Perfect Lock effect ended.", event.time)
             effect_handler.end_perfect_lock_effect(state, event.time, play.song.length)
-            self._update_stats_and_ppn(context)
+            effect_handler.recalculate_stats_and_ppn(state, play)
 
     def _handle_sync_end(self, event: Event, context: Dict):
         """Handles the end of a Sync skill effect."""
         state = context["state"]
+        play = context["play"]
         slot_idx = event.payload["slot_idx"]
         if slot_idx in state.active_sync_effects:
-            card = context["play"].team.slots[slot_idx].card
+            card = play.team.slots[slot_idx].card
             if card:
                 self.logger.info(
                     "EVENT @ %.3fs: Sync effect ended for (%d) %s.",
@@ -104,7 +105,7 @@ class EventProcessor:
                     card.display_name,
                 )
             del state.active_sync_effects[slot_idx]
-            self._update_stats_and_ppn(context)
+            effect_handler.recalculate_stats_and_ppn(state, play)
 
     def _handle_note_start(self, event: Event, context: Dict):
         """Handles the start judgement for a hold note."""
@@ -160,7 +161,7 @@ class EventProcessor:
                 "Perfects", state.perfect_hits, current_time, context
             )
 
-        if is_pl_active and final_original_perfect:
+        if is_pl_active and not final_original_perfect:
             accuracy_multiplier = 1.08
         elif hit_type == "Perfect":
             accuracy_multiplier = 1.0
@@ -175,8 +176,12 @@ class EventProcessor:
             note_score = math.floor(
                 base_ppn * note_mult * combo_mult * accuracy_multiplier
             )
+
             if hit_type == "Perfect" and state.active_psu_effects:
-                note_score += sum(eff["value"] for eff in state.active_psu_effects)
+                note_score += sum(
+                    eff["value"] for eff in state.active_psu_effects.values()
+                )
+
             if state.active_cbu_effects:
                 cbu_multiplier = next(
                     (
@@ -188,12 +193,14 @@ class EventProcessor:
                 )
                 bonus = sum(
                     math.floor(eff["value"] * cbu_multiplier)
-                    for eff in state.active_cbu_effects
+                    for eff in state.active_cbu_effects.values()
                 )
                 note_score += min(bonus, self.game_data.MAX_COMBO_FEVER_BONUS)
 
             if state.active_spark_effects:
-                spark_bonus = sum(eff["value"] for eff in state.active_spark_effects)
+                spark_bonus = sum(
+                    eff["value"] for eff in state.active_spark_effects.values()
+                )
                 state.total_score += spark_bonus
 
             state.total_score += note_score
@@ -289,52 +296,6 @@ class EventProcessor:
                 "Score", triggered, state, play, context["event_queue"], current_time
             )
 
-    def _update_stats_and_ppn(self, context: Dict):
-        """
-        Recalculates all slot stats and PPN values based on active effects.
-        """
-        state = context["state"]
-        play = context["play"]
-
-        original_slot_stats = [
-            {"smile": s.total_smile, "pure": s.total_pure, "cool": s.total_cool}
-            for s in play.team.slots
-        ]
-        current_stats = [dict(s) for s in original_slot_stats]
-
-        if state.active_appeal_boost:
-            boost_val = state.active_appeal_boost["value"]
-            for target_idx in state.active_appeal_boost["target_slots"]:
-                for attr in ["smile", "pure", "cool"]:
-                    current_stats[target_idx][attr] = math.ceil(
-                        current_stats[target_idx][attr] * (1 + boost_val)
-                    )
-
-        for slot_idx, sync_info in state.active_sync_effects.items():
-            current_stats[slot_idx] = dict(
-                current_stats[sync_info["target_slot_index"]]
-            )
-
-        # Trick the SIS, not Total Trick the skill.
-        is_trick_active = state.active_pl_count > 0
-        if is_trick_active:
-            for slot_idx, tricks in play.trick_slots.items():
-                for trick_sis in tricks:
-                    attr = trick_sis.attribute.lower()
-                    bonus = math.ceil(
-                        original_slot_stats[slot_idx][attr] * trick_sis.value
-                    )
-                    current_stats[slot_idx][attr] += bonus
-
-        final_team_stats = {
-            "Smile": sum(s.get("smile", 0) for s in current_stats),
-            "Pure": sum(s.get("pure", 0) for s in current_stats),
-            "Cool": sum(s.get("cool", 0) for s in current_stats),
-        }
-        state.current_slot_ppn = play.calculate_ppn_for_all_slots(
-            final_team_stats.get(play.song.attribute, 0)
-        )
-
     # --- Effect End Handlers ---
     def _handle_sru_end(self, event: Event, context: Dict):
         """Handles the end of a Skill Rate Up effect."""
@@ -355,7 +316,7 @@ class EventProcessor:
             event.payload["item_name"],
         )
         context["state"].active_appeal_boost = None
-        self._update_stats_and_ppn(context)
+        effect_handler.recalculate_stats_and_ppn(context["state"], context["play"])
 
     def _handle_psu_end(self, event: Event, context: Dict):
         """Handles the end of a Perfect Score Up effect."""

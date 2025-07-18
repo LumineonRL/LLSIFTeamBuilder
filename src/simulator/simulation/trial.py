@@ -5,6 +5,7 @@ orchestrating specialized handlers.
 
 from __future__ import annotations
 
+import heapq
 from typing import TYPE_CHECKING, Dict, List, Tuple
 
 import numpy as np
@@ -58,7 +59,7 @@ class Trial:
         the song has ended.
         """
         while self.event_queue and not self.state.song_has_ended:
-            event = self.event_queue.pop(0)
+            event = heapq.heappop(self.event_queue)
             self.processor.dispatch(event, self.state, self.play, self.event_queue)
 
     def _initialize_trackers(self):
@@ -102,41 +103,46 @@ class Trial:
 
         for i, note in enumerate(self.song.notes):
             # Note spawn events
-            events.append(
+            heapq.heappush(
+                events,
                 Event(
                     time=note.start_time - on_screen_duration,
                     priority=EventType.NOTE_SPAWN,
                     payload={"note_idx": i, "spawn_type": "start"},
-                )
+                ),
             )
+
             if note.start_time != note.end_time:  # Hold note
-                events.append(
+                heapq.heappush(
+                    events,
                     Event(
                         time=note.end_time - on_screen_duration,
                         priority=EventType.NOTE_SPAWN,
                         payload={"note_idx": i, "spawn_type": "end"},
-                    )
+                    ),
                 )
-                events.append(
+                heapq.heappush(
+                    events,
                     Event(
                         time=note.start_time,
                         priority=EventType.NOTE_START,
                         payload={"note_idx": i},
-                    )
+                    ),
                 )
 
             # Note completion event
-            events.append(
+            heapq.heappush(
+                events,
                 Event(
                     time=note.end_time,
                     priority=EventType.NOTE_COMPLETION,
                     payload={"note_idx": i},
-                )
+                ),
             )
 
         # Song end event
         song_end_time = last_note_completion_time + 0.001
-        events.append(Event(song_end_time, EventType.SONG_END))
+        heapq.heappush(events, Event(song_end_time, EventType.SONG_END))
 
         # Time-based skill events
         for slot_idx, slot in enumerate(self.team.slots):
@@ -145,10 +151,11 @@ class Trial:
                 if threshold > 0:
                     for t in np.arange(threshold, self.song.length, threshold):
                         payload = {"card": slot.card, "slot_idx": slot_idx}
-                        events.append(
-                            Event(float(t), EventType.TIME_SKILL, payload=payload)
+                        heapq.heappush(
+                            events,
+                            Event(float(t), EventType.TIME_SKILL, payload=payload),
                         )
-        events.sort()
+
         return events, song_end_time
 
     def get_total_pl_uptime(self) -> float:

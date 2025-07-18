@@ -9,6 +9,7 @@ scheduling end events for any duration-based effects.
 from __future__ import annotations
 
 import math
+import heapq
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
@@ -47,7 +48,7 @@ def recalculate_stats_and_ppn(state: "TrialState", play: "Play"):
         target_sync_idx = sync_info["target_slot_index"]
         current_stats[slot_idx] = dict(current_stats[target_sync_idx])
 
-    is_trick_active = state.active_pl_count > 0 or state.total_trick_end_time > 0
+    is_trick_active = state.active_pl_count > 0
     if is_trick_active:
         for slot_idx, tricks in play.trick_slots.items():
             for trick_sis in tricks:
@@ -133,10 +134,10 @@ def apply_perfect_lock_effect(
     state.active_pl_count += 1
     end_time = min(current_time + duration, song_end_time)
 
-    event_queue.append(Event(end_time, EventType.LOCK_END, payload={"type": "pl_end"}))
-    event_queue.sort()
+    heapq.heappush(
+        event_queue, Event(end_time, EventType.LOCK_END, payload={"type": "pl_end"})
+    )
 
-    # Recalculate stats immediately to apply Trick SIS bonus
     recalculate_stats_and_ppn(state, play)
 
     return duration
@@ -182,7 +183,7 @@ def apply_total_trick_effect(
 
 
 def apply_generic_timed_effect(
-    state_effects_list: List[Dict],
+    state_effects_dict: Dict[uuid.UUID, Any],
     event_queue: List[Event],
     event_type: EventType,
     current_time: float,
@@ -196,23 +197,23 @@ def apply_generic_timed_effect(
     effect_id = uuid.uuid4()
     end_time = min(current_time + duration, song_end_time)
 
-    state_effects_list.append({"id": effect_id, "value": value})
-    event_queue.append(Event(end_time, event_type, payload={"id": effect_id}))
-    event_queue.sort()
+    state_effects_dict[effect_id] = {"value": value}
+
+    heapq.heappush(event_queue, Event(end_time, event_type, payload={"id": effect_id}))
+
     return effect_id
 
 
 def end_generic_timed_effect(
-    state_effects_list: List[Dict], effect_id: uuid.UUID
+    state_effects_dict: Dict[uuid.UUID, Any], effect_id: uuid.UUID | None
 ) -> bool:
     """
-    Removes an effect from the state's active list by its unique ID.
+    Removes an effect from the state's active dictionary by its unique ID.
     """
-    initial_count = len(state_effects_list)
-    state_effects_list[:] = [
-        eff for eff in state_effects_list if eff.get("id") != effect_id
-    ]
-    return len(state_effects_list) < initial_count
+    if effect_id and effect_id in state_effects_dict:
+        del state_effects_dict[effect_id]
+        return True
+    return False
 
 
 def apply_appeal_boost_effect(
@@ -274,14 +275,15 @@ def apply_appeal_boost_effect(
         "value": boost_val,
         "target_slots": target_slots,
     }
-    event_queue.append(
+    heapq.heappush(
+        event_queue,
         Event(
             end_time,
             EventType.APPEAL_BOOST_END,
             payload={"item_name": item_name, "slot_idx": slot_idx},
-        )
+        ),
     )
-    event_queue.sort()
+
     recalculate_stats_and_ppn(state, play)
     return duration, boost_val, target_str
 
@@ -325,10 +327,10 @@ def apply_sync_effect(
     end_time = min(current_time + duration, song_end_time)
 
     state.active_sync_effects[slot_idx] = {"target_slot_index": target_idx}
-    event_queue.append(
-        Event(end_time, EventType.SYNC_END, payload={"slot_idx": slot_idx})
+    heapq.heappush(
+        event_queue, Event(end_time, EventType.SYNC_END, payload={"slot_idx": slot_idx})
     )
-    event_queue.sort()
+
     recalculate_stats_and_ppn(state, play)
 
     target_card_name = ""
@@ -371,14 +373,15 @@ def apply_skill_rate_up_effect(
     )
 
     state.active_sru_effect = {"value": boost_val, "slot_idx": slot_idx}
-    event_queue.append(
+    heapq.heappush(
+        event_queue,
         Event(
             end_time,
             EventType.SKILL_RATE_UP_END,
             payload={"item_name": item_name, "slot_idx": slot_idx},
-        )
+        ),
     )
-    event_queue.sort()
+
     return duration, boost_val
 
 
