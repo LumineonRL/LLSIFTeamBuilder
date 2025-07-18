@@ -31,15 +31,15 @@ class EventProcessor:
             play_context["random_state"], self.logger
         )
 
-        play = play_context["play"]
+        state: "TrialState" = play_context["state"]
         self.counter_skill_slots: Dict[str, List[int]] = {
             "Rhythm Icons": [],
             "Perfects": [],
             "Combo": [],
         }
-        for i, slot in enumerate(play.team.slots):
-            if slot.card and slot.card.skill.activation in self.counter_skill_slots:
-                self.counter_skill_slots[slot.card.skill.activation].append(i)
+        for i, card in state.cached_slot_cards.items():
+            if card and card.skill.activation in self.counter_skill_slots:
+                self.counter_skill_slots[card.skill.activation].append(i)
 
     def dispatch(
         self, event: Event, state: "TrialState", play: "Play", event_queue: List[Event]
@@ -103,10 +103,9 @@ class EventProcessor:
     def _handle_sync_end(self, event: Event, context: Dict):
         """Handles the end of a Sync skill effect."""
         state = context["state"]
-        play = context["play"]
         slot_idx = event.payload["slot_idx"]
         if slot_idx in state.active_sync_effects:
-            card = play.team.slots[slot_idx].card
+            card = state.cached_slot_cards[slot_idx]
             if card:
                 self.logger.info(
                     "EVENT @ %.3fs: Sync effect ended for (%d) %s.",
@@ -115,7 +114,7 @@ class EventProcessor:
                     card.display_name,
                 )
             del state.active_sync_effects[slot_idx]
-            effect_handler.recalculate_stats_and_ppn(state, play)
+            effect_handler.recalculate_stats_and_ppn(state, context["play"])
 
     def _handle_note_start(self, event: Event, context: Dict):
         """Handles the start judgement for a hold note."""
@@ -214,7 +213,7 @@ class EventProcessor:
                 state.total_score += spark_bonus
 
             state.total_score += note_score
-            slot_card = play.team.slots[hitting_slot_index].card
+            slot_card = state.cached_slot_cards[hitting_slot_index]
             if self.logger and slot_card:
                 self.logger.info(
                     "(%d) %s hit a %s on %s note #%d for %d points at %.3fs.",
@@ -250,23 +249,23 @@ class EventProcessor:
         """
         Checks and triggers skills based on a counter.
         """
+        state = context["state"]
         relevant_slot_indices = self.counter_skill_slots.get(activation_type, [])
         if not relevant_slot_indices:
-            return  # Exit early if no cards have this skill.
+            return
 
         triggered = []
         for slot_idx in relevant_slot_indices:
-            card = context["play"].team.slots[slot_idx].card
-            if card:
-                threshold = card.skill_threshold
-                if threshold and counter > 0 and counter % threshold == 0:
-                    triggered.append({"card": card, "slot_idx": slot_idx})
+            card = state.cached_slot_cards[slot_idx]
+            threshold = state.cached_skill_thresholds.get(slot_idx)
+            if card and threshold and counter > 0 and counter % threshold == 0:
+                triggered.append({"card": card, "slot_idx": slot_idx})
 
         if triggered:
             self.skill_handler.process_triggers(
                 activation_type,
                 triggered,
-                context["state"],
+                state,
                 context["play"],
                 context["event_queue"],
                 current_time,
@@ -274,16 +273,17 @@ class EventProcessor:
 
     def _process_star_note_triggers(self, current_time: float, context: Dict):
         """Processes skills activated by Star Notes."""
+        state = context["state"]
         triggered = [
-            {"card": s.card, "slot_idx": i}
-            for i, s in enumerate(context["play"].team.slots)
-            if s.card and s.card.skill.activation == "Star Notes"
+            {"card": card, "slot_idx": i}
+            for i, card in state.cached_slot_cards.items()
+            if card and card.skill.activation == "Star Notes"
         ]
         if triggered:
             self.skill_handler.process_triggers(
                 "Star Notes",
                 triggered,
-                context["state"],
+                state,
                 context["play"],
                 context["event_queue"],
                 current_time,
@@ -294,15 +294,17 @@ class EventProcessor:
         state = context["state"]
         play = context["play"]
         triggered = []
-        for idx, slot in enumerate(play.team.slots):
-            card = slot.card
-            if not (card and card.skill.activation == "Score" and card.skill_threshold):
+        for idx, card in state.cached_slot_cards.items():
+            if not (card and card.skill.activation == "Score"):
                 continue
 
-            next_thresh = state.score_skill_trackers.get(idx, card.skill_threshold)
+            threshold = state.cached_skill_thresholds.get(idx)
+            if not threshold:
+                continue
+
+            next_thresh = state.score_skill_trackers.get(idx, threshold)
             if state.total_score >= next_thresh:
-                if card.skill_threshold:
-                    state.score_skill_trackers[idx] = next_thresh + card.skill_threshold
+                state.score_skill_trackers[idx] = next_thresh + threshold
                 triggered.append({"card": card, "slot_idx": idx})
 
         if triggered:

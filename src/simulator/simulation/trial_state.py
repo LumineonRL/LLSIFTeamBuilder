@@ -9,6 +9,8 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 import numpy as np
 
+from src.simulator.card.card import Card
+
 
 @dataclass
 class TrialState:
@@ -30,7 +32,6 @@ class TrialState:
     song_end_time: float = field(default=0.0, init=False)
 
     # --- PPN & Stat Modifiers ---
-    # This is initialized with the base PPN and updated by effects.
     current_slot_ppn: List[int] = field(default_factory=list)
 
     # --- Effect Trackers ---
@@ -54,6 +55,10 @@ class TrialState:
     last_skill_info: Optional[Dict[str, Any]] = None
     score_skill_trackers: Dict[int, int] = field(default_factory=dict)
     year_group_skill_trackers: Dict[int, Set[str]] = field(default_factory=dict)
+
+    # These are populated once at the start of a trial to avoid repeated @property calls.
+    cached_slot_cards: Dict[int, Optional[Card]] = field(default_factory=dict)
+    cached_skill_thresholds: Dict[int, Optional[int]] = field(default_factory=dict)
 
     # --- Miscellaneous State ---
     # Determines skill processing order for simultaneous activations.

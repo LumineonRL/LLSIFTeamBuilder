@@ -40,9 +40,11 @@ class Trial:
         # --- Dynamic State ---
         self.state = TrialState(random_state=random_state)
         self.state.current_slot_ppn = list(play_instance.base_slot_ppn)
+
+        self._cache_team_properties()
+
         self._initialize_trackers()
 
-        # --- Event Queue & Processor ---
         self.event_queue, self.song_end_time = self._build_event_queue()
         self.state.song_end_time = self.song_end_time
 
@@ -51,6 +53,7 @@ class Trial:
             "logger": self.logger,
             "random_state": random_state,
             "play": play_instance,
+            "state": self.state,
         }
         self.processor = EventProcessor(processor_context)
 
@@ -63,33 +66,38 @@ class Trial:
             event = heapq.heappop(self.event_queue)
             self.processor.dispatch(event, self.state, self.play, self.event_queue)
 
-    def _initialize_trackers(self):
-        """Sets up the initial state for various skill trackers."""
-        self.state.score_skill_trackers = {
-            idx: s.card.skill_threshold
-            for idx, s in enumerate(self.team.slots)
-            if s.card and s.card.skill.activation == "Score" and s.card.skill_threshold
-        }
+    def _cache_team_properties(self):
+        """Caches frequently accessed properties to reduce overhead."""
+        for idx, slot in enumerate(self.team.slots):
+            card = slot.card
+            self.state.cached_slot_cards[idx] = card
+            if card:
+                self.state.cached_skill_thresholds[idx] = card.skill_threshold
 
-        # Initialize trackers for Year Group skills
-        for idx, s in enumerate(self.team.slots):
-            card = s.card
-            if not (
-                card and card.skill.activation == "Year Group" and card.skill.target
-            ):
+    def _initialize_trackers(self):
+        """Sets up the initial state for various skill trackers using the cache."""
+        for idx, card in self.state.cached_slot_cards.items():
+            if not card:
                 continue
 
-            all_members = self.game_data.sub_group_mapping.get(card.skill.target, set())
-            required_members = set(all_members) - {card.character}
-            self.state.year_group_skill_trackers[idx] = required_members
-            if self.logger:
-                self.logger.debug(
-                    "YEAR GROUP DBG: Initialized tracker for (%d) %s. "
-                    "Waiting for: %s",
-                    idx + 1,
-                    card.display_name,
-                    required_members or "{None}",
+            if card.skill.activation == "Score":
+                threshold = self.state.cached_skill_thresholds.get(idx)
+                if threshold:
+                    self.state.score_skill_trackers[idx] = threshold
+
+            elif card.skill.activation == "Year Group" and card.skill.target:
+                all_members = self.game_data.sub_group_mapping.get(
+                    card.skill.target, set()
                 )
+                required_members = set(all_members) - {card.character}
+                self.state.year_group_skill_trackers[idx] = required_members
+                if self.logger:
+                    self.logger.debug(
+                        "YEAR GROUP DBG: Initialized tracker for (%d) %s. Waiting for: %s",
+                        idx + 1,
+                        card.display_name,
+                        required_members or "{None}",
+                    )
 
     def _build_event_queue(self) -> Tuple[List[Event], float]:
         """Creates the initial list of all events for the song."""
@@ -112,7 +120,6 @@ class Trial:
                     payload={"note_idx": i, "spawn_type": "start"},
                 ),
             )
-
             if note.start_time != note.end_time:  # Hold note
                 heapq.heappush(
                     events,
@@ -146,12 +153,12 @@ class Trial:
         heapq.heappush(events, Event(song_end_time, EventType.SONG_END))
 
         # Time-based skill events
-        for slot_idx, slot in enumerate(self.team.slots):
-            if slot.card and slot.card.skill.activation == "Time":
-                threshold = slot.card.skill_threshold or 0
-                if threshold > 0:
+        for slot_idx, card in self.state.cached_slot_cards.items():
+            if card and card.skill.activation == "Time":
+                threshold = self.state.cached_skill_thresholds.get(slot_idx)
+                if threshold and threshold > 0:
                     for t in np.arange(threshold, self.song.length, threshold):
-                        payload = {"card": slot.card, "slot_idx": slot_idx}
+                        payload = {"card": card, "slot_idx": slot_idx}
                         heapq.heappush(
                             events,
                             Event(float(t), EventType.TIME_SKILL, payload=payload),
