@@ -181,7 +181,7 @@ class EventProcessor:
         if 0 <= hitting_slot_index < len(play.team.slots):
             base_ppn = state.current_slot_ppn[hitting_slot_index]
             note_mult = play.get_note_multiplier(note)
-            combo_mult = play.get_combo_multiplier(state.combo_count)
+            combo_mult = play.get_combo_multiplier(state.combo_count, self.game_data)
             note_score = math.floor(
                 base_ppn * note_mult * combo_mult * accuracy_multiplier
             )

@@ -6,8 +6,8 @@ of a team playing a song.
 # pylint: disable=too-few-public-methods
 
 import logging
-import math
 import time
+import math
 import warnings
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -18,7 +18,6 @@ from src.simulator.card.card import Card
 from src.simulator.simulation.game_data import GameData
 from src.simulator.simulation.play_config import PlayConfig
 from src.simulator.simulation.trial import Trial
-from src.simulator.simulation.numba_util import _get_combo_multiplier_nb
 from src.simulator.sis.sis import SIS
 from src.simulator.song.note import Note
 from src.simulator.song.song import Song
@@ -68,10 +67,6 @@ class Play:
             for i, slot in enumerate(self.team.slots)
             if slot.card
         }
-
-        self.combo_bonus_tiers_np = np.array(
-            game_data.combo_bonus_tiers, dtype=np.float64
-        )
 
         team_total_stat = getattr(
             self.team, f"total_team_{self.song.attribute.lower()}", 0
@@ -168,9 +163,13 @@ class Play:
             return Play.NOTE_MULTIPLIERS["is_swing"]
         return Play.NOTE_MULTIPLIERS["default"]
     
-    def get_combo_multiplier(self, combo_count: int) -> float:
+    @staticmethod
+    def get_combo_multiplier(combo_count: int, game_data: GameData) -> float:
         """Finds the combo multiplier for the current combo count."""
-        return _get_combo_multiplier_nb(combo_count, self.combo_bonus_tiers_np)
+        for threshold, multiplier in game_data.combo_bonus_tiers:
+            if combo_count + 1 >= threshold:
+                return multiplier
+        return 1.0  # Default if no tier is met
 
     # --- Logging and Output ---
 

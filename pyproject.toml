@@ -5,7 +5,6 @@ description = "Simulation environment and team builder for LLSIF"
 requires-python = ">=3.10"
 dependencies = [
     "numpy >=2.31",
-    "numba >= 0.61.2",
     ]
 
 [build-system]
