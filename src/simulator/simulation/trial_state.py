@@ -17,8 +17,8 @@ class TrialState:
     """
     Holds all the mutable state for a single simulation run.
 
-    By centralizing the dynamic data, this class simplifies the main Trial
-    orchestrator and makes the flow of state through the simulation explicit.
+    Centralizes dynamic Trial data and makes the flow of its state
+    through the simulation explicit.
     """
 
     random_state: InitVar[np.random.Generator]
