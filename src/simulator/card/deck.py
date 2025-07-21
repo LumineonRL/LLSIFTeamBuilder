@@ -1,3 +1,4 @@
+import copy
 import os
 import json
 import warnings
@@ -232,6 +233,31 @@ class Deck:
 
     def get_entry(self, deck_id: int) -> Optional[DeckEntry]:
         return self._entries.get(deck_id)
+    
+    def __deepcopy__(self, memo: dict) -> "Deck":
+        """Creates a deep copy of the deck, compatible with Python's copy.deepcopy()."""
+        new_deck = Deck(self._card_factory)
+        new_deck._gallery = copy.deepcopy(self.gallery, memo)
+        new_deck._next_deck_id = self._next_deck_id
+
+        new_entries = {}
+        for deck_id, entry in self._entries.items():
+            card_config = {
+                "idolized": entry.card.idolized_status == "idolized",
+                "level": entry.card.level,
+                "skill_level": entry.card.current_skill_level,
+                "sis_slots": entry.card.current_sis_slots,
+            }
+            new_card = self._card_factory.create_card(
+                card_id=entry.card.card_id,
+                gallery=new_deck.gallery,
+                **card_config
+            )
+            if new_card:
+                new_entries[deck_id] = DeckEntry(deck_id=deck_id, card=new_card)
+        
+        new_deck._entries = new_entries
+        return new_deck
 
     def __repr__(self) -> str:
         """Provides a detailed string representation of the deck's contents."""

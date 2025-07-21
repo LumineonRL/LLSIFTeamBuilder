@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import warnings
@@ -119,6 +120,21 @@ class SISManager:
         """Clears all SIS from the manager."""
         self._skills.clear()
         self._next_manager_internal_id = 1
+
+    def __deepcopy__(self, _memo: dict) -> "SISManager":
+        """Creates a deep copy of the manager, compatible with copy.deepcopy()."""
+        new_manager = SISManager(self._factory)
+        new_manager._next_manager_internal_id = self._next_manager_internal_id
+
+        new_skills = {}
+        for manager_id, ps in self._skills.items():
+            new_sis = self._factory.create_sis(sid=ps.sis.id)
+            if new_sis:
+                new_ps = PlayerSIS(manager_id, new_sis)
+                new_skills[manager_id] = new_ps
+
+        new_manager._skills = new_skills
+        return new_manager
 
     def __repr__(self) -> str:
         """Provides a string summary of the SIS in the manager."""

@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import warnings
@@ -153,6 +154,24 @@ class AccessoryManager:
         """Clears all accessories from the manager."""
         self._accessories.clear()
         self._next_manager_internal_id = 1
+
+    def __deepcopy__(self, _memo: dict) -> "AccessoryManager":
+        """Creates a deep copy of the manager, compatible with copy.deepcopy()."""
+        new_manager = AccessoryManager(self._factory)
+        new_manager._next_manager_internal_id = self._next_manager_internal_id
+        
+        new_accessories = {}
+        for manager_id, pa in self._accessories.items():
+            new_accessory = self._factory.create_accessory(
+                accessory_id=pa.accessory.accessory_id,
+                skill_level=pa.accessory.skill_level
+            )
+            if new_accessory:
+                new_pa = PlayerAccessory(manager_id, new_accessory)
+                new_accessories[manager_id] = new_pa
+
+        new_manager._accessories = new_accessories
+        return new_manager
 
     def __repr__(self) -> str:
         """Provides a string summary of the accessories in the manager."""
