@@ -1,0 +1,15 @@
+{
+  "next_manager_internal_id": 3,
+  "accessories": [
+    {
+      "manager_internal_id": 2,
+      "accessory_id": 35,
+      "skill_level": 8
+    },
+    {
+      "manager_internal_id": 1,
+      "accessory_id": 27,
+      "skill_level": 5
+    }
+  ]
+}

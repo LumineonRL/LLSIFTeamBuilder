@@ -1,0 +1,45 @@
+[
+  {
+    "card_id": 1,
+    "display_name": "Test Card",
+    "rarity": "UR",
+    "attribute": "Smile",
+    "character": "Test Character",
+    "is_promo": false,
+    "is_preidolized_non_promo": false,
+    "stats": {
+      "idolized": {
+        "smile": 5000,
+        "pure": 4000,
+        "cool": 3000,
+        "sis_base": 2,
+        "sis_max": 4
+      },
+      "unidolized": {
+        "smile": 4000,
+        "pure": 3000,
+        "cool": 2000
+      }
+    },
+    "skill": {
+      "type": "Score Up",
+      "activation": "Notes",
+      "target": "Self",
+      "level": [1, 2, 3, 4, 5, 6, 7, 8],
+      "threshold": [20, 20, 20, 20, 25, 25, 30, 30],
+      "chance": [36.0, 39.0, 42.0, 45.0, 48.0, 51.0, 54.0, 60.0],
+      "value": [400, 500, 600, 700, 800, 900, 1000, 1200],
+      "duration": [3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5]
+    },
+    "leader_skill": {
+      "leader_attribute": "Smile",
+      "leader_secondary_attribute": "UR",
+      "leader_value": 0.12,
+      "extra": {
+        "leader_extra_attribute": "First Year",
+        "leader_extra_target": "Muse",
+        "leader_extra_value": 0.03
+      }
+    }
+  }
+]

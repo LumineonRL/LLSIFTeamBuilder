@@ -1,0 +1,14 @@
+{
+  "skill_chance": 60.0,
+  "skill_value": 1200,
+  "skill_threshold": 30,
+  "skill_duration": 6.5,
+  "leader_skill": {
+    "attribute": "Smile",
+    "secondary_attribute": "UR",
+    "value": 0.12,
+    "extra_attribute": "First Year",
+    "extra_target": "Muse",
+    "extra_value": 0.03
+  }
+}

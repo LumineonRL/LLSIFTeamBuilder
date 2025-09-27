@@ -1,0 +1,13 @@
+{
+  "next_manager_internal_id": 3,
+  "skills": [
+    {
+      "manager_internal_id": 1,
+      "sid": 2
+    },
+    {
+      "manager_internal_id": 2,
+      "sid": 100
+    }
+  ]
+}
