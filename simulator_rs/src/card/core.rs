@@ -9,6 +9,7 @@ use super::card_data::CardData;
 use super::gallery::Gallery;
 use super::stats::Stats;
 
+#[derive(Debug, Clone)]
 pub struct Card {
     pub card_data: Arc<CardData>,
     gallery: Arc<RwLock<Gallery>>,
@@ -100,7 +101,7 @@ impl Card {
             level: final_level,
             level_cap,
             skill_level: 1,
-            current_sis_slots: initial_sis_slots as u8,
+            current_sis_slots: initial_sis_slots,
         })
     }
 
@@ -132,7 +133,7 @@ impl Card {
 
     pub fn set_current_sis_slots(&mut self, value: u8) -> Result<(), String> {
         let stats = self.stats();
-        if !(stats.sis_base..=stats.sis_max).contains(&(value as u32)) {
+        if !(stats.sis_base..=stats.sis_max).contains(&value) {
             return Err(format!(
                 "SIS slots must be between {} and {}.",
                 stats.sis_base, stats.sis_max
@@ -151,7 +152,7 @@ impl Card {
         value_list.get(clamped_index).cloned()
     }
 
-    pub fn skill_chance(&self) -> Option<f64> {
+    pub fn skill_chance(&self) -> Option<f32> {
         self.get_skill_attribute_for_level(&self.skill.chances, self.skill_level)
     }
 
@@ -160,12 +161,12 @@ impl Card {
             .flatten()
     }
 
-    pub fn skill_threshold(&self) -> Option<i64> {
+    pub fn skill_threshold(&self) -> Option<i32> {
         self.get_skill_attribute_for_level(&self.skill.thresholds, self.skill_level)
             .flatten()
             .map(|n| match n {
                 Number::Int(i) => i,
-                Number::Float(f) => f as i64,
+                Number::Float(f) => f as i32,
             })
     }
 

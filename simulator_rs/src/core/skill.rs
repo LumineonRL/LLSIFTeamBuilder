@@ -4,8 +4,8 @@ use std::fmt;
 #[derive(Debug, Clone, Copy, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum Number {
-    Int(i64),
-    Float(f64),
+    Int(i32),
+    Float(f32),
 }
 
 impl fmt::Display for Number {
@@ -28,7 +28,7 @@ pub struct Skill {
     #[serde(default, alias = "threshold")]
     pub thresholds: Vec<Option<Number>>,
     #[serde(default, alias = "chance")]
-    pub chances: Vec<f64>,
+    pub chances: Vec<f32>,
     #[serde(default, alias = "value")]
     pub values: Vec<Option<Number>>,
     #[serde(default, alias = "duration")]

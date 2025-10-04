@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct AccessoryFactory {
-    accessory_data_map: HashMap<u32, Arc<AccessoryData>>,
+    accessory_data_map: HashMap<u16, Arc<AccessoryData>>,
 }
 
 impl AccessoryFactory {
@@ -21,7 +21,7 @@ impl AccessoryFactory {
         let accessory_data_map = raw_data
             .into_iter()
             .filter_map(|(id_str, raw_data)| {
-                id_str.parse::<u32>().ok().map(|id| {
+                id_str.parse::<u16>().ok().map(|id| {
                     let data = AccessoryData {
                         accessory_id: id,
                         name: raw_data.name,
@@ -38,7 +38,7 @@ impl AccessoryFactory {
         Ok(Self { accessory_data_map })
     }
 
-    pub fn create_accessory(&self, accessory_id: u32, skill_level: u8) -> Option<Accessory> {
+    pub fn create_accessory(&self, accessory_id: u16, skill_level: u8) -> Option<Accessory> {
         self.accessory_data_map
             .get(&accessory_id)
             .and_then(|data| Accessory::new(data.clone(), skill_level).ok())

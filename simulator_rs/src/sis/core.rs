@@ -13,7 +13,7 @@ impl Sis {
     }
 
     // Convenience accessors that proxy to the underlying data
-    pub fn id(&self) -> u32 {
+    pub fn id(&self) -> u16 {
         self.data.id
     }
 
@@ -25,7 +25,7 @@ impl Sis {
         &self.data.effect
     }
 
-    pub fn slots(&self) -> u32 {
+    pub fn slots(&self) -> u8 {
         self.data.slots
     }
 
@@ -45,7 +45,7 @@ impl Sis {
         self.data.target.as_deref()
     }
 
-    pub fn value(&self) -> f64 {
+    pub fn value(&self) -> f32 {
         self.data.value
     }
 }

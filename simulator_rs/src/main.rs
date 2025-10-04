@@ -1,9 +1,8 @@
 use simulator_rs::accessory::factory::AccessoryFactory;
 use simulator_rs::accessory::manager::AccessoryManager;
 use simulator_rs::card::card_factory::CardFactory;
-use simulator_rs::card::deck::Deck;
-use simulator_rs::sis::factory::SisFactory;
-use simulator_rs::sis::manager::SisManager;
+use simulator_rs::card::manager::CardManager;
+use simulator_rs::sis::{SISFactory, SISManager};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -35,15 +34,36 @@ fn main() {
     .expect("Failed to create Card Factory.");
 
     let factory_arc = Arc::new(card_factory);
-    let mut deck = Deck::new(Arc::clone(&factory_arc));
+    let mut card_manager = CardManager::new(Arc::clone(&factory_arc));
 
-    println!("--- Deck and Card Example ---");
-    if let Some(deck_id) = deck.add_card(1, true, 4, Some(100), Some(4)) {
-        println!("Successfully added card with Deck ID: {deck_id}");
+    println!("--- Card Manager Example ---");
+    if let Some(manager_internal_id) = card_manager.add_card(1, true, 4, Some(100), Some(4)) {
+        println!("Successfully added card with Manager ID: {manager_internal_id}");
     }
-    if let Some(card) = deck.get_card(1) {
+    if let Some(card) = card_manager.get_card(1) {
         println!("{card}\n");
     }
+
+    let card_save_path = manifest_dir.join("temp").join("player_cards.json");
+    println!("-> Saving manager state to: {card_save_path:?}");
+    if let Err(e) = card_manager.save(card_save_path.to_str().unwrap()) {
+        eprintln!("Error saving state: {e}");
+    } else {
+        println!("Save successful.");
+    }
+
+    card_manager.add_card(2, false, 1, None, None);
+    card_manager.remove_card(1);
+    println!("\n-> Modified manager. Current state:\n{card_manager}\n");
+
+    println!("-> Loading manager state from file...");
+    if let Err(e) = card_manager.load(card_save_path.to_str().unwrap()) {
+        eprintln!("Error loading state: {e}");
+    } else {
+        println!("Load successful.");
+    }
+    println!("\nFinal Manager State (Restored from file):\n{card_manager}");
+    println!("\n----------------------------------------\n");
 
     println!("--- Accessory Manager Example ---");
 
@@ -94,17 +114,17 @@ fn main() {
 
     println!("--- SIS Manager Example ---");
 
-    let sis_factory = SisFactory::new(sis_file.to_str().expect("sis.json path is not valid UTF-8"))
+    let sis_factory = SISFactory::new(sis_file.to_str().expect("sis.json path is not valid UTF-8"))
         .expect("Failed to create SIS Factory.");
 
-    let mut sis_manager = SisManager::new(sis_factory);
+    let mut sis_manager = SISManager::new(Arc::new(sis_factory));
     println!("Initialized a new, empty SIS Manager.\n");
 
     println!("-> Adding SIS...");
-    if let Some(id) = sis_manager.add_sis(2) {
+    if let Ok(id) = sis_manager.add_sis(2) {
         println!("Added SIS, received Manager ID: {id}");
     }
-    if let Some(id) = sis_manager.add_sis(100) {
+    if let Ok(id) = sis_manager.add_sis(100) {
         println!("Added SIS, received Manager ID: {id}");
     }
     println!("\nCurrent Manager State:\n{sis_manager}\n");

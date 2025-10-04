@@ -10,7 +10,7 @@ use super::core::Card;
 use super::gallery::Gallery;
 
 pub struct CardFactory {
-    card_data_map: Arc<HashMap<u32, Arc<CardData>>>,
+    card_data_map: Arc<HashMap<u16, Arc<CardData>>>,
     level_cap_map: Arc<HashMap<String, serde_json::Value>>,
     level_cap_bonus_map: Arc<HashMap<String, serde_json::Value>>,
 }
@@ -39,7 +39,7 @@ impl CardFactory {
             .map_err(|e| format!("Failed to parse JSON from {path}: {e}"))
     }
 
-    fn load_and_index_card_data(path: &str) -> Result<HashMap<u32, Arc<CardData>>, String> {
+    fn load_and_index_card_data(path: &str) -> Result<HashMap<u16, Arc<CardData>>, String> {
         let raw_data: Vec<CardData> = Self::load_json(path)?;
         let mut indexed_map = HashMap::new();
         for record in raw_data {
@@ -50,7 +50,7 @@ impl CardFactory {
 
     pub fn create_card(
         &self,
-        card_id: u32,
+        card_id: u16,
         gallery: Arc<RwLock<Gallery>>,
         idolized: bool,
         skill_level: u8,

@@ -81,7 +81,7 @@ impl Accessory {
         value_list.get(clamped_index).cloned()
     }
 
-    pub fn skill_chance(&self) -> Option<f64> {
+    pub fn skill_chance(&self) -> Option<f32> {
         self.get_skill_attribute_for_level(&self.skill.chances, self.skill_level)
     }
 
@@ -90,7 +90,7 @@ impl Accessory {
             .flatten()
     }
 
-    pub fn skill_threshold(&self) -> Option<u32> {
+    pub fn skill_threshold(&self) -> Option<u16> {
         self.get_skill_attribute_for_level(&self.skill.thresholds, self.skill_level)
             .flatten()
             .and_then(|n| match n {
@@ -99,12 +99,12 @@ impl Accessory {
             })
     }
 
-    pub fn skill_duration(&self) -> Option<f64> {
+    pub fn skill_duration(&self) -> Option<f32> {
         self.get_skill_attribute_for_level(&self.skill.durations, self.skill_level)
             .flatten()
             .map(|n| match n {
                 Number::Float(f) => f,
-                Number::Int(i) => i as f64,
+                Number::Int(i) => i as f32,
             })
     }
 }
@@ -162,12 +162,9 @@ impl Display for Accessory {
             }
         }
 
-        writeln!(f, "{header}")?;
-        writeln!(f, "{stats_line}")?;
-        for line in skill_lines {
-            writeln!(f, "{line}")?;
-        }
+        let mut all_lines = vec![header, stats_line];
+        all_lines.extend(skill_lines);
 
-        Ok(())
+        write!(f, "{}", all_lines.join("\n"))
     }
 }

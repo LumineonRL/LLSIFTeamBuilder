@@ -29,7 +29,7 @@ struct AccessoryManagerState {
 #[derive(Serialize, Deserialize, Debug)]
 struct PlayerAccessoryState {
     manager_internal_id: u32,
-    accessory_id: u32,
+    accessory_id: u16,
     skill_level: u8,
 }
 
@@ -46,7 +46,7 @@ impl AccessoryManager {
         &self.accessories
     }
 
-    pub fn add_accessory(&mut self, accessory_id: u32, skill_level: u8) -> Option<u32> {
+    pub fn add_accessory(&mut self, accessory_id: u16, skill_level: u8) -> Option<u32> {
         let accessory = self.factory.create_accessory(accessory_id, skill_level)?;
 
         let manager_id = self.next_manager_internal_id;
@@ -110,11 +110,13 @@ impl AccessoryManager {
     }
 
     pub fn save(&self, filepath: &str) -> Result<(), io::Error> {
+        let mut sorted_accessories: Vec<_> = self.accessories.values().collect();
+        sorted_accessories.sort_by_key(|pa| pa.manager_internal_id);
+
         let state = AccessoryManagerState {
             next_manager_internal_id: self.next_manager_internal_id,
-            accessories: self
-                .accessories
-                .values()
+            accessories: sorted_accessories
+                .iter()
                 .map(|pa| PlayerAccessoryState {
                     manager_internal_id: pa.manager_internal_id,
                     accessory_id: pa.accessory.data.accessory_id,
@@ -168,21 +170,19 @@ impl fmt::Display for AccessoryManager {
             return write!(f, "<AccessoryManager (empty)>");
         }
 
-        writeln!(
-            f,
+        let header = format!(
             "<AccessoryManager ({} accessories)>",
             self.accessories.len()
-        )?;
+        );
 
         let mut sorted_accessories: Vec<_> = self.accessories.values().collect();
         sorted_accessories.sort_by_key(|pa| pa.manager_internal_id);
 
-        for (i, pa) in sorted_accessories.iter().enumerate() {
-            write!(f, "  - ID {}: {}", pa.manager_internal_id, pa.accessory)?;
-            if i < sorted_accessories.len() - 1 {
-                writeln!(f)?;
-            }
-        }
-        Ok(())
+        let items: Vec<String> = sorted_accessories
+            .iter()
+            .map(|pa| format!("  - ID {}: {}", pa.manager_internal_id, pa.accessory))
+            .collect();
+
+        write!(f, "{}\n{}", header, items.join("\n"))
     }
 }

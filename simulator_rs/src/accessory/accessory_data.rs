@@ -14,7 +14,7 @@ pub struct EffectData {
 #[derive(Debug, Deserialize, Clone, PartialEq, Default)]
 pub struct TriggerData {
     #[serde(default)]
-    pub chances: Vec<f64>,
+    pub chances: Vec<f32>,
     #[serde(default)]
     pub values: Vec<Option<Number>>,
 }
@@ -42,7 +42,7 @@ pub struct AccessoryDataRaw {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct AccessoryData {
-    pub accessory_id: u32,
+    pub accessory_id: u16,
     pub name: String,
     pub character: String,
     pub card_id: Option<String>,

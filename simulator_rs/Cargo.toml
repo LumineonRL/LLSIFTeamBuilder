@@ -11,6 +11,24 @@ log = "0.4"
 env_logger = "0.10"
 anyhow = "1.0"
 dunce = "1.0"
+thiserror = "1.0"
+uuid = { version = "1.8", features = ["v4", "serde"] }
 
 [dev-dependencies]
 tempfile = "3.10.1"
+
+[[test]]
+name = "card_golden_test"
+path = "tests/golden/card_test.rs"
+
+[[test]]
+name = "sis_golden_test"
+path = "tests/golden/sis_test.rs"
+
+[[test]]
+name = "accessory_golden_test"
+path = "tests/golden/accessory_test.rs"
+
+[[test]]
+name = "simulation_config_test"
+path = "tests/integration/simulation_config_test.rs"

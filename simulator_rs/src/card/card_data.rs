@@ -8,7 +8,7 @@ use super::stats::Stats;
 
 #[derive(Debug, Clone, PartialEq, Deserialize)]
 pub struct CardData {
-    pub card_id: u32,
+    pub card_id: u16,
     pub display_name: String,
     pub rarity: String,
     pub attribute: String,

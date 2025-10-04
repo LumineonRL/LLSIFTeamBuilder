@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 #[derive(Debug, Clone)]
 pub struct SisFactory {
-    sis_data_map: HashMap<u32, Arc<SisData>>,
+    sis_data_map: HashMap<u16, Arc<SisData>>,
 }
 
 impl SisFactory {
@@ -26,7 +26,7 @@ impl SisFactory {
         Ok(Self { sis_data_map })
     }
 
-    pub fn create_sis(&self, sis_id: u32) -> Option<Sis> {
+    pub fn create_sis(&self, sis_id: u16) -> Option<Sis> {
         self.sis_data_map
             .get(&sis_id)
             .map(|data| Sis::new(data.clone()))
