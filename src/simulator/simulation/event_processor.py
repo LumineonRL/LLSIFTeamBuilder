@@ -17,18 +17,20 @@ import src.simulator.simulation.effect_handler as effect_handler
 from src.simulator.simulation.skill_activation_handler import SkillActivationHandler
 
 if TYPE_CHECKING:
-    from src.simulator.simulation.play import Play
+    from src.simulator.simulation.event_publisher import EventPublisher
+    from src.simulator.simulation.protocols import PlayInterface
     from src.simulator.simulation.trial_state import TrialState
 
 
 class EventProcessor:
     """Dispatches events to appropriate handlers."""
 
-    def __init__(self, play_context: Dict[str, Any]):
+    def __init__(self, play_context: Dict[str, Any], publisher: "EventPublisher"):
         self.game_data = play_context["game_data"]
         self.logger = play_context["logger"]
+        self.publisher = publisher
         self.skill_handler = SkillActivationHandler(
-            play_context["random_state"], self.logger
+            play_context["random_state"], self.logger, self.publisher
         )
 
         state: "TrialState" = play_context["state"]
@@ -41,9 +43,7 @@ class EventProcessor:
             if card and card.skill.activation in self.counter_skill_slots:
                 self.counter_skill_slots[card.skill.activation].append(i)
 
-    def dispatch(
-        self, event: Event, state: "TrialState", play: "Play", event_queue: List[Event]
-    ):
+    def dispatch(self, event: Event, state: "TrialState", play: "PlayInterface"):
         """Routes an event to its corresponding handler method."""
         handlers = {
             EventType.NOTE_SPAWN: self._handle_note_spawn,
@@ -61,7 +61,9 @@ class EventProcessor:
         }
         handler = handlers.get(event.priority)
         if handler:
-            context = {"state": state, "play": play, "event_queue": event_queue}
+            # The event queue is no longer passed in the context dict.
+            # The publisher is available as self.publisher.
+            context = {"state": state, "play": play}
             handler(event, context)
 
     # --- Event Handlers ---
@@ -87,7 +89,6 @@ class EventProcessor:
             [event.payload],
             context["state"],
             context["play"],
-            context["event_queue"],
             event.time,
         )
 
@@ -98,11 +99,14 @@ class EventProcessor:
         if event.payload.get("type") == "pl_end":
             self.logger.info("EVENT @ %.3fs: A Perfect Lock effect ended.", event.time)
             effect_handler.end_perfect_lock_effect(state, event.time, play.song.length)
-            effect_handler.recalculate_stats_and_ppn(state, play)
+            effect_handler.recalculate_stats_and_ppn(
+                state, play.team, play.song, play.game_data, play.trick_slots
+            )
 
     def _handle_sync_end(self, event: Event, context: Dict):
         """Handles the end of a Sync skill effect."""
         state = context["state"]
+        play = context["play"]
         slot_idx = event.payload["slot_idx"]
         if slot_idx in state.active_sync_effects:
             card = state.cached_slot_cards[slot_idx]
@@ -114,7 +118,9 @@ class EventProcessor:
                     card.display_name,
                 )
             del state.active_sync_effects[slot_idx]
-            effect_handler.recalculate_stats_and_ppn(state, context["play"])
+            effect_handler.recalculate_stats_and_ppn(
+                state, play.team, play.song, play.game_data, play.trick_slots
+            )
 
     def _handle_note_start(self, event: Event, context: Dict):
         """Handles the start judgement for a hold note."""
@@ -267,7 +273,6 @@ class EventProcessor:
                 triggered,
                 state,
                 context["play"],
-                context["event_queue"],
                 current_time,
             )
 
@@ -285,7 +290,6 @@ class EventProcessor:
                 triggered,
                 state,
                 context["play"],
-                context["event_queue"],
                 current_time,
             )
 
@@ -309,7 +313,7 @@ class EventProcessor:
 
         if triggered:
             self.skill_handler.process_triggers(
-                "Score", triggered, state, play, context["event_queue"], current_time
+                "Score", triggered, state, play, current_time
             )
 
     # --- Effect End Handlers ---
@@ -325,14 +329,18 @@ class EventProcessor:
 
     def _handle_appeal_boost_end(self, event: Event, context: Dict):
         """Handles the end of an Appeal Boost effect."""
+        state = context["state"]
+        play = context["play"]
         self.logger.info(
             "EVENT @ %.3fs: Appeal Boost effect from (%d) %s ended.",
             event.time,
             event.payload["slot_idx"] + 1,
             event.payload["item_name"],
         )
-        context["state"].active_appeal_boost = None
-        effect_handler.recalculate_stats_and_ppn(context["state"], context["play"])
+        state.active_appeal_boost = None
+        effect_handler.recalculate_stats_and_ppn(
+            state, play.team, play.song, play.game_data, play.trick_slots
+        )
 
     def _handle_psu_end(self, event: Event, context: Dict):
         """Handles the end of a Perfect Score Up effect."""

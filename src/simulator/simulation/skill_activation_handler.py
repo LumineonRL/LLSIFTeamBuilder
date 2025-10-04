@@ -16,10 +16,11 @@ import numpy as np
 
 import src.simulator.simulation.effect_handler as effect_handler
 from src.simulator.card.card import Card
-from src.simulator.simulation.events import Event, EventType
+from src.simulator.simulation.events import EventType
 
 if TYPE_CHECKING:
-    from src.simulator.simulation.play import Play
+    from src.simulator.simulation.event_publisher import EventPublisher
+    from src.simulator.simulation.protocols import PlayInterface
     from src.simulator.simulation.trial_state import TrialState
 
 
@@ -28,16 +29,21 @@ class SkillActivationHandler:
     Orchestrates the entire skill activation process for a given trigger.
     """
 
-    def __init__(self, random_state: np.random.Generator, logger: logging.Logger):
+    def __init__(
+        self,
+        random_state: np.random.Generator,
+        logger: logging.Logger,
+        publisher: "EventPublisher",
+    ):
         self.random_state = random_state
         self.logger = logger
+        self.publisher = publisher
         self.amp_consumed_this_tick = False
 
     def _check_score_triggers(
         self,
         state: "TrialState",
-        play: "Play",
-        event_queue: List[Event],
+        play: "PlayInterface",
         current_time: float,
     ):
         """Processes skills activated by reaching a score threshold."""
@@ -55,17 +61,14 @@ class SkillActivationHandler:
                 triggered.append({"card": card, "slot_idx": idx})
 
         if triggered:
-            self.process_triggers(
-                "Score", triggered, state, play, event_queue, current_time
-            )
+            self.process_triggers("Score", triggered, state, play, current_time)
 
     def process_triggers(
         self,
         activation_type: str,
         triggered_items: List[Dict],
         state: "TrialState",
-        play: "Play",
-        event_queue: List[Event],
+        play: "PlayInterface",
         current_time: float,
     ):
         """
@@ -103,7 +106,6 @@ class SkillActivationHandler:
                     activation_type,
                     state,
                     play,
-                    event_queue,
                     current_time,
                 )
 
@@ -113,8 +115,7 @@ class SkillActivationHandler:
         slot_idx: int,
         activation_type: str,
         state: "TrialState",
-        play: "Play",
-        event_queue: List[Event],
+        play: "PlayInterface",
         current_time: float,
     ):
         """
@@ -126,7 +127,6 @@ class SkillActivationHandler:
             activation_type,
             state,
             play,
-            event_queue,
             current_time,
             is_accessory=False,
         )
@@ -156,7 +156,6 @@ class SkillActivationHandler:
             "Accessory",
             state,
             play,
-            event_queue,
             current_time,
             is_accessory=True,
         )
@@ -177,8 +176,7 @@ class SkillActivationHandler:
         slot_idx: int,
         activation_type: str,
         state: "TrialState",
-        play: "Play",
-        event_queue: List[Event],
+        play: "PlayInterface",
         current_time: float,
         is_accessory: bool,
     ) -> Tuple[bool, bool]:
@@ -220,7 +218,6 @@ class SkillActivationHandler:
             activation_type,
             state,
             play,
-            event_queue,
             current_time,
             eff_lvl,
         )
@@ -232,8 +229,7 @@ class SkillActivationHandler:
         slot_idx: int,
         activation_type: str,
         state: "TrialState",
-        play: "Play",
-        event_queue: List[Event],
+        play: "PlayInterface",
         current_time: float,
         eff_lvl: int,
     ):
@@ -273,17 +269,20 @@ class SkillActivationHandler:
                     "duration": 0,
                 }
                 if score > 0:
-                    self._check_score_triggers(state, play, event_queue, current_time)
+                    self._check_score_triggers(state, play, current_time)
 
             case "Perfect Lock":
                 duration = effect_handler.apply_perfect_lock_effect(
                     state,
                     current_time,
                     state.song_end_time,
-                    event_queue,
+                    self.publisher,
                     skilled_item,
                     eff_lvl,
-                    play,
+                    play.team,
+                    play.song,
+                    play.game_data,
+                    play.trick_slots,
                 )
                 self.logger.info(
                     "SKILL: (%d) %s's Perfect Lock activated for %.2f seconds.",
@@ -349,7 +348,6 @@ class SkillActivationHandler:
                     self._activate_encore_skill(
                         state,
                         play,
-                        event_queue,
                         current_time,
                         state.last_skill_info,
                         eff_lvl,
@@ -373,7 +371,7 @@ class SkillActivationHandler:
                         slot_idx,
                         current_time,
                         state.song_end_time,
-                        event_queue,
+                        self.publisher,
                         eff_lvl,
                     )
                     self.logger.info(
@@ -396,12 +394,13 @@ class SkillActivationHandler:
                             state,
                             skilled_item,
                             slot_idx,
-                            play.team.slots,
-                            play.game_data,
                             current_time,
                             state.song_end_time,
-                            event_queue,
-                            play,
+                            self.publisher,
+                            play.team,
+                            play.song,
+                            play.game_data,
+                            play.trick_slots,
                             eff_lvl,
                         )
                     )
@@ -419,13 +418,14 @@ class SkillActivationHandler:
                     state,
                     skilled_item,
                     slot_idx,
-                    play.team.slots,
-                    play.game_data,
                     self.random_state,
                     current_time,
                     state.song_end_time,
-                    event_queue,
-                    play,
+                    self.publisher,
+                    play.team,
+                    play.song,
+                    play.game_data,
+                    play.trick_slots,
                     eff_lvl,
                 )
                 if target_idx != -1:
@@ -469,7 +469,7 @@ class SkillActivationHandler:
 
                 effect_handler.apply_generic_timed_effect(
                     effect_list,
-                    event_queue,
+                    self.publisher,
                     end_event,
                     current_time,
                     duration,
@@ -505,7 +505,7 @@ class SkillActivationHandler:
                             skilled_item,
                             current_time,
                             state.song_end_time,
-                            event_queue,
+                            self.publisher,
                             eff_lvl,
                         )
                     )
@@ -518,14 +518,13 @@ class SkillActivationHandler:
 
         if isinstance(skilled_item, Card):
             self._process_year_group_triggers(
-                skilled_item.character, current_time, state, play, event_queue
+                skilled_item.character, current_time, state, play
             )
 
     def _activate_encore_skill(
         self,
         state: "TrialState",
-        play: "Play",
-        event_queue: List[Event],
+        play: "PlayInterface",
         current_time: float,
         copied_info: Dict,
         eff_lvl: int,
@@ -576,7 +575,7 @@ class SkillActivationHandler:
                 )
                 effect_handler.apply_generic_timed_effect(
                     state.active_cbu_effects,
-                    event_queue,
+                    self.publisher,
                     EventType.COMBO_BONUS_UP_END,
                     current_time,
                     duration,
@@ -588,10 +587,13 @@ class SkillActivationHandler:
                     state,
                     current_time,
                     state.song_end_time,
-                    event_queue,
+                    self.publisher,
                     copied_item,
                     eff_lvl,
-                    play,
+                    play.team,
+                    play.song,
+                    play.game_data,
+                    play.trick_slots,
                 )
             case "Total Trick":
                 effect_handler.apply_total_trick_effect(
@@ -612,7 +614,7 @@ class SkillActivationHandler:
                 )
                 effect_handler.apply_generic_timed_effect(
                     state.active_psu_effects,
-                    event_queue,
+                    self.publisher,
                     EventType.PERFECT_SCORE_UP_END,
                     current_time,
                     duration,
@@ -624,12 +626,13 @@ class SkillActivationHandler:
                     state,
                     copied_item,
                     copied_slot,
-                    play.team.slots,
-                    play.game_data,
                     current_time,
                     state.song_end_time,
-                    event_queue,
-                    play,
+                    self.publisher,
+                    play.team,
+                    play.song,
+                    play.game_data,
+                    play.trick_slots,
                     eff_lvl,
                 )
             case "Sync":
@@ -637,13 +640,14 @@ class SkillActivationHandler:
                     state,
                     copied_item,
                     copied_slot,
-                    play.team.slots,
-                    play.game_data,
                     self.random_state,
                     current_time,
                     state.song_end_time,
-                    event_queue,
-                    play,
+                    self.publisher,
+                    play.team,
+                    play.song,
+                    play.game_data,
+                    play.trick_slots,
                     eff_lvl,
                 )
             case "Skill Rate Up":
@@ -653,7 +657,7 @@ class SkillActivationHandler:
                     copied_slot,
                     current_time,
                     state.song_end_time,
-                    event_queue,
+                    self.publisher,
                     eff_lvl,
                 )
             case "Spark":
@@ -676,7 +680,7 @@ class SkillActivationHandler:
                             copied_item,
                             current_time,
                             state.song_end_time,
-                            event_queue,
+                            self.publisher,
                             eff_lvl,
                         )
                     )
@@ -692,15 +696,14 @@ class SkillActivationHandler:
             case _:  # Handles Scorer/Healer
                 if (score_gain := copied_info.get("score_gain", 0)) > 0:
                     state.total_score += score_gain
-                    self._check_score_triggers(state, play, event_queue, current_time)
+                    self._check_score_triggers(state, play, current_time)
 
     def _process_year_group_triggers(
         self,
         activating_character: str,
         current_time: float,
         state: "TrialState",
-        play: "Play",
-        event_queue: List[Event],
+        play: "PlayInterface",
     ):
         """
         Processes 'Year Group' skills that require multiple member activations.
@@ -724,7 +727,6 @@ class SkillActivationHandler:
                             [{"card": receiver_card, "slot_idx": receiver_idx}],
                             state,
                             play,
-                            event_queue,
                             current_time,
                         )
                         # Reset the tracker for this card for future activations

@@ -7,14 +7,12 @@ of a team playing a song.
 
 import logging
 import time
-import math
-import warnings
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
 
-from src.simulator.card.card import Card
+import src.simulator.simulation.effect_handler as effect_handler
 from src.simulator.simulation.game_data import GameData
 from src.simulator.simulation.play_config import PlayConfig
 from src.simulator.simulation.trial import Trial
@@ -32,10 +30,6 @@ class Play:
     of a single run to the `Trial` class. It is responsible for setting up
     the simulation environment, running trials, and reporting results.
     """
-
-    PPN_BASE_FACTOR = 0.0125
-    GROUP_BONUS = 0.1
-    ATTRIBUTE_BONUS = 0.1
 
     NOTE_MULTIPLIERS = {
         "is_hold_and_swing": 0.625,
@@ -71,8 +65,8 @@ class Play:
         team_total_stat = getattr(
             self.team, f"total_team_{self.song.attribute.lower()}", 0
         )
-        self.base_slot_ppn: List[int] = self.calculate_ppn_for_all_slots(
-            team_total_stat
+        self.base_slot_ppn: List[int] = effect_handler.calculate_ppn_for_all_slots(
+            self.team, self.song, self.game_data, team_total_stat
         )
 
     def simulate(self, n_trials: int = 1, log_level: Optional[int] = None) -> List[int]:
@@ -119,37 +113,7 @@ class Play:
 
         return trial_scores
 
-    # --- PPN and Multiplier Calculation Helpers ---
-
-    def _check_group_bonus(self, card: Card) -> float:
-        """Checks if a card's group matches the song's for a bonus."""
-        song_group = self.song.group
-        valid_members = self.game_data.group_mapping.get(song_group, set())
-        return self.GROUP_BONUS if card.character in valid_members else 0.0
-
-    def _check_attribute_bonus(self, card: Card) -> float:
-        """Checks if a card's attribute matches the song's for a bonus."""
-        return self.ATTRIBUTE_BONUS if self.song.attribute == card.attribute else 0.0
-
-    def calculate_ppn_for_all_slots(self, team_total_stat: int) -> List[int]:
-        """Calculates the PPN for each team slot given a total team stat."""
-        if team_total_stat == 0:
-            warnings.warn("Team total stat for song attribute is 0. All PPN will be 0.")
-            return [0] * self.team.NUM_SLOTS
-
-        ppn_values = []
-        for slot in self.team.slots:
-            if not slot.card:
-                ppn_values.append(0)
-                continue
-
-            group_bonus = self._check_group_bonus(slot.card)
-            attribute_bonus = self._check_attribute_bonus(slot.card)
-
-            total_bonus = 1 + group_bonus + attribute_bonus
-            slot_ppn = math.floor(team_total_stat * self.PPN_BASE_FACTOR * total_bonus)
-            ppn_values.append(slot_ppn)
-        return ppn_values
+    # --- Multiplier Calculation Helpers ---
 
     @staticmethod
     def get_note_multiplier(note: Note) -> float:
@@ -162,7 +126,7 @@ class Play:
         if note.is_swing:
             return Play.NOTE_MULTIPLIERS["is_swing"]
         return Play.NOTE_MULTIPLIERS["default"]
-    
+
     @staticmethod
     def get_combo_multiplier(combo_count: int, game_data: GameData) -> float:
         """Finds the combo multiplier for the current combo count."""

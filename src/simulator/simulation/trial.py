@@ -12,13 +12,14 @@ import numpy as np
 
 from src.simulator.simulation.events import Event, EventType
 from src.simulator.simulation.event_processor import EventProcessor
+from src.simulator.simulation.event_publisher import EventPublisher
 from src.simulator.simulation.trial_state import TrialState
 
 if TYPE_CHECKING:
-    from src.simulator.simulation.play import Play
+    from src.simulator.simulation.protocols import PlayInterface
 
 
-class Trial:
+class Trial(EventPublisher):
     """
     Manages the setup and execution of a single simulation trial.
 
@@ -27,7 +28,11 @@ class Trial:
     all event-specific logic to the EventProcessor.
     """
 
-    def __init__(self, play_instance: "Play", random_state: np.random.Generator):
+    play: "PlayInterface"
+
+    def __init__(
+        self, play_instance: "PlayInterface", random_state: np.random.Generator
+    ):
         """Initializes a single simulation trial."""
         # --- Static References & Context ---
         self.play = play_instance
@@ -55,7 +60,11 @@ class Trial:
             "play": play_instance,
             "state": self.state,
         }
-        self.processor = EventProcessor(processor_context)
+        self.processor = EventProcessor(processor_context, self)
+
+    def publish(self, event: Event):
+        """Adds an event to the event queue."""
+        heapq.heappush(self.event_queue, event)
 
     def run(self):
         """
@@ -64,7 +73,8 @@ class Trial:
         """
         while self.event_queue and not self.state.song_has_ended:
             event = heapq.heappop(self.event_queue)
-            self.processor.dispatch(event, self.state, self.play, self.event_queue)
+            # The event queue is no longer passed directly; the publisher handles it.
+            self.processor.dispatch(event, self.state, self.play)
 
     def _cache_team_properties(self):
         """Caches frequently accessed properties to reduce overhead."""
